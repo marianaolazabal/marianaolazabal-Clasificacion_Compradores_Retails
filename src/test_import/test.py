@@ -21,7 +21,7 @@ from pyzipcode import ZipCodeDatabase
 import statsmodels.api as sm
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
 
-from test_import.test2 import multi
+from test_import.test2 import multi #test_import.test2 lo que hace es que cuando llamamos desde main.py llames a multi
 
 def resta(a,b):
     resultado = a-b
@@ -36,4 +36,5 @@ def division(a,b):
     return a/b
 
 
-multi(9)
+#test2.multi(3)
+

@@ -21,7 +21,7 @@ from pyzipcode import ZipCodeDatabase
 import statsmodels.api as sm
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
 
-from test2 import multi
+from test_import.test2 import multi
 
 def resta(a,b):
     resultado = a-b

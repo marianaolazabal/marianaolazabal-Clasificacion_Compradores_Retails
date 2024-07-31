@@ -1,6 +1,9 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from test_import import test2
 from test_import import test
+from test_import import test2
 from test_import import plots
 import pandas as p 
 test.resta(3,1)

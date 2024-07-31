@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,16 +21,7 @@ from pyzipcode import ZipCodeDatabase
 import statsmodels.api as sm
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
 
-df_Retail = pd.read_csv('../data/new_retail_data.csv')
-
-def grafico():
-    sns.histplot(df_Retail['Total_Purchases'], kde=True)
-    plt.title('Histograma de Total_Purchases')
-    plt.xlabel('Total_Purchases')
-    plt.ylabel('Frecuencia')
-    plt.show()
-
-
+from test2 import multi
 
 def resta(a,b):
     resultado = a-b
@@ -44,4 +36,4 @@ def division(a,b):
     return a/b
 
 
-
+multi(9)

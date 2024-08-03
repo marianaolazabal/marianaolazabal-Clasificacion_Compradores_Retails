@@ -23,7 +23,7 @@ import os
 import gc
 #from test_import.funciones_generales import getTipoVariable
 from funciones_generales import transformarTipoVariable,getTipoVariable
-from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot
+from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot, graficoBoxPlot
 
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
 
@@ -433,12 +433,38 @@ print("Verificando la variable luego de la normalizacion, se observa que el prob
 
 #Outliers
 
+graficoBoxPlot(df_Retail, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
+
+print("Como se puede ver en el grafico, hay evidencia de valores atipicos. Sin embargo, es posible que estos tengan sentido para el analisis, por lo que optare por dejarlos y estudiar (en el EDA) en mayor profundidad si es conveniente sacarlos o dejarlos.")
 
 
+# - Product_Category -->  Category of the purchased product.
+
+cantidadUnicos=df_Retail['Product_Category'].nunique()
+
+print("Hay solo", cantidadUnicos, "tipo de categorias.", "Estas son Electronics, Books, Home Decor, Grocery, Clothing")
 
 
+# - Product_Brand --> Brand of the purchased product.
+
+unique_ProductBrand = df_Retail['Product_Brand'].cat.categories
+num_marcas = len(unique_ProductBrand)
+print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & Beyond, BlueStar, Coca-Cola, Penguin Books, Pepsi, Random House, Samsung, Sony, Whirepool, Zara")
 
 
+# - Product_Type --> Type of the purchased product.
+
+
+unique_tipo_productos = df_Retail['Product_Type'].cat.categories
+num_tipo_productos = len(unique_tipo_productos)
+print("Hay solo", num_tipo_productos, "Estos son: Bathroom, Bedding, BlueStar AC, Children's, Chocolate, Headphones, Jacket, Jeans, Juice, Kitchen, Laptop, Lighting, Literature, Mitsubishi 1.5 Ton 3 Star Split AC, Non-Fiction, Shirt, Shoes, Shorts, Smartphone, Snacks, Soft Drink, T-shirt, Tablet, Television, Thriller, Tools, Water")
+
+
+# - Feedback --> Feedback provided by the customer on the purchase.
+
+unique_Feedback = df_Retail['Feedback'].cat.categories
+num_feedback = len(unique_Feedback)
+print("Hay solo", num_feedback, "feedback posibles.", "Estos son: Average, Bad, Excellent, Good")
 
 
 

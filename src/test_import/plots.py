@@ -33,3 +33,10 @@ def grafico_qqPlot(dataFrame, variable):
 
 def graficoDisplot(dataFrame, variable):
     sns.displot(dataFrame[variable], kde = True)
+
+
+def graficoBoxPlot(dataFrame, variable, titulo, ylabel):
+    sns.boxplot(y=dataFrame[variable])
+    plt.title(f'Box Plot de {titulo}')
+    plt.ylabel(ylabel)
+    plt.show()

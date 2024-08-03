@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import scipy.stats as stats
 
 #current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -23,3 +24,12 @@ def grafico_Histograma(dataFrame,variable,titulo,xlabel,ylabel):
     plt.ylabel(ylabel)
     plt.show()
 
+
+
+def grafico_qqPlot(dataFrame, variable):
+    stats.probplot(dataFrame[variable], dist="norm", plot=plt)
+    plt.title('Diagrama Q-Q')
+    plt.show()
+
+def graficoDisplot(dataFrame, variable):
+    sns.displot(dataFrame[variable], kde = True)

@@ -23,7 +23,7 @@ import os
 import gc
 #from test_import.funciones_generales import getTipoVariable
 from funciones_generales import transformarTipoVariable,getTipoVariable
-from plots import grafico_Histograma
+from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot
 
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
 
@@ -394,6 +394,53 @@ gc.collect()
 df_Retail['Total_Purchases'].dtype
 print("Verificar normalidad de los datos")
 grafico_Histograma(df_Retail,"Total_Purchases","Total_Purchases","Total comprado","Frecuencia")
+
+print("La variable Total_Purchases es normal, el rango va entre 1 a 10 cantidades compradas")
+
+
+# - Amount --> Total gastado en una compra. La elimino porque la columna Total_Amount es un producto entre 
+
+df_Retail = df_Retail.drop(columns=['Amount'])
+
+
+# - Total_Amount --> Total amount spent by the customer (calculated as Amount * Total_Purchases)
+
+grafico_Histograma(df_Retail,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
+
+print("El histograma sugiere que los valores en la columna 'Total_Amount' están distribuidos de manera no uniforme, como se puede apreciar en el histograma la variable no presenta una distribución normal. Esto es un problema para realizar comparaciones estadísticas, por lo que es necesario normalizarla.")
+
+
+#En el siguiente grafico se puede observar si la variable presenta o no una distribucion normal. 
+# La linea roja es una linea teórica donde los datos siguen una distribución normal. 
+# Si los puntos de la variable a estudiar se alinean aproximadamente a lo largo de la recta roja entonces se puede decir que es normal.
+
+grafico_qqPlot(df_Retail,"Total_Amount")
+
+print("Como se puede apreciar, los puntos se desvían significativamente de la línea roja, especialmente en los extremos, lo que sugiere que los datos de 'Total_Amount' no siguen una distribución normal.")
+
+graficoDisplot(df_Retail,"Total_Amount")
+
+print("La distribucion no sigue una funcion normal, por lo que es necesario la transformacion de la variable al logaritmo")
+
+df_Retail['Total_Amount_log'] = np.log(df_Retail['Total_Amount'])
+df_Retail_norm = df_Retail.drop(columns=['Total_Amount'])
+
+#Verifico nuevamente el qqplot con la variable transformada
+
+grafico_qqPlot(df_Retail,"Total_Amount_log")
+
+print("Verificando la variable luego de la normalizacion, se observa que el problema persiste. Esto puede deberse a la presencia de valores atipicos. A continuacion se estudian estos.")
+
+#Outliers
+
+
+
+
+
+
+
+
+
 
 
 

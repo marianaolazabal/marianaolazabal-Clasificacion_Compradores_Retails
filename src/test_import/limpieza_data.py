@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
+import calendar
 import requests #--pip install requests
 #!pip install pycountry
 #!pip install pyzipcode
@@ -19,6 +20,8 @@ from geopy.exc import GeocoderTimedOut
 from pyzipcode import ZipCodeDatabase
 import statsmodels.api as sm
 import os
+#from test_import.funciones_generales import getTipoVariable
+from funciones_generales import getTipoVariable
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
 
 ##Referencia de dataset##
@@ -38,7 +41,7 @@ df_Retail = pd.read_csv(csv_path)
 
 df_Retail.head()
 
-df_Retail.size
+print("Tamaño inicial del dataFrame " + str(df_Retail.size))
 
 df_Retail_copy=df_Retail.copy()
 
@@ -70,6 +73,7 @@ columns_to_check = [
        'Order_Status'
 ]
 
+
 # Encontrar Transaction_IDs consistentes para cada columna
 consistent_transaction_ids = set(df_Retail_copy['Transaction_ID'])  # Inicialmente todos los IDs son válidos
 for column in columns_to_check:
@@ -81,6 +85,7 @@ for column in columns_to_check:
     
     # Intersección con IDs válidos actuales
     consistent_transaction_ids &= set(consistent_ids)
+
 
 # Filtrar el DataFrame original para mantener solo los Transaction_IDs con valores consistentes en todas las columnas
 df_Retail_copy = df_Retail_copy[df_Retail_copy['Transaction_ID'].isin(consistent_transaction_ids)]
@@ -97,7 +102,9 @@ df_Retail_copy_unique=df_Retail_copy.copy()
 max_compras = df_Retail_copy_unique['Customer_ID'].value_counts().max()
 print("El cliente que compró más veces, lo hizo " + str(max_compras) + " veces")
 
+
 # - City es la ciudad donde el cliente vive
+
 # Paso a corroborar que la ciudad no tenga caracteres raros y que para una misma ciudad este escrito de forma diferente
 
 df_Retail_copy_unique['City'].unique()
@@ -137,7 +144,10 @@ if(df_paises_incorrectos.empty):
 else:
     print(df_paises_incorrectos)
 
+
+
 # - State es el estado donde el cliente vive
+
 
 df_Retail_copy_unique['State'].unique()
 
@@ -189,4 +199,179 @@ else:
     print(df_incorrectas)
 
 
+
 # - Zipcode es el codigo de la direccion del cliente
+
+
+nan_count = df_Retail_copy_unique['Zipcode'].isna().sum()
+print("Hay " + str(nan_count) + " valores nulos para la variable Zipcode")
+
+df_Retail_copy_unique = df_Retail_copy_unique.dropna(subset=['Zipcode'])
+
+df_Retail_copy_unique['Zipcode'] = df_Retail_copy_unique['Zipcode'].round(0)
+df_Retail_copy_unique['Zipcode'] = df_Retail_copy_unique['Zipcode'].astype(int)
+
+#Columnas con valores faltantes
+df_Retail_copy_unique.isna().sum().sum() # number of missing cells
+print("El " + str(round(df_Retail_copy_unique.isna().sum().sum() / df_Retail_copy_unique.size * 100, 1)) + " % de los datos son faltantes") # percentage of missing cells
+
+# Por mayor comodidad, transformo todas las variables a category menos las numericas
+
+columns_not_to_convert = ['Age', 'Zipcode','Total_Purchases', 'Amount', 'Total_Amount', 'Ratings', 'Customer_ID', 'Transaction_ID']
+all_columns = set(df_Retail_copy_unique.columns)
+
+columns_not_to_convert_set = set(columns_not_to_convert)
+columns_to_skip = list(all_columns - columns_not_to_convert_set)
+
+# Convertir las columnas restantes a tipo 'category'
+for col in columns_to_skip:
+    df_Retail_copy_unique[col] = df_Retail_copy_unique[col].astype('category')
+
+
+
+# - Age
+
+print("Unique values of Age")
+df_Retail_copy_unique['Age'].unique()
+
+print(getTipoVariable(df_Retail_copy_unique, 'Age'))
+
+df_Retail_copy_unique = df_Retail_copy_unique.dropna(subset=['Age'])
+#Transformo Age a un int
+df_Retail_copy_unique['Age'] = df_Retail_copy_unique['Age'].astype('int')
+print(getTipoVariable(df_Retail_copy_unique, 'Age'))
+
+df_Retail_verificarAge=df_Retail_copy_unique.copy()
+# Verificar si hay clientes con edad menor a 18
+underage_clients = (df_Retail_verificarAge['Age'] < 18).any()
+
+# Mostrar resultado
+if underage_clients:
+    print("Hay clientes cuya edad es menor a 18.")
+else:
+    print("No hay clientes cuya edad sea menor a 18.")
+
+
+# - Year
+
+df_Retail_copy_unique = df_Retail_copy_unique.dropna(subset=['Year'])
+print(getTipoVariable(df_Retail_copy_unique, 'Year'))
+df_Retail_copy_unique['Year'] = df_Retail_copy_unique['Year'].astype('int')
+print(getTipoVariable(df_Retail_copy_unique, 'Year'))
+
+
+#Quiero borrar todos los valores nulos o nan pero quiero estudiar primero si me conviene borrar las filas o una columna entera,
+# porque si los datos faltantes estan en su mayoria en una columna puede ser mejor deshacerme de esa columna en lugar de borrar registros.
+#A continuacion estudio cual es la variable que tiene la mayor cantidad de nulos o valores nan
+
+# Calcular el número de valores NaN por columna
+nan_counts = df_Retail_copy_unique.isna().sum()
+max_nan_count = nan_counts.max()
+
+print("La columna con la mayor cantidad de números NaN tiene un total de", max_nan_count, "valores. Esta cantidad es pocos datos por lo que no voy a borrar columnas por el momento")
+
+
+
+# - Name --> Mail del cliente
+
+# Elimino la columna porque no es estadisticamente necesaria
+df_Retail_copy_unique = df_Retail_copy_unique.drop(columns=['Name'])
+
+# - Email --> Mail del cliente
+
+#Elimino la columna porque no es estadisticamente necesaria
+df_Retail_copy_unique = df_Retail_copy_unique.drop(columns=['Email'])
+
+
+# - Phone --> Phone del cliente
+#Elimino la columna porque no es estadisticamente necesaria
+df_Retail_copy_unique = df_Retail_copy_unique.drop(columns=['Phone'])
+
+
+# - Gender
+
+df_Retail_verificarGender=df_Retail_copy_unique.copy()
+cantidadUnicos=df_Retail_verificarGender['Gender'].nunique()
+print("Hay solo", cantidadUnicos, "valores unicos de la variable genero y son Female and Male")
+
+
+# - Income
+
+df_Retail_verificarIncome=df_Retail_copy_unique.copy()
+cantidadUnicos=df_Retail_verificarIncome['Income'].nunique()
+print("Hay solo", cantidadUnicos, "valores unicos de la variable Income y son Low, High and Medium")
+
+
+# - Customer_Segment
+
+df_Retail_verificarCustomer_Segment=df_Retail_copy_unique.copy()
+cantidadUnicos=df_Retail_verificarCustomer_Segment['Customer_Segment'].nunique()
+print("Hay solo", cantidadUnicos, "valores unicos de la variable Customer_Segment y son Premium, Regular and New")
+
+
+# - Date --> Figura como mm/dd/yyyy
+
+df_Retail_verificarDate=df_Retail_copy_unique.copy()
+num_rows_df_Retail_copy_unique = df_Retail_copy_unique.shape[0]
+print(f"Number of rows: {num_rows_df_Retail_copy_unique}")
+
+#Verfico que solo hay datos para el 2023 y 2024
+df_Retail_verificarDate['Date'] = pd.to_datetime(df_Retail_verificarDate['Date'], errors='coerce')
+df_Retail_verificarDate['Extracted_Year'] = df_Retail_verificarDate['Date'].dt.year
+df_Retail_verificarDate['Year_Match'] = df_Retail_verificarDate['Extracted_Year'] == df_Retail_verificarDate['Year']
+
+num_rows = df_Retail_verificarDate.shape[0]
+print(f"Number of rows: {num_rows}")
+
+print("Hay" , df_Retail_verificarDate['Date'].isna().sum() , "valores na")
+
+df_2023 = df_Retail_verificarDate[df_Retail_verificarDate['Year'] == 2023]
+df_2024 = df_Retail_verificarDate[df_Retail_verificarDate['Year'] == 2024]
+
+
+# Extrae el mes de la columna 'Year'
+df_2023.loc[:, 'Month'] = df_2023['Date'].dt.month
+valores_unicos_mes_2023 = sorted(df_2023['Month'].unique())
+nombres_meses_2023 = [calendar.month_name[mes] for mes in valores_unicos_mes_2023]
+print("Los meses para el año 2023 son", nombres_meses_2023)
+
+df_2024.loc[:, 'Month'] = df_2024['Date'].dt.month
+valores_unicos_mes_2024 = sorted(df_2024['Month'].unique())
+nombres_meses_2024 = [calendar.month_name[mes] for mes in valores_unicos_mes_2024]
+print("Los meses para el año 2024 son", nombres_meses_2024)
+
+
+# Controles generales
+
+
+total_rows_before = df_Retail_copy_unique.shape[0]
+
+# Eliminar todas las filas que contienen al menos un NaN en alguna columna
+df_Retail_copy_unique = df_Retail_copy_unique.dropna()
+
+# Contar las filas después de eliminar NaN
+total_rows_after = df_Retail_copy_unique.shape[0]
+
+# Calcular cuántas filas se eliminaron
+rows_deleted = total_rows_before - total_rows_after
+
+# Mostrar resultados
+print("Número total de filas antes de eliminar NaN:", total_rows_before)
+print("Número total de filas después de eliminar NaN:", total_rows_after)
+print("Número de filas eliminadas:", rows_deleted)
+
+
+
+
+df_Retail_copy_unique['Total_Amount'] = df_Retail_copy_unique['Total_Amount'].round(2)
+df_Retail_copy_unique['Amount'] = df_Retail_copy_unique['Amount'].round(2)
+df_Retail_copy_unique['Total_Purchases'] = df_Retail_copy_unique['Total_Purchases'].round(2)
+
+
+
+
+
+
+def dataFrame_limpiado():
+    return df_Retail_copy_unique
+

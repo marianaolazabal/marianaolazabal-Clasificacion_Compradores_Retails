@@ -324,12 +324,13 @@ df_Retail_copy['Date'] = pd.to_datetime(df_Retail_copy['Date'], errors='coerce')
 df_Retail_copy['Extracted_Year'] = df_Retail_copy['Date'].dt.year
 df_Retail_copy['Year_Match'] = df_Retail_copy['Extracted_Year'] == df_Retail_copy['Year']
 
-hay_false = not df_Retail_copy['Year_Match'].any()
+df_year_mismatch = df_Retail_copy[~df_Retail_copy['Year_Match']]
 
-if hay_false:
+if df_year_mismatch.empty:
     print("No hay valores False en la columna 'Year_Match'.")
 else:
-    print("Hay al menos un valor False en la columna 'Year_Match'.")
+    print("Hay al menos un valor False en la columna 'Year_Match':")
+    print(df_year_mismatch)
 
 num_rows = df_Retail_copy.shape[0]
 print(f"Number of rows: {num_rows}")
@@ -338,30 +339,9 @@ del df_Retail_copy
 gc.collect()
 
 
-df_2023 = df_Retail[df_Retail['Year'] == 2023]
-df_2024 = df_Retail[df_Retail['Year'] == 2024]
-
-
-df_2023['Month'] = df_2023['Date'].dt.month.astype(int)
-valores_unicos_mes_2023 = sorted(df_2023['Month'].unique())
-nombres_meses_2023 = [calendar.month_name[mes] for mes in valores_unicos_mes_2023]
-print("Los meses para el año 2023 son", nombres_meses_2023)
-
-df_2024['Month'] = df_2024['Date'].dt.month.astype(int)
-valores_unicos_mes_2024 = sorted(df_2024['Month'].unique())
-nombres_meses_2024 = [calendar.month_name[mes] for mes in valores_unicos_mes_2024]
-print("Los meses para el año 2024 son", nombres_meses_2024)
-
-print("Del resultado se observa que los datos van desde Marzo del 2023 a Marzo 2024, siendo un year completo")
-
-del df_2023, df_2024
-gc.collect()
-
-
 # Month
 
-df_Retail_copy=df_Retail.copy()
-unique_months = df_Retail_copy['Month'].cat.categories
+unique_months = df_Retail['Month'].cat.categories
 
 def verificarMeses():
     correct_months = ['April', 'August', 'December', 'February', 'January', 'July', 'June',
@@ -405,6 +385,8 @@ if(todos_correctos):
 else:
     print("Hay valores incorrectos")
 
+del df_Retail_copy
+gc.collect()
 
 
 # - Total_Purchases --> Cantidad de artículos comprados por el cliente

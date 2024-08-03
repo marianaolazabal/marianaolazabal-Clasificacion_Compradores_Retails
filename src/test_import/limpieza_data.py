@@ -22,7 +22,7 @@ import statsmodels.api as sm
 import os
 import gc
 #from test_import.funciones_generales import getTipoVariable
-from funciones_generales import transformarTipoVariable,getTipoVariable
+from funciones_generales import transformarTipoVariable,getTipoVariable, revisarValores
 from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot, graficoBoxPlot
 
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
@@ -82,6 +82,11 @@ rows_deleted = total_rows_before - total_rows_after
 print("Número total de filas antes de eliminar NaN:", total_rows_before)
 print("Número total de filas después de eliminar NaN:", total_rows_after)
 print("Número de filas eliminadas:", rows_deleted)
+
+resultado = revisarValores(df_Retail)
+print("Columnas con valores nulos:", resultado['columnas_con_nulos'])
+print("Columnas con valores 0:", resultado['columnas_con_ceros'])
+
 
 
 
@@ -444,6 +449,23 @@ cantidadUnicos=df_Retail['Product_Category'].nunique()
 
 print("Hay solo", cantidadUnicos, "tipo de categorias.", "Estas son Electronics, Books, Home Decor, Grocery, Clothing")
 
+#Verificar si existe y tiene sentido para un mismo producto tener distinta categoria
+
+df_Retail_copy=df_Retail.copy()
+
+grouped = df_Retail.groupby('products')['Product_Category'].nunique()
+productos_con_categorias_distintas = grouped[grouped > 1]
+
+productos_con_categorias_distintas = productos_con_categorias_distintas.reset_index()
+productos_con_categorias_distintas.columns = ['products', 'Unique_Category_Count']
+
+print("Productos con categorías distintas:")
+productos_con_categorias_distintas.head()
+
+del df_Retail_copy
+gc.collect()
+
+
 
 # - Product_Brand --> Brand of the purchased product.
 
@@ -457,25 +479,51 @@ print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & B
 
 unique_tipo_productos = df_Retail['Product_Type'].cat.categories
 num_tipo_productos = len(unique_tipo_productos)
-print("Hay solo", num_tipo_productos, "Estos son: Bathroom, Bedding, BlueStar AC, Children's, Chocolate, Headphones, Jacket, Jeans, Juice, Kitchen, Laptop, Lighting, Literature, Mitsubishi 1.5 Ton 3 Star Split AC, Non-Fiction, Shirt, Shoes, Shorts, Smartphone, Snacks, Soft Drink, T-shirt, Tablet, Television, Thriller, Tools, Water")
+print("Hay solo", num_tipo_productos, "tipos de productos. Estos son: Bathroom, Bedding, BlueStar AC, Children's, Chocolate, Headphones, Jacket, Jeans, Juice, Kitchen, Laptop, Lighting, Literature, Mitsubishi 1.5 Ton 3 Star Split AC, Non-Fiction, Shirt, Shoes, Shorts, Smartphone, Snacks, Soft Drink, T-shirt, Tablet, Television, Thriller, Tools, Water")
 
 
 # - Feedback --> Feedback provided by the customer on the purchase.
 
 unique_Feedback = df_Retail['Feedback'].cat.categories
 num_feedback = len(unique_Feedback)
-print("Hay solo", num_feedback, "feedback posibles.", "Estos son: Average, Bad, Excellent, Good")
+print("Hay solo", num_feedback, "tipos de feedback posibles.", "Estos son: Average, Bad, Excellent, Good")
 
 
 
+# - Shipping_Method --> Method used for shipping the product.
+
+unique_Shipping_Method = df_Retail['Shipping_Method'].cat.categories
+num_Shipping_Method = len(unique_Shipping_Method)
+print("Hay solo", num_Shipping_Method, "metodos de Shipping disponibles.", "Estos son: Express, Same-Day, Standard")
 
 
+# - Payment_Method--> Method used for payment.
+
+unique_Payment_Method = df_Retail['Payment_Method'].cat.categories
+num_Payment_Method = len(unique_Payment_Method)
+print("Hay solo", num_Payment_Method, "metodos de pago posibles.", "Estos son: Cash, Credit Card, Debit Card, PayPal")
 
 
+# - Order_Status --> Status of the order (e.g., Pending, Processing, Shipped, Delivered).
+
+unique_Order_Status = df_Retail['Order_Status'].cat.categories
+num_Order_Status = len(unique_Order_Status)
+print("Hay solo", num_Order_Status, "estatus posibles en las que pueden estar las ordenes.", "Estos son: Delivered, Pending, Processing, Shipped")
 
 
+# Ratings --> ratings given by customers on different products.
+
+unique_Ratings = df_Retail['Ratings'].unique()
+num_Ratings = len(unique_Ratings)
+print("Hay solo", num_Ratings, "posibles valores para Ratings.", "Estos son: 1, 2, 3, 4, 5")
 
 
+# --> Products
+
+
+unique_Products = df_Retail['products'].cat.categories
+num_Products = len(unique_Products)
+print("Hay solo", num_Products, "productos distintos.")
 
 
 

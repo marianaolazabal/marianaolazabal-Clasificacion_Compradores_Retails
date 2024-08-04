@@ -1,4 +1,4 @@
-from test_import import limpieza_data
+from scripts import limpieza_data
 
 
 df=limpieza_data.dataFrame_limpiado()

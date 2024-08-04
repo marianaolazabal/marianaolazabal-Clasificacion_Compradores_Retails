@@ -25,6 +25,7 @@ import io
 import zipfile
 #from test_import.funciones_generales import getTipoVariable
 from funciones_generales import transformarTipoVariable,getTipoVariable, revisarValores, pathToData
+import funciones_generales as funciones_generales
 from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot, graficoBoxPlot
 
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode

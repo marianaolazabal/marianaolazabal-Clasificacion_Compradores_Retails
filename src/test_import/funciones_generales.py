@@ -31,6 +31,7 @@ def revisarValores(dataFrame):
 
     return resultado
 
+#funcion agarra path del cvs data/
 def pathToData():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 

@@ -21,8 +21,10 @@ from pyzipcode import ZipCodeDatabase
 import statsmodels.api as sm
 import os
 import gc
+import io
+import zipfile
 #from test_import.funciones_generales import getTipoVariable
-from funciones_generales import transformarTipoVariable,getTipoVariable, revisarValores
+from funciones_generales import transformarTipoVariable,getTipoVariable, revisarValores, pathToData
 from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot, graficoBoxPlot
 
 #from uszipcode import SearchEngine, SimpleZipcode, Zipcode
@@ -32,13 +34,8 @@ from plots import grafico_Histograma, grafico_qqPlot, graficoDisplot, graficoBox
 #https://www.kaggle.com/datasets/sahilprajapati143/retail-analysis-large-dataset
 
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Sube dos niveles para llegar al directorio raíz del proyecto
-root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
-
-# Construye la ruta al archivo CSV en el directorio 'data'
-csv_path = os.path.join(root_dir, 'data', 'new_retail_data.csv')
+#llama a la funcion desde funciones_generales
+csv_path = pathToData()
 #print(f"CSV path: {csv_path}")
 df_Retail = pd.read_csv(csv_path)
 
@@ -530,3 +527,17 @@ print("Hay solo", num_Products, "productos distintos.")
 def dataFrame_limpiado():
     return df_Retail
 
+#guarda el csv en la carpeta data y lo zipea
+csv_file_name = 'Limpiado.csv'
+zip_file_path = csv_path + 'Limpiado.zip'
+csv_buffer = io.StringIO()
+df_Retail.to_csv(csv_buffer, index=False)
+
+with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    # Move the pointer to the start of the buffer
+    csv_buffer.seek(0)
+    # Write the CSV buffer to the ZIP file
+    zipf.writestr(csv_file_name, csv_buffer.getvalue())
+
+# Optional: Close the buffer
+csv_buffer.close()

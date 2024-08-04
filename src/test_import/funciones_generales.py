@@ -1,3 +1,4 @@
+import os
 # Transformar variables
 def transformarTipoVariable(columns_to_convert,dataFrame, tipo):
     for column in columns_to_convert:
@@ -29,3 +30,13 @@ def revisarValores(dataFrame):
             resultado['columnas_con_ceros'][column] = num_ceros
 
     return resultado
+
+def pathToData():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Sube dos niveles para llegar al directorio raíz del proyecto
+    root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
+
+    # Construye la ruta al archivo CSV en el directorio 'data'
+    csv_path = os.path.join(root_dir, 'data', 'new_retail_data.zip')
+    return csv_path

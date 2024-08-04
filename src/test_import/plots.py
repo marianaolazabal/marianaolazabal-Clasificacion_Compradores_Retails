@@ -40,3 +40,21 @@ def graficoBoxPlot(dataFrame, variable, titulo, ylabel):
     plt.title(f'Box Plot de {titulo}')
     plt.ylabel(ylabel)
     plt.show()
+
+
+def plot_bar_graphs(dataFrame, variable):
+    plt.figure(figsize=(15, 5))
+    ax = sns.countplot(x=variable, data=dataFrame, order=dataFrame[variable].value_counts().index)
+    ax.bar_label(ax.containers[0],rotation=45)
+    plt.xlabel(variable, fontsize=15)
+    plt.ylabel('Count', fontsize=15)
+    plt.title(f'Bar Graph of {variable}', fontsize=20)
+    plt.xticks(rotation=45, ha='right', fontsize=12)
+    plt.show()
+
+
+
+
+
+
+

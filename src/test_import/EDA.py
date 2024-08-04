@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from limpieza_data import dataFrame_limpiado 
+from plots import plot_bar_graphs, grafico_Histograma
 
 
 df=dataFrame_limpiado()
@@ -43,18 +44,20 @@ plt.show()
 # Hipotesis
 
 #H1. El importe gastado en la orden puede ayudar a identificar patrones de consumo entre los usuarios.
+df_clientes_gasto = df.groupby('Customer_ID')['Total_Amount_log'].sum().reset_index()
+df_clientes_gasto['Customer_ID'].nunique()
+df_clientes_gasto.head()
+# 2. Renombrar la columna para mayor claridad
+df_clientes_gasto.rename(columns={'Total_Amount_log': 'Total_Gastado'}, inplace=True)
 
-def plot_bar_graphs(df, columns):
-    for column in columns:
-        plt.figure(figsize=(15, 5))
-        ax = sns.countplot(x=column, data=df, order=df[column].value_counts().index)
-        ax.bar_label(ax.containers[0],rotation=45)
-        plt.xlabel(column, fontsize=15)
-        plt.ylabel('Count', fontsize=15)
-        plt.title(f'Bar Graph of {column}', fontsize=20)
-        plt.xticks(rotation=45, ha='right', fontsize=12)
-        plt.show()
-        
-cat_features = ['make','vehicle_class', 'engine_size', 'cylinders', 'transmission', 'fuel_type']
 
-plot_bar_graphs(df, cat_features)
+#plot_bar_graphs(df_clientes_gasto, "Total_Gastado")
+
+
+grafico_Histograma(df_clientes_gasto,'Total_Gastado','Total gastado por cliente','Total_Gastado','Frecuencia')
+
+print("""Se puede observar del grafico que existen distintos grupos de clientes. Principalmente, los picos podrian estar indicando grupos específicos de gasto
+Por ejemplo, hay un gran número de clientes que gastan entre 5 y 10 unidades, otro grupo que gasta entre 10 y 15 unidades, y así sucesivamente.
+A medida que el total gastado aumenta, la frecuencia de los clientes disminuye, lo que indica que menos clientes gastan cantidades más altas.
+La cola que se extiende hacia la derecha sugiere que hay algunos clientes que gastan cantidades significativamente altas, 
+pero estos son mucho menos frecuentes.""")

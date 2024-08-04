@@ -2,12 +2,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from limpieza_data import dataFrame_limpiado 
+#from limpieza_data import dataFrame_limpiado 
+from funciones_generales import pathToData
 from plots import plot_bar_graphs, grafico_Histograma
 import gc
 
 
-df=dataFrame_limpiado()
+csv_path = pathToData()
+df =pd.read_csv(csv_path + 'Limpiado.zip')
+
+#df=dataFrame_limpiado()
 df.head()
 
 df.info()

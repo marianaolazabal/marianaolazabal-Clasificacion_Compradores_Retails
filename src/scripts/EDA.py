@@ -7,6 +7,7 @@ import statsmodels.api as sm
 from funciones_generales import pathToData
 from plots import plot_bar_graphs, grafico_Histograma
 import gc
+import plotly.express as px
 
 
 csv_path = pathToData()
@@ -196,9 +197,17 @@ df_grouped_by_product_month = df.groupby(['products', 'Month']).agg({
     'Amount': 'mean'
 }).reset_index()
 
+
 # Para simplificar, se usará una estructura básica de dos periodos para el cálculo
 # Encuentra los productos únicos
 products = df_grouped_by_product_month['products'].unique()
+
+total_purchases_per_product = df.groupby('products')['Total_Purchases'].sum().reset_index()
+total_purchases_per_product.rename(columns={'Total_Purchases': 'Total_Purchases_All'}, inplace=True)
+
+df = df.merge(total_purchases_per_product, on='products', how='left')
+
+df.head()
 
 
 elasticity_results = []
@@ -243,35 +252,30 @@ for product in products:
 df_elasticity = pd.DataFrame(elasticity_results)
 
 # Mostrar los resultados
-print(df_elasticity)
+df_elasticity.head()
+
+# Unir df_elasticity con df para copiar la columna Total_Purchases_All
+df_elasticity = df_elasticity.merge(df[['products', 'Total_Purchases_All']], left_on='Product', right_on='products', how='left')
+
+# Eliminar la columna Product duplicada
+df_elasticity.drop(columns=['Product'], inplace=True)
+df_elasticity=df_elasticity.drop_duplicates()
+df_elasticity.head(20)
+df.head(20)
 
 
-# Crear el gráfico de barras
-plt.figure(figsize=(100, 60))
-
-# Crear el gráfico de barras
-sns.barplot(data=df_elasticity, x='Product', y='Elasticity', palette='viridis')
-
-# Configuración de la gráfica
-plt.title('Elasticidad Precio de la Demanda por Producto', fontsize=20)
-plt.xlabel('Producto', fontsize=60)
-plt.ylabel('Elasticidad', fontsize=30)
-plt.xticks(rotation=90, fontsize=30)  # Ajustar el tamaño de la fuente en el eje x
-plt.yticks(fontsize=14)  # Ajustar el tamaño de la fuente en el eje y, si es necesario
-
-plt.tight_layout()
-
-# Mostrar el gráfico
-plt.show()
+df_elasticity_filtro=df_elasticity['Total_Purchases_All'].min()
+print(df_elasticity_filtro)
 
 
 # Crear el gráfico de barras interactivo
 fig = px.bar(df_elasticity, 
-             x='Product', 
-             y='Elasticity', 
+             x='products', 
+             y='Elasticity',
+             height=1000, 
              color='Elasticity', 
              text='Elasticity', 
-             hover_data={'Price': True, 'Quantity': True, 'Elasticity': True})
+             hover_data={'products': True, 'Elasticity': True})
 
 # Configuración del título y etiquetas
 fig.update_layout(
@@ -279,7 +283,6 @@ fig.update_layout(
     xaxis_title='Producto',
     yaxis_title='Elasticidad',
     title_font_size=20,
-    xaxis=dict(tickfont=dict(size=20)),
     yaxis=dict(tickfont=dict(size=14))
 )
 
@@ -287,5 +290,25 @@ fig.update_layout(
 fig.show()
 
 
+print("""Del grafico se desprenden los productos cuyas elasticidades estan entre 0 y 1, los individuos que compran productos con elasticidades
+      positivas, son mas propensos a revisar sus utilidades y revaluar su consumo""")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #OTRA HIPOTESIS
 #BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA
+
+#PROBAR ESTO
+
+df_prueba = px.data.gapminder().query("country == 'Canada'")

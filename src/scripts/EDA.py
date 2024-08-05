@@ -133,14 +133,16 @@ pd.set_option('display.max_columns', None)
 df.head()
 
 # Agrupar los datos por producto, año y mes, y sumar las cantidades demandadas
-df_grouped = df.groupby(['products', 'Month'])['Total_Purchases'].sum().reset_index()
+df_grouped = df.groupby(['products', 'Month','Product_Category', 'Total_Amount_log', 'Amount'])['Total_Purchases'].sum().reset_index()
+df_grouped.head()
+df_grouped_Electronics=df_grouped[df_grouped['Product_Category']=='Electronics']
 
 # Configurar el estilo de Seaborn
 sns.set(style="whitegrid")
 
 # Crear el gráfico
 plt.figure(figsize=(14, 8))
-sns.lineplot(data=df_grouped, x='Month', y='Total_Purchases', hue='products', marker='o')
+sns.lineplot(data=df_grouped_Electronics, x='Month', y='Total_Purchases', hue='products', marker='o')
 
 # Ajustar etiquetas y título
 plt.title('Evolución de las Cantidades Demandadas por Producto')

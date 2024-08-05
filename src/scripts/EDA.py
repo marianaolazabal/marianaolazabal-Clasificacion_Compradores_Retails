@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import statsmodels.api as sm
 #from limpieza_data import dataFrame_limpiado 
 from funciones_generales import pathToData
 from plots import plot_bar_graphs, grafico_Histograma
@@ -137,27 +138,153 @@ df_grouped = df.groupby(['products', 'Month','Product_Category', 'Total_Amount_l
 df_grouped.head()
 df_grouped_Electronics=df_grouped[df_grouped['Product_Category']=='Electronics']
 
-# Configurar el estilo de Seaborn
-sns.set(style="whitegrid")
 
-# Crear el gráfico
-plt.figure(figsize=(14, 8))
-sns.lineplot(data=df_grouped_Electronics, x='Month', y='Total_Purchases', hue='products', marker='o')
+def grafico_cantidadesDemandadas(dataFrame, variable, valor):
+  # Definir el orden de los meses
+  order = [
+      'March', 'April', 'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December',
+      'January', 'February'
+  ]
 
-# Ajustar etiquetas y título
-plt.title('Evolución de las Cantidades Demandadas por Producto')
-plt.xlabel('Fecha')
-plt.ylabel('Cantidad Demandada')
-plt.xticks(rotation=45)
-plt.legend(title='Producto', bbox_to_anchor=(1.05, 1), loc='upper left')
+  # Filtrar los datos para 'Lenovo Tab'
+  df_grouped_filtrado = dataFrame[dataFrame[variable] == valor]
+
+  # Ordenar los datos por el mes
+  df_grouped_filtrado['Month'] = pd.Categorical(df_grouped_filtrado['Month'], categories=order, ordered=True)
+  df_grouped_filtrado.sort_values(by='Month', inplace=True)
+
+  # Configurar el estilo de Seaborn
+  sns.set(style="whitegrid")
+
+  # Crear la figura y los ejes
+  fig, ax1 = plt.subplots(figsize=(14, 8))
+
+  # Graficar la cantidad demandada en el primer eje
+  color = 'tab:blue'
+  ax1.set_xlabel('Fecha')
+  ax1.set_ylabel('Cantidad Demandada', color=color)
+  sns.lineplot(data=df_grouped_filtrado, x='Month', y='Total_Purchases', marker='o', ax=ax1, color=color)
+  ax1.tick_params(axis='y', labelcolor=color)
+
+  # Crear un segundo eje para el precio
+  ax2 = ax1.twinx()
+  color = 'tab:red'
+  ax2.set_ylabel('Precio', color=color)
+  sns.lineplot(data=df_grouped_filtrado, x='Month', y='Amount', marker='x', ax=ax2, color=color)
+  ax2.tick_params(axis='y', labelcolor=color)
+
+  # Añadir título y ajustar la leyenda
+  plt.title('Evolución de Cantidades Demandadas y Precios por Producto')
+  fig.tight_layout()
+  plt.xticks(rotation=45)
+
+  # Mostrar el gráfico
+  plt.show()
+
+
+df_grouped_Electronics['products'].unique()
+
+
+grafico_cantidadesDemandadas(df_grouped_Electronics, 'products', 'Lenovo Tab')
+grafico_cantidadesDemandadas(df_grouped_Electronics, 'products', '4K TV')
+
+
+# Agrupar los datos por producto y mes
+df_grouped_by_product_month = df.groupby(['products', 'Month']).agg({
+    'Total_Purchases': 'sum',
+    'Amount': 'mean'
+}).reset_index()
+
+# Para simplificar, se usará una estructura básica de dos periodos para el cálculo
+# Encuentra los productos únicos
+products = df_grouped_by_product_month['products'].unique()
+
+
+elasticity_results = []
+
+for product in products:
+    df_product = df_grouped_by_product_month[df_grouped_by_product_month['products'] == product]
+
+    # Asegúrate de que haya datos suficientes
+    if df_product.shape[0] < 2:
+        elasticity_results.append({
+            'Product': product,
+            'Elasticity': None
+        })
+        continue
+
+    # Preparar datos para regresión
+    X = df_product['Amount']  # Precio
+    Y = df_product['Total_Purchases']  # Cantidad demandada
+
+    X = sm.add_constant(X)  # Añadir constante para el término de intersección
+
+    model = sm.OLS(Y, X).fit()  # Ajustar el modelo
+
+    # Extraer el coeficiente de precio (beta)
+    beta = model.params['Amount']
+
+    # Calcular elasticidad
+    P_avg = X['Amount'].mean()  # Precio promedio
+    Q_avg = Y.mean()  # Cantidad promedio
+
+    if P_avg != 0:
+        elasticity = beta * (P_avg / Q_avg)
+    else:
+        elasticity = None
+
+    elasticity_results.append({
+        'Product': product,
+        'Elasticity': elasticity
+    })
+
+# Convertir resultados a DataFrame
+df_elasticity = pd.DataFrame(elasticity_results)
+
+# Mostrar los resultados
+print(df_elasticity)
+
+
+# Crear el gráfico de barras
+plt.figure(figsize=(100, 60))
+
+# Crear el gráfico de barras
+sns.barplot(data=df_elasticity, x='Product', y='Elasticity', palette='viridis')
+
+# Configuración de la gráfica
+plt.title('Elasticidad Precio de la Demanda por Producto', fontsize=20)
+plt.xlabel('Producto', fontsize=60)
+plt.ylabel('Elasticidad', fontsize=30)
+plt.xticks(rotation=90, fontsize=30)  # Ajustar el tamaño de la fuente en el eje x
+plt.yticks(fontsize=14)  # Ajustar el tamaño de la fuente en el eje y, si es necesario
+
+plt.tight_layout()
 
 # Mostrar el gráfico
-plt.tight_layout()
 plt.show()
 
 
+# Crear el gráfico de barras interactivo
+fig = px.bar(df_elasticity, 
+             x='Product', 
+             y='Elasticity', 
+             color='Elasticity', 
+             text='Elasticity', 
+             hover_data={'Price': True, 'Quantity': True, 'Elasticity': True})
 
+# Configuración del título y etiquetas
+fig.update_layout(
+    title='Elasticidad Precio de la Demanda por Producto',
+    xaxis_title='Producto',
+    yaxis_title='Elasticidad',
+    title_font_size=20,
+    xaxis=dict(tickfont=dict(size=20)),
+    yaxis=dict(tickfont=dict(size=14))
+)
 
+# Mostrar el gráfico
+fig.show()
 
 
 #OTRA HIPOTESIS

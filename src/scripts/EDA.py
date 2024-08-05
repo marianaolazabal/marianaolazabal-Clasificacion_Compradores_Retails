@@ -9,6 +9,8 @@ from plots import plot_bar_graphs, grafico_Histograma
 import gc
 import plotly.express as px
 
+#TIENE QUE QUEDARME UNA TABLA CON UNA LINEA POR CLIENTEEEEEE
+
 
 csv_path = pathToData()
 df =pd.read_csv(csv_path + 'Limpiado.zip')
@@ -295,16 +297,32 @@ print("""Del grafico se desprenden los productos cuyas elasticidades estan entre
 
 
 
+# H3. Los tipos de productos y las características inherentes a los productos comprados ayudan a explicar patrones de consumo.
+
+#Frecuencia de compra de los clientes entre categorias y entre productos
+df.columns
+df_clientes=df.groupby('Customer_ID')
+df_clientes.head()
+
+# Agrupar por 'Customer_ID' y 'Product_Type' y contar la frecuencia de compra
+purchase_frequency = df.groupby(['Customer_ID', 'Product_Type']).size().reset_index(name='Purchase_Frequency')
+purchase_frequency.head()
+purchase_frequency = purchase_frequency.groupby(['Product_Type', 'Product_Type'])['Purchase_Frequency'].sum().reset_index()
+
+
+
+
+fig = px.bar(purchase_frequency, x="medal", y="count", color="nation", text_auto=True)
+fig.show()
 
 
 
 
 
-
-
-
-
-
+fig = px.bar(purchase_frequency, y='Purchase_Frequency', x='Product_Type', color='Customer_ID', text='Purchase_Frequency',
+            title="Frecuencia de Compra por Cliente y Tipo de Producto", labels={'Customer_ID': 'ID del Cliente'})
+fig.update_traces(textposition='outside', texttemplate='%{text:.2s}')
+fig.show()
 
 #OTRA HIPOTESIS
 #BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA

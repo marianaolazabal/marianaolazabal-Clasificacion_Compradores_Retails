@@ -129,6 +129,33 @@ print("""La mayoria de los clientes compran de 10 a 15 unidades, siendo este el 
 # una segmentación funcional basada en su sensibilidad al precio. Este análisis permite a las empresas ajustar sus estrategias de precios y marketing
 #  para maximizar la efectividad y mejorar la satisfacción del cliente.
 
+pd.set_option('display.max_columns', None)
+df.head()
+
+# Agrupar los datos por producto, año y mes, y sumar las cantidades demandadas
+df_grouped = df.groupby(['products', 'Month'])['Total_Purchases'].sum().reset_index()
+
+# Configurar el estilo de Seaborn
+sns.set(style="whitegrid")
+
+# Crear el gráfico
+plt.figure(figsize=(14, 8))
+sns.lineplot(data=df_grouped, x='Month', y='Total_Purchases', hue='products', marker='o')
+
+# Ajustar etiquetas y título
+plt.title('Evolución de las Cantidades Demandadas por Producto')
+plt.xlabel('Fecha')
+plt.ylabel('Cantidad Demandada')
+plt.xticks(rotation=45)
+plt.legend(title='Producto', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+# Mostrar el gráfico
+plt.tight_layout()
+plt.show()
+
+
+
+
 
 
 #OTRA HIPOTESIS

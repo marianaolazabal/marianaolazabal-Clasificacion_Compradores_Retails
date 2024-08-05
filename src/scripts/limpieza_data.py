@@ -401,11 +401,6 @@ grafico_Histograma(df_Retail,"Total_Purchases","Total_Purchases","Total comprado
 print("La variable Total_Purchases es normal, el rango va entre 1 a 10 cantidades compradas")
 
 
-# - Amount --> Total gastado en una compra. La elimino porque la columna Total_Amount es un producto entre 
-
-df_Retail = df_Retail.drop(columns=['Amount'])
-
-
 # - Total_Amount --> Total amount spent by the customer (calculated as Amount * Total_Purchases)
 
 grafico_Histograma(df_Retail,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
@@ -471,6 +466,55 @@ unique_ProductBrand = df_Retail['Product_Brand'].cat.categories
 num_marcas = len(unique_ProductBrand)
 print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & Beyond, BlueStar, Coca-Cola, Penguin Books, Pepsi, Random House, Samsung, Sony, Whirepool, Zara")
 
+# Algunos productos cuyo nombre contienen el nombre de la marca, tienen otro nombre en la columna marca, por lo tanto sustituyo
+# la marca por la que existe en el nombre
+
+
+# Mostrar los primeros registros para verificar
+df_Retail.head()
+
+pd.set_option('display.max_rows', None)  # Mostrar todas las filas
+
+marca_producto = df_Retail.groupby('Product_Brand')['products'].unique()
+
+# Mostrar las marcas y los productos únicos asociados
+for marca, productos in marca_producto.items():
+    print(f"Marca: {marca}")
+    print(f"Productos: {', '.join(productos)}")
+    print()
+
+
+def cambioMarca(producto, marca):
+    df_Retail_Electronics.loc[df_Retail_Electronics['products'].str.contains(producto, case=False, na=False), 'Product_Brand'] = marca
+
+# Define los productos y marcas
+productos = ['Samsung Galaxy','Samsung Galaxy Tab','Lenovo Tab','Lenovo ThinkPad','Razer Blade', 'Samsung Notebook', 'Acer Swift', 'Asus ZenBook', 'HP Spectre', 'Dell XPS', 
+              'Huawei P', 'Amazon Fire Tablet', 'Google Pixel', 'LG Gram', 'Microsoft Surface Laptop', 
+              'iPhone', 'LG G', 'Xiaomi Mi', 'Microsoft Surface', 'iPad', 'Asus ZenPad', 'Nokia', 
+              'Huawei MediaPad', 'Acer Iconia Tab', 'Motorola Moto', 'Sony Xperia Tablet', 
+              'Google Pixel Slate', 'OnePlus', 'Sony Xperia']
+marcas = ['Samsung','Samsung','Lenovo','Lenovo','Razer', 'Samsung', 'Acer', 'Asus', 'HP', 'Dell', 'Huawei', 'Amazon', 'Google', 'LG', 
+          'Microsoft', 'Apple', 'LG', 'Xiaomi', 'Microsoft', 'Apple', 'Asus', 'Nokia', 
+          'Huawei', 'Acer', 'Motorola', 'Sony', 'Google', 'OnePlus', 'Sony']
+
+# Crear el DataFrame de mapeo
+df_mapping = pd.DataFrame({
+    'products': productos,
+    'Product_Brand': marcas
+})
+
+df_Retail = df_Retail.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
+
+# Reemplazar 'Product_Brand' en df_Retail con los valores de 'Product_Brand_new'
+df_Retail['Product_Brand'] = df_Retail['Product_Brand_new'].combine_first(df_Retail['Product_Brand'])
+
+# Eliminar la columna temporal 'Product_Brand_new'
+df_Retail = df_Retail.drop(columns='Product_Brand_new')
+
+df_Retail_Electronics=df_Retail[df_Retail['Product_Category']=='Electronics']
+df_Retail_Electronics.head(20)
+
+
 
 # - Product_Type --> Type of the purchased product.
 
@@ -517,7 +561,7 @@ print("Hay solo", num_Ratings, "posibles valores para Ratings.", "Estos son: 1, 
 
 
 # --> Products
-
+df_Retail['products'] = df_Retail['products'].astype('category')
 
 unique_Products = df_Retail['products'].cat.categories
 num_Products = len(unique_Products)

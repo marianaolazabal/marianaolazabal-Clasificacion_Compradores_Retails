@@ -274,7 +274,7 @@ print(df_elasticity_filtro)
 fig = px.bar(df_elasticity, 
              x='products', 
              y='Elasticity',
-             height=1000, 
+             height=800, 
              color='Elasticity', 
              text='Elasticity', 
              hover_data={'products': True, 'Elasticity': True})
@@ -292,37 +292,45 @@ fig.update_layout(
 fig.show()
 
 
-print("""Del grafico se desprenden los productos cuyas elasticidades estan entre 0 y 1, los individuos que compran productos con elasticidades
-      positivas, son mas propensos a revisar sus utilidades y revaluar su consumo""")
+print("""El grafico muestra la elasticidad precio de la demanda para diferentes productos.
+      
+Los clientes que compran productos elasticidad negativa podria indicar que el cliente es sensible al precio 
+ya que un cambio en el precio afecta a las cantidades demandadas. Cuanto mas negativo sea el valor, mayor
+sera el cambio en las cantidades demandadas en relacion al precio.
+
+En contrapartida, los clientes que compran productos con elasticidades cercanas a cero, podrian ser clasificados
+como menos sensibles al precio, ya que cambios en el precio no afectan demasiado su comportamiento de compra.
+      
+Por último, los productos con elasticidades positivas son los llamados de Veblen y Giffen para los cuales al 
+aumentar el precio, aumenta la demanda. Son por ejemplo, bienes de lujo o productos en los que un mayor precio
+percibido puede aumentar la demanda debido a la percepción de mayor calidad o prestigio.
+
+Entender estos patrones permite conocer insights para definir promociones y descuentos con mayor exactitud.
+Para productos con alta elasticidad negativa (valor absoluto alto), ofrecer descuentos o promociones puede 
+atraer más ventas, ya que los clientes son muy sensibles a cambios en el precio.
+Para productos con elasticidad baja (valor absoluto bajo), se puede ajustar los precios sin esperar grandes 
+cambios en la demanda, optimizando así los márgenes de ganancia.""")
 
 
 
 # H3. Los tipos de productos y las características inherentes a los productos comprados ayudan a explicar patrones de consumo.
 
-#Frecuencia de compra de los clientes entre categorias y entre productos
-df.columns
-df_clientes=df.groupby('Customer_ID')
-df_clientes.head()
+grouped_df = df.groupby('products')['Total_Purchases'].sum().reset_index()
 
-# Agrupar por 'Customer_ID' y 'Product_Type' y contar la frecuencia de compra
-purchase_frequency = df.groupby(['Customer_ID', 'Product_Type']).size().reset_index(name='Purchase_Frequency')
-purchase_frequency.head()
-purchase_frequency = purchase_frequency.groupby(['Product_Type', 'Product_Type'])['Purchase_Frequency'].sum().reset_index()
-
-
-
-
-fig = px.bar(purchase_frequency, x="medal", y="count", color="nation", text_auto=True)
-fig.show()
+# Creamos el gráfico de barras
+plt.figure(figsize=(60, 26))
+sns.barplot(data=grouped_df, x='products', y='Total_Purchases', palette='viridis')
+plt.title('Cantidad Comprada de Cada Product_Type')
+plt.xlabel('Product_Type')
+plt.ylabel('Cantidad Comprada')
+plt.xticks(rotation=45)  # Rotar etiquetas del eje x si es necesario
+plt.show()
 
 
 
 
 
-fig = px.bar(purchase_frequency, y='Purchase_Frequency', x='Product_Type', color='Customer_ID', text='Purchase_Frequency',
-            title="Frecuencia de Compra por Cliente y Tipo de Producto", labels={'Customer_ID': 'ID del Cliente'})
-fig.update_traces(textposition='outside', texttemplate='%{text:.2s}')
-fig.show()
+
 
 #OTRA HIPOTESIS
 #BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA
@@ -330,3 +338,7 @@ fig.show()
 #PROBAR ESTO
 
 df_prueba = px.data.gapminder().query("country == 'Canada'")
+#Age
+fig = px.scatter(df.query("year==2007"), x="Age", y="Total_Purchases", size="Total_Amount_log", color="continent",
+           hover_name="country", log_x=True, size_max=60)
+fig.show()

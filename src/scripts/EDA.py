@@ -294,7 +294,7 @@ fig.show()
 
 print("""El grafico muestra la elasticidad precio de la demanda para diferentes productos.
       
-Los clientes que compran productos elasticidad negativa podria indicar que el cliente es sensible al precio 
+Los clientes que compran productos con elasticidad negativa podria indicar que el cliente es sensible al precio 
 ya que un cambio en el precio afecta a las cantidades demandadas. Cuanto mas negativo sea el valor, mayor
 sera el cambio en las cantidades demandadas en relacion al precio.
 
@@ -314,6 +314,61 @@ cambios en la demanda, optimizando así los márgenes de ganancia.""")
 
 
 # H3. Los tipos de productos y las características inherentes a los productos comprados ayudan a explicar patrones de consumo.
+df.head()
+df.columns
+
+fig = px.treemap(df, 
+                 path=['Product_Category', 'Product_Type', 'Product_Brand'], 
+                 values='Total_Purchases',
+                 title='Productos más comprados por categoría',
+                 color='Total_Purchases',
+                 color_continuous_scale='RdBu')
+
+fig.show()
+
+
+fig = px.treemap(df, 
+                 path=['Product_Category', 'Product_Type', 'Product_Brand'], 
+                 values='Amount',
+                 title='Productos más comprados por categoría',
+                 color='Total_Purchases',
+                 color_continuous_scale='RdBu')
+
+fig.show()
+
+
+customer_counts = df.groupby(['Product_Category', 'Product_Type', 'Product_Brand','Customer_ID'])['Total_Amount'].sum().reset_index()
+customer_counts.rename(columns={'Customer_ID': 'Customer_Count'}, inplace=True)
+fig = px.treemap(customer_counts, 
+                 path=['Product_Category', 'Product_Type', 'Product_Brand'], 
+                 values='Customer_Count',
+                 title='Número de clientes que compraron por categoría de producto',
+                 color='Customer_Count',
+                 color_continuous_scale='RdBu')
+
+fig.show()
+
+# Contar las ocurrencias de cada cliente
+customer_counts = df['Customer_ID'].value_counts()
+
+# Obtener el ID del cliente que se repite más veces
+most_frequent_customer_id = customer_counts.idxmax()
+
+print(f"El ID del cliente que se repite más veces es {most_frequent_customer_id}.")
+
+df47382=df[df['Customer_ID']==47382]
+df47382.head(10)
+#BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA
+
+#PROBAR ESTO
+
+df_prueba = px.data.gapminder().query("country == 'Canada'")
+#Age
+fig = px.scatter(df.query("year==2007"), x="Age", y="Total_Purchases", size="Total_Amount_log", color="continent",
+           hover_name="country", log_x=True, size_max=60)
+fig.show()
+
+
 
 grouped_df = df.groupby('products')['Total_Purchases'].sum().reset_index()
 
@@ -326,19 +381,5 @@ plt.ylabel('Cantidad Comprada')
 plt.xticks(rotation=45)  # Rotar etiquetas del eje x si es necesario
 plt.show()
 
-
-
-
-
-
-
-#OTRA HIPOTESIS
-#BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA
-
-#PROBAR ESTO
-
-df_prueba = px.data.gapminder().query("country == 'Canada'")
-#Age
-fig = px.scatter(df.query("year==2007"), x="Age", y="Total_Purchases", size="Total_Amount_log", color="continent",
-           hover_name="country", log_x=True, size_max=60)
-fig.show()
+plt.figure(figsize=(5, 5))
+df['Product_Type'].value_counts().head(5).plot(kind='pie',  autopct='%1.1f%%')

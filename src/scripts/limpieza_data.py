@@ -123,9 +123,7 @@ transformarTipoVariable(columns_to_convert_category, df_Retail, 'category')
 columns_to_check = [
        'Customer_ID', 'Name', 'Email', 'Address',
        'City', 'State', 'Zipcode', 'Country', 'Age', 'Gender', 'Income',
-       'Customer_Segment', 'Date', 'Year', 'Month', 'Time',
-       'Feedback', 'Shipping_Method', 'Payment_Method',
-       'Order_Status'
+       'Customer_Segment','Feedback', 'Shipping_Method', 'Payment_Method'
 ]
 
 
@@ -146,14 +144,6 @@ for column in columns_to_check:
 df_Retail = df_Retail[df_Retail['Transaction_ID'].isin(consistent_transaction_ids)]
 
 df_Retail.head()
-
-df_Retail_unique_copy = df_Retail[df_Retail['Transaction_ID'] == 4676558.0]
-df_Retail_unique_copy.head(3)
-
-# Cuntas veces se repite el cliente que compro mas veces
-
-max_compras = df_Retail['Customer_ID'].value_counts().max()
-print("El cliente que compró más veces, lo hizo " + str(max_compras) + " veces")
 
 
 # - City es la ciudad donde el cliente vive

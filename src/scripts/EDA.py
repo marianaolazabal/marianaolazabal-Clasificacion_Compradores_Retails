@@ -316,7 +316,7 @@ cambios en la demanda, optimizando así los márgenes de ganancia.""")
 # H3. Los tipos de productos y las características inherentes a los productos comprados ayudan a explicar patrones de consumo.
 df.head()
 df.columns
-
+df['Product_Brand'].unique()
 fig = px.treemap(df, 
                  path=['Product_Category', 'Product_Type', 'Product_Brand'], 
                  values='Total_Purchases',
@@ -326,6 +326,19 @@ fig = px.treemap(df,
 
 fig.show()
 
+print('''De este grafico se destacan algunas marcas y productos mas frecuentes entre los que compran los clientes.
+Samsung y Sony son las marcas mas destacadas de la categoria Electronics. Por su parte, Pepsi y Coca-Cola, son las mas 
+vendidas en Grocery y tambien se observa en esta categoria que las bebidas son las mas compradas, seguidas por Chocolate 
+snacks. En la categoria de ropa tenemos Adidas y Nike como las predominantes para zapatos, shorts y camperas, 
+seguido por Zara en cuando a pantalones, vestidos y remeras. En la categoria books figuran tres marcas, Random House, Harper Collins 
+y Penguin Books. Para Home Decor esta IKEA, Bed Bath & Beyond y Home Depot.
+Viendo que las marcas se repiten en varias categorias, parece que los clientes podrian tener preferencias entre estas marcas.
+Si bien hay diferencia entre las cantidades compradas, esta diferencia no es tan pronunciada, lo que podria estar diciendo 
+que si bien los clientes prefieren algunas marcas sobre otras, las marcas mas compradas parecen estar equilibradas en cuanto a su 
+market sheare. Esto podria ser beneficio para la empresa ya que tiene un mejor margen para negociar, impulsando ventas de 
+algunos productos con promociones o descuentos.
+Este tipo de análisis es útil para entender las preferencias del consumidor y puede ayudar a las empresas a tomar decisiones informadas 
+sobre inventarios, estrategias de marketing y asociaciones de marca.''')
 
 fig = px.treemap(df, 
                  path=['Product_Category', 'Product_Type', 'Product_Brand'], 
@@ -336,17 +349,17 @@ fig = px.treemap(df,
 
 fig.show()
 
+df['Product_Type'].unique()
+#customer_counts = df.groupby(['Product_Category', 'Product_Type', 'Product_Brand','Customer_ID'])['Total_Amount'].sum().reset_index()
+#customer_counts.rename(columns={'Customer_ID': 'Customer_Count'}, inplace=True)
+#fig = px.treemap(customer_counts, 
+#                 path=['Product_Category', 'Product_Type', 'Product_Brand'], 
+#                 values='Customer_Count',
+#                 title='Número de clientes que compraron por categoría de producto',
+#                 color='Customer_Count',
+#                 color_continuous_scale='RdBu')
 
-customer_counts = df.groupby(['Product_Category', 'Product_Type', 'Product_Brand','Customer_ID'])['Total_Amount'].sum().reset_index()
-customer_counts.rename(columns={'Customer_ID': 'Customer_Count'}, inplace=True)
-fig = px.treemap(customer_counts, 
-                 path=['Product_Category', 'Product_Type', 'Product_Brand'], 
-                 values='Customer_Count',
-                 title='Número de clientes que compraron por categoría de producto',
-                 color='Customer_Count',
-                 color_continuous_scale='RdBu')
-
-fig.show()
+#fig.show()
 
 # Contar las ocurrencias de cada cliente
 customer_counts = df['Customer_ID'].value_counts()
@@ -356,9 +369,84 @@ most_frequent_customer_id = customer_counts.idxmax()
 
 print(f"El ID del cliente que se repite más veces es {most_frequent_customer_id}.")
 
-df47382=df[df['Customer_ID']==47382]
-df47382.head(10)
+#df47382=df[df['Customer_ID']==47382]
+#df47382.head(10)
+
+
 #BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA
+
+
+
+#H4. El tipo de envío solicitado para la entrega del pedido.
+
+
+def graficoTorta(variableInteres, variableFiltro, titulo):
+    # Agrupar por cliente y el interés, y sumar las compras
+    df_suma = df.groupby([variableInteres, 'Customer_ID'])[variableFiltro].sum().reset_index()
+
+    # Agrupar por el interés y sumar las compras
+    df_total = df_suma.groupby(variableInteres)[variableFiltro].sum().reset_index()
+
+    # Crear el gráfico de torta
+    fig = px.pie(
+        df_total,
+        names=variableInteres,
+        values=variableFiltro,
+        title=titulo
+    )
+    fig.show()
+
+
+graficoTorta('Shipping_Method', 'Total_Purchases', 'Gráfico Shipping Method por compras de cliente')
+
+
+print('''Preferencia por Envíos Rápidos: La mayoría de los clientes prefieren métodos de envío rápidos 
+("Same-Day" y "Express"), sumando un 68.5% del total de compras, lo que sugiere una tendencia hacia la necesidad 
+de recibir los productos rápidamente.
+Implicaciones para la Logística: Las empresas deberían asegurar una logística eficiente para mantener la satisfacción 
+del cliente, dado el alto porcentaje de pedidos que requieren envíos rápidos.''')
+
+
+df['Product_Category'].unique()
+
+
+
+
+
+
+
+
+
+
+
+
+
+df.columns
+df.head()
+df['Shipping_Method'].unique()
+df_Shipping_Method=df[df['Shipping_Method']=='Standard']
+
+df_Shipping_Method_grouped = df_Shipping_Method.groupby(['Product_Category', 'Product_Type']).size().reset_index(name='cantidad_prod_categoria')
+# Crear un mapa de colores para los diferentes level_one
+unique_Product_Category = df_Shipping_Method_grouped['Product_Category'].unique()
+colors = sns.color_palette("husl", len(unique_Product_Category))
+color_map = {Product_Category: color for Product_Category, color in zip(unique_Product_Category, colors)}
+
+# Crear el gráfico de barras
+plt.figure(figsize=(10, 6))
+sns.barplot(data=df_Shipping_Method_grouped, x='Product_Type', y='cantidad_prod_categoria', hue='Product_Category', dodge=False, palette=color_map)
+
+# Personalizar la leyenda
+plt.legend(title='Categoria', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.title('Cantidad comprada por producto y categoria')
+plt.xlabel('Productos')
+plt.ylabel('Cantidad')
+plt.xticks(rotation=90)
+plt.show()
+
+
+
+
 
 #PROBAR ESTO
 

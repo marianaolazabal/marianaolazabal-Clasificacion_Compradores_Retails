@@ -411,38 +411,70 @@ df['Product_Category'].unique()
 
 
 
+#H6. Las categorías de productos más compradas pueden indicar intereses y necesidades predominantes entre diferentes grupos de compradores.
+
+graficoTorta('Product_Category', 'Total_Purchases', 'Grafico Categoria de productos comprados por los clientes')
+
+print('''El grafico revela que los clientes compran productos de una amplia variedad de categorias.
+Esto genera que la empresa deba tener un inventario variado que pueda atender las necesidades de sus clientes y cuidar el
+churn.
+La diversidad en las compras podria indicar patrones especificos en los clientes y con eso una posible segmentacion 
+de mercado, lo que permite a la empresa anticiparse a las necesidades de los clientes, ofreciendo los productos que mas les interesan
+y disponibilizando promociones y descuentos. Conocer los segmentos permite al sector de marketing enfocar sus campa;as con mas
+eficiencia y optimizar los recursos disponibilizando publicidades en los medios indicados.
+Un inventario variado requiere una gestión eficiente de la cadena de suministro. Esto puede incluir la adopción de tecnologías avanzadas 
+para el seguimiento de inventarios y la previsión de la demanda.
+Ofrecer una variedad de productos puede mejorar la experiencia del cliente y aumenta las ventas al fomentar ventas adicionales.
+La diversificacion de la oferta permite a la empresa una estabilidad financiera ya que la caida de ventas de un producto
+puede verse compensada mediante el aumento de otro.''')
 
 
-
-
-
-
-
-
-
-
-df.columns
-df.head()
-df['Shipping_Method'].unique()
-df_Shipping_Method=df[df['Shipping_Method']=='Standard']
-
-df_Shipping_Method_grouped = df_Shipping_Method.groupby(['Product_Category', 'Product_Type']).size().reset_index(name='cantidad_prod_categoria')
-# Crear un mapa de colores para los diferentes level_one
-unique_Product_Category = df_Shipping_Method_grouped['Product_Category'].unique()
-colors = sns.color_palette("husl", len(unique_Product_Category))
-color_map = {Product_Category: color for Product_Category, color in zip(unique_Product_Category, colors)}
-
-# Crear el gráfico de barras
-plt.figure(figsize=(10, 6))
-sns.barplot(data=df_Shipping_Method_grouped, x='Product_Type', y='cantidad_prod_categoria', hue='Product_Category', dodge=False, palette=color_map)
-
-# Personalizar la leyenda
-plt.legend(title='Categoria', bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.title('Cantidad comprada por producto y categoria')
-plt.xlabel('Productos')
-plt.ylabel('Cantidad')
-plt.xticks(rotation=90)
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Product_Category', y='Total_Purchases', hue='Shipping_Method', data=df, ci=None)
+plt.title('Total de Compras por Categoría y Método de Envío')
+plt.xlabel('Categoría de Producto')
+plt.ylabel('Total de Compras')
+plt.legend(title='Método de Envío')
 plt.show()
+
+
+
+
+############SEGUIR#################
+
+total_purchases_by_category = df.groupby('Product_Category')['Total_Purchases'].sum().reset_index()
+total_purchases_by_category.rename(columns={'Total_Purchases': 'Total_Purchases_Category'}, inplace=True)
+
+# Unir los totales de cada categoría con el DataFrame original
+df = df.merge(total_purchases_by_category, on='Product_Category')
+
+# Calcular el porcentaje de compras para cada tipo de envío
+df['Percentage'] = (df['Total_Purchases'] / df['Total_Purchases_Category']) * 100
+
+# Crear el gráfico de barras con porcentajes
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Product_Category', y='Percentage', hue='Shipping_Method', data=df, ci=None)
+plt.title('Porcentaje de Compras por Categoría y Método de Envío')
+plt.xlabel('Categoría de Producto')
+plt.ylabel('Porcentaje de Compras')
+plt.legend(title='Método de Envío')
+plt.show()
+
+
+
+
+#H7. El método de pago utilizado en la transacción es un factor determinante para analizar tipos de consumidores.
+
+graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
+
+
+
+
+
+
+
+
+
 
 
 

@@ -429,13 +429,209 @@ La diversificacion de la oferta permite a la empresa una estabilidad financiera 
 puede verse compensada mediante el aumento de otro.''')
 
 
+graficoTorta('Product_Category', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
+
+
+total_purchases_by_category_shipping = df.groupby(['Product_Category', 'Shipping_Method'])['Total_Purchases'].sum().reset_index()
+
+# Paso 2: Calcular el total de compras por categoría
+total_purchases_by_category = df.groupby('Product_Category')['Total_Purchases'].sum().reset_index()
+total_purchases_by_category.rename(columns={'Total_Purchases': 'Total_Purchases_Category'}, inplace=True)
+
+# Paso 3: Unir los totales de cada categoría con el DataFrame agrupado por tipo de envío
+df_merged = total_purchases_by_category_shipping.merge(total_purchases_by_category, on='Product_Category')
+
+# Paso 4: Calcular el porcentaje de compras para cada tipo de envío dentro de cada categoría
+df_merged['Percentage'] = (df_merged['Total_Purchases'] / df_merged['Total_Purchases_Category']) * 100
+
+# Paso 5: Crear el gráfico de barras con porcentajes
 plt.figure(figsize=(12, 6))
-sns.barplot(x='Product_Category', y='Total_Purchases', hue='Shipping_Method', data=df, ci=None)
-plt.title('Total de Compras por Categoría y Método de Envío')
+sns.barplot(x='Product_Category', y='Percentage', hue='Shipping_Method', data=df_merged, ci=None)
+plt.title('Porcentaje de Compras por Categoría y Método de Envío')
 plt.xlabel('Categoría de Producto')
-plt.ylabel('Total de Compras')
+plt.ylabel('Porcentaje de Compras')
 plt.legend(title='Método de Envío')
+plt.xticks(rotation=45)  # Opcional: para mejorar la legibilidad de las etiquetas
+plt.tight_layout()  # Ajusta el diseño para que todo el texto sea visible
 plt.show()
+
+
+print('''Del grafico se observa que en su mayoria los clientes prefieren metodos de envio rapido. 
+Sin embargo, para la categoria Electronics los consumidores buscan en su mayoria que se haga el mimso dia o en forma expres, 
+el metodo de envio Standard es el menos usado. Esto puede deberse a que los clientes no quieren tener incertidumbre 
+en cuanto a su entrega, prefieren asegurarse que llegara ese dia y no tener que coordinar pero estan menos dispuestos 
+que en otras categorias, a pagar un envio expres. Es probable que el importe de los articulos sea de mayor porte y 
+por tanto prefieren ahorrar en el metodo de envio. Para esto podria ser oportuno ver en mas detalle el metodo de envio 
+de los productos.''')
+
+
+# Supongamos que df ya está definido con las columnas 'Product_Category', 'products', 'Shipping_Method', y 'Total_Purchases'
+
+# Paso 1: Filtrar datos para la categoría Electronics
+df_Electronics = df[df['Product_Category'] == 'Electronics']
+total_purchases_Electronics = df_Electronics.groupby(['products', 'Shipping_Method'])['Total_Purchases'].sum().reset_index()
+
+# Paso 2: Calcular el total de compras por producto
+total_purchases_by_Electronics = df_Electronics.groupby('products')['Total_Purchases'].sum().reset_index()
+total_purchases_by_Electronics.rename(columns={'Total_Purchases': 'Total_Purchases_products'}, inplace=True)
+
+# Paso 3: Unir los totales de cada producto con el DataFrame agrupado por tipo de envío
+df_merged = total_purchases_Electronics.merge(total_purchases_by_Electronics, on='products')
+
+# Paso 4: Calcular el porcentaje de compras para cada tipo de envío dentro de cada producto
+df_merged['Percentage'] = (df_merged['Total_Purchases'] / df_merged['Total_Purchases_products']) * 100
+
+# Paso 5: Crear el gráfico de barras apiladas
+products = df_merged['products'].unique()
+shipping_methods = df_merged['Shipping_Method'].unique()
+
+# Crear una matriz para las compras
+matrix = pd.pivot_table(df_merged, values='Percentage', index='products', columns='Shipping_Method', fill_value=0)
+
+# Crear el gráfico de barras apiladas
+ax = matrix.plot(kind='bar', stacked=True, figsize=(25, 18))
+
+plt.title('Porcentaje de Compras por Productos en la Categoría Electronics y Método de Envío')
+plt.xlabel('Productos')
+plt.ylabel('Porcentaje de Compras')
+plt.xticks(rotation=90, fontsize=12)  # Rotar etiquetas x y ajustar el tamaño de la fuente
+plt.legend(title='Método de Envío')
+plt.tight_layout()  # Ajusta el diseño para que todo el texto sea visible
+
+plt.show()
+
+
+print('''Los productos que se compran unicamente con envio en el día o Express son los aires acondicionados. 
+Esto puede deberse a compras de urgencia, por ejemplo una ola de calor en la que el cliente prefiere tener el articulo 
+cuanto antes. Tambien puede deberse a la disponibilidad horaria, si son articulos que el cliente necesita y no quiere 
+correr el riesgo de no estar cuando lo lleven, paga para asegurarse de que le sera entregado ese mismo dia o en un 
+horario acotado con la opcion express. Otra explicacion puede ser promociones o descuentos en las que el cliente es 
+incentivado a realizar la compra y solicitarlo con esos metodos de envio.''')
+
+
+# Ligadas a las características del usuario
+
+# H7. El método de pago utilizado en la transacción es un factor determinante para analizar tipos de consumidores.
+
+graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
+
+# La mayoria d elos clientes prefieren un metodo de pago online, rapido y eficiente.
+# Visualizar por categoria y productos
+
+
+total_purchases_by_category_Payment_Method = df.groupby(['Product_Category', 'Payment_Method'])['Total_Amount_log'].sum().reset_index()
+
+# Paso 2: Calcular el total de compras por categoría
+Total_Amount_log_category = df.groupby('Product_Category')['Total_Amount_log'].sum().reset_index()
+Total_Amount_log_category.rename(columns={'Total_Amount_log': 'Total_Amount_log_Category'}, inplace=True)
+
+# Paso 3: Unir los totales de cada categoría con el DataFrame agrupado por tipo de envío
+df_merged = total_purchases_by_category_Payment_Method.merge(Total_Amount_log_category, on='Product_Category')
+
+# Paso 4: Calcular el porcentaje de compras para cada tipo de envío dentro de cada categoría
+df_merged['Percentage'] = (df_merged['Total_Amount_log'] / df_merged['Total_Amount_log_Category']) * 100
+
+# Paso 5: Crear el gráfico de barras con porcentajes
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Product_Category', y='Percentage', hue='Payment_Method', data=df_merged, ci=None)
+plt.title('Porcentaje de Compras por Categoría y Método de Pago')
+plt.xlabel('Categoría de Producto')
+plt.ylabel('Porcentaje de Compras')
+plt.legend(title='Método de Pago')
+plt.xticks(rotation=45)  # Opcional: para mejorar la legibilidad de las etiquetas
+plt.tight_layout()  # Ajusta el diseño para que todo el texto sea visible
+plt.show()
+
+
+# H9. La frecuencia de compras puede revelar la lealtad del cliente y su comportamiento de compra recurrente.
+
+frecuencia_comp_cliente = df.groupby('Customer_ID')['Transaction_ID'].nunique().reset_index()
+frecuencia_comp_cliente.rename(columns={'Transaction_ID': 'frecuencia_comp_cliente'}, inplace=True)
+
+# Paso 2: Unir esta información al DataFrame original
+df = df.merge(frecuencia_comp_cliente, on='Customer_ID', how='left')
+
+
+df62101=df[df['Customer_ID']==62101]
+df62101.head()
+
+
+plt.figure(figsize=(12, 6))
+sns.histplot(df['frecuencia_comp_cliente'], bins=30)  # kde=True añade una estimación de la densidad
+plt.title('Distribución de la Frecuencia de Compras de Clientes')
+plt.xlabel('Número de Compras')
+plt.ylabel('Número de Clientes')
+plt.show()
+
+
+categories = df['Product_Category'].unique()
+
+plt.figure(figsize=(14, 10))
+for category in categories:
+    # Filtrar por categoría
+    df_category = df[df['Product_Category'] == category]
+
+    # Crear un histograma para cada categoría
+    sns.histplot(df_category['frecuencia_comp_cliente'], bins=30, label=category)
+
+plt.title('Distribución de la Frecuencia de Compras por Categoría de Producto')
+plt.xlabel('Número de Compras')
+plt.ylabel('Número de Clientes')
+plt.legend(title='Categoría de Producto')
+plt.show()
+
+
+print('''Como se puede apreciar del grafico, la mayoria de los clientes compran la categoria Clothing, 
+seguido por Grocery y Electronics.
+La empresa debe tener en consideracion el stock de productos dentro de estas categorias. Tambien podria considerar 
+vender en conjunto alguno de estos, generando nuevas oportunidades de venta
+y optimizacion de stock y envios.
+Por ejemplo, cuando se compra ropa deportiva se pueden ofrecer productos electronicos de deportes o bebidas, alimentos 
+o suplementos deportivos.''')
+
+
+# H10. El poder adquisitivo del cliente permite identificar patrones de consumo.
+
+graficoTorta('Income', 'frecuencia_comp_cliente', 'Grafico income de los clientes')
+
+print('''Se observa del grafico una alta presencia de clientes con ingresos medios. En el siguiente grafico vemos 
+las cantidades compradas de cada categoria de producto por nivel de ingreso.''')
+
+
+# H12. Las características demográficas del comprador, como edad, género y ubicación, permiten segmentar a los 
+# clientes en grupos específicos.
+
+
+age_summary = df.groupby('Age').size().reset_index(name='Number_of_Customers')
+
+# Crear el gráfico de barras
+plt.figure(figsize=(14, 8))
+plt.bar(age_summary['Age'], age_summary['Number_of_Customers'], color='skyblue')
+
+# Configurar el título y las etiquetas
+plt.title('Cantidad de Clientes por Edad')
+plt.xlabel('Edad')
+plt.ylabel('Número de Clientes')
+
+# Configurar las etiquetas del eje x para mostrar todas las edades
+plt.xticks(ticks=age_summary['Age'], labels=age_summary['Age'].astype(str), rotation=90)
+
+# Ajustar el diseño para que el texto sea visible
+plt.tight_layout()
+
+# Mostrar el gráfico
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
 
 
 

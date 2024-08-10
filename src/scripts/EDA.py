@@ -78,6 +78,10 @@ pero estos son mucho menos frecuentes.""")
 del df_clientes_gasto
 gc.collect()
 
+# Transformacion Gasto total/Cantidad comprada (Historicamente por el cliente)
+
+
+
 
 # - H2. La cantidad comprada y el precio de productos son factores que permite definir perfiles de compradores.
 
@@ -314,7 +318,7 @@ atraer más ventas, ya que los clientes son muy sensibles a cambios en el precio
 Para productos con elasticidad baja (valor absoluto bajo), se puede ajustar los precios sin esperar grandes 
 cambios en la demanda, optimizando así los márgenes de ganancia.""")
 
-
+#Transformacion elasticidad de los productos comprados por el cliente 
 
 # H3. Los tipos de productos y las características inherentes a los productos comprados ayudan a explicar patrones de consumo.
 df.head()
@@ -376,7 +380,7 @@ print(f"El ID del cliente que se repite más veces es {most_frequent_customer_id
 #df47382.head(10)
 
 
-#BIENES SUSTITUTOS Y COMPLEMENTARIOS, HACER ELASTICIDAD CRUZADA
+#No voy a usar los productos para modelar, sino para separar funcionalmente
 
 
 
@@ -413,6 +417,9 @@ del cliente, dado el alto porcentaje de pedidos que requieren envíos rápidos.'
 df['Product_Category'].unique()
 
 
+#Porcentaje comprado por cada tipo de envio 
+
+
 # H5. El Feedback permite entender a la satisfaccion del cliente. Podria ser una herramienta de clasificacion funcional.
 
 
@@ -443,6 +450,9 @@ print('''Los clientes están en su mayoría muy satisfechos con el servicio. Sin
 que lo considera malo o promedio. La satisfacción de los clientes es una de las razones más frecuentes por las que 
 se ve afectado el churn. Estudiar este fenómeno con mayor profundidad y ofrecer programas de compensación podría ayudar 
 a incentivar nuevas compras.''')
+
+
+#No lo voy a usar para modelar
 
 
 #H6. Las categorías de productos más compradas pueden indicar intereses y necesidades predominantes entre diferentes grupos 
@@ -544,7 +554,11 @@ horario acotado con la opcion express. Otra explicacion puede ser promociones o 
 incentivado a realizar la compra y solicitarlo con esos metodos de envio.''')
 
 
+# Transormacion, pocentaje comprado por el cliente por categoria de producto
+
+
 # H7. El Rating de productos permite entender porque los clientes compran determinados productos.
+
 df.columns
 # Agrupar por Product_Type y Ratings y sumar Total_Purchases
 TotalComprado_TipoProducto = df.groupby(['products'])['Total_Purchases'].sum().reset_index(name='Total_Comprado')
@@ -579,9 +593,13 @@ fig.show()
 
 
 
-print('''Los tipos de productos que recibieron mejor Ranking y que los clientes comprar mas cantidades son, Water, Non-Fiction, 
-Fiction, Smartphones.''')
+print('''El grafico muestra si existe una relacion entre la cantidad comprada por los clientes en un determinado producto 
+y el rating que le dan al producto. Seria de esperar que los productos mas comprados presenten Ratings mayores.
+Se observa una tendencia de puntajes altos para los productos mas comprados, siendo el 4 y el 3 los valores mas presentes.
+En todos los productos predomina el ranking 5, 4 y 3. Lo cual es favorable y brinda a los clientes mayor confianza al 
+comprar los productos.''')
 
+#Transformacion, poner el para el cliente cuantos productos compro en cada rating
 
 
 # Ligadas a las características del usuario
@@ -631,6 +649,10 @@ plt.show()
 print('''Se destaca en la categoria Electronics el uso de Tarjeta de credito por ensima del resto de los metodos de pago.
 Para los productos electronicos de mayor costo, la empresa podria ofrecer un sistema de financiamiento con tarjeta de credito,
 incentivando asi las ventas.''')
+
+#Transformacion, porcentaje comprado por el cliente por cada metodo
+
+
 
 # H9. La frecuencia de compras puede revelar la lealtad del cliente y su comportamiento de compra recurrente.
 
@@ -688,6 +710,9 @@ Por ejemplo, cuando se compra ropa deportiva se pueden ofrecer productos electro
 o suplementos deportivos.''')
 
 
+#Transformacion, poner la cantidad de compras realizadas por el cliente en la plataforma
+
+
 # H10. El poder adquisitivo del cliente permite identificar patrones de consumo.
 
 graficoTorta('Income', 'frecuencia_comp_cliente', 'Grafico income de los clientes')
@@ -730,7 +755,21 @@ intereses de estos para mejorar este mercado.''')
 
 
 # Ligadas al contexto
+
+
 # H13. La estacionalidad de las compras proporcionan información sobre preferencias estacionales y ciclos de compra.
+
+
+
+
+
+
+
+
+
+
+
+
 # H14. Las horas y días de la semana en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
 # H15. El clima puede ser un factor determinante por el cual se dan determinadas compras.
 

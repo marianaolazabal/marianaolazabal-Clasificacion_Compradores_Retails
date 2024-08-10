@@ -546,29 +546,37 @@ incentivado a realizar la compra y solicitarlo con esos metodos de envio.''')
 
 # H7. El Rating de productos permite entender porque los clientes compran determinados productos.
 df.columns
-# Agrupar por Product y Ratings y contar la cantidad de clientes para cada combinación
-rating_summary = df.groupby(['Product_Type', 'Ratings'])['Total_Purchases'].sum().reset_index(name='Total_Comprado')
+# Agrupar por Product_Type y Ratings y sumar Total_Purchases
+TotalComprado_TipoProducto = df.groupby(['products'])['Total_Purchases'].sum().reset_index(name='Total_Comprado')
+TotalComprado_TipoProducto.head()
+Cantidad_por_Rating = df.groupby(['Ratings', 'products'])['Transaction_ID'].nunique().reset_index(name='Clientes_por_Rating')
+Cantidad_por_Rating.head()
 
-# Ordenar por Ratings y Customer_Count en orden descendente
-rating_summary_sorted = rating_summary.sort_values(by=['Ratings', 'Total_Comprado'], ascending=[True, False])
+df_grafico=TotalComprado_TipoProducto.merge(Cantidad_por_Rating, on='products', how='left')
+df_grafico.head(10)
 
-# Obtener el top 3 de productos por cada rating
-#top_3_by_rating = rating_summary_sorted.groupby('Ratings').head(5)
+# Crear el gráfico de dispersión interactivo con plotly
+fig = px.scatter(
+    df_grafico,
+    x='Clientes_por_Rating',
+    y='Total_Comprado',
+    color='Ratings',
+    hover_name='products',  # Mostrar el nombre del producto al pasar el mouse
+    size_max=100,
+    title='Diagrama de Dispersión: Total Comprado vs Clientes por Rating'
+)
 
-# Configurar el tamaño del gráfico
-plt.figure(figsize=(14, 8))
+# Personalizar etiquetas de los ejes
+fig.update_layout(
+    xaxis_title="Clientes por Rating",
+    yaxis_title="Total Comprado",
+    legend_title="Ratings",
+    template="plotly_white"
+)
 
-# Crear el gráfico de barras
-sns.barplot(data=rating_summary_sorted, x='Product_Type', y='Total_Comprado', hue='Ratings', dodge=True)
+# Mostrar el gráfico interactivo
+fig.show()
 
-# Configurar el título y las etiquetas
-plt.title('Cantidad de Clientes para Cada Rating agrupado por tipo de producto')
-plt.xlabel('Rating')
-plt.xticks(rotation=90)
-plt.ylabel('Cantidad de Clientes')
-
-# Mostrar el gráfico
-plt.show()
 
 
 print('''Los tipos de productos que recibieron mejor Ranking y que los clientes comprar mas cantidades son, Water, Non-Fiction, 

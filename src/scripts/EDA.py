@@ -721,7 +721,7 @@ print('''Se observa del grafico una alta presencia de clientes con ingresos medi
 las cantidades compradas de cada categoria de producto por nivel de ingreso.''')
 
 
-# H12. Las características demográficas del comprador, como edad, género y ubicación, permiten segmentar a los 
+# H12. Las características demográficas del comprador, como edad, género, permiten segmentar a los 
 # clientes en grupos específicos.
 
 #Debo contar las edades de cada TransactionID, de lo contrario estaria contando de mas las que estan repetidas.
@@ -752,6 +752,60 @@ print('''La edad de los clientes muestra que el grupo que mas compras han realiz
 Por otro lado, hay tramos de edades en los que las compras son muy constantes, se podria estudiar en mayor profunidad los 
 intereses de estos para mejorar este mercado.''')
 
+#GENERO
+
+clientes_por_sexo = df.groupby('Gender')['Customer_ID'].nunique().reset_index(name='Total_Clientes')
+
+# Calcular el porcentaje de clientes por género
+clientes_por_sexo['Porcentaje'] = (clientes_por_sexo['Total_Clientes'] / clientes_por_sexo['Total_Clientes'].sum()) * 100
+
+# Mostrar el DataFrame resultante
+print(clientes_por_sexo)
+
+# Crear un gráfico de barras para visualizar los porcentajes
+plt.figure(figsize=(8, 6))
+sns.barplot(x='Gender', y='Porcentaje', data=clientes_por_sexo, palette='pastel')
+
+# Personalizar el gráfico
+plt.title('Porcentaje de Clientes por Género')
+plt.xlabel('Género')
+plt.ylabel('Porcentaje')
+plt.ylim(0, 100)
+plt.grid(True)
+
+# Mostrar el gráfico
+plt.show()
+
+
+
+print('''Los clientes se encuentran bastante equilibrados, pese a que hay mas hombres que mujeres.''')
+
+
+
+gasto_por_sexo = df.groupby('Gender')['Total_Purchases'].sum().reset_index(name='Total_Comprado')
+
+# Calcular el porcentaje de gasto por género
+gasto_por_sexo['Porcentaje_comprado'] = (gasto_por_sexo['Total_Comprado'] / gasto_por_sexo['Total_Comprado'].sum()) * 100
+
+# Mostrar el DataFrame resultante
+print(gasto_por_sexo)
+
+# Crear un gráfico de barras para visualizar el porcentaje de gasto por género
+plt.figure(figsize=(8, 6))
+sns.barplot(x='Gender', y='Porcentaje_comprado', data=gasto_por_sexo, palette='coolwarm')
+
+# Personalizar el gráfico
+plt.title('Porcentaje de compras por Género')
+plt.xlabel('Género')
+plt.ylabel('Porcentaje de compras')
+plt.ylim(0, 100)
+plt.grid(True)
+
+# Mostrar el gráfico
+plt.show()
+
+
+print('''Del grafico se puede apreciar como los hombres compran mas articulos que las mujeres.''')
 
 
 # Ligadas al contexto
@@ -759,9 +813,10 @@ intereses de estos para mejorar este mercado.''')
 
 # H13. La estacionalidad de las compras proporcionan información sobre preferencias estacionales y ciclos de compra.
 
+df.head()
 
-
-
+df47382=df[df['Customer_ID']==47382]
+df47382.head()
 
 
 
@@ -772,6 +827,8 @@ intereses de estos para mejorar este mercado.''')
 
 # H14. Las horas y días de la semana en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
 # H15. El clima puede ser un factor determinante por el cual se dan determinadas compras.
+# H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
+# H17. El barrio ayuda a entender como clasificara  los clientes
 
 
 

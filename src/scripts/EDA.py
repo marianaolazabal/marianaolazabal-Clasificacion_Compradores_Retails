@@ -445,7 +445,8 @@ se ve afectado el churn. Estudiar este fenómeno con mayor profundidad y ofrecer
 a incentivar nuevas compras.''')
 
 
-#H6. Las categorías de productos más compradas pueden indicar intereses y necesidades predominantes entre diferentes grupos de compradores.
+#H6. Las categorías de productos más compradas pueden indicar intereses y necesidades predominantes entre diferentes grupos 
+# de compradores.
 
 graficoTorta('Product_Category', 'Total_Purchases', 'Grafico Categoria de productos comprados por los clientes')
 
@@ -541,6 +542,38 @@ cuanto antes. Tambien puede deberse a la disponibilidad horaria, si son articulo
 correr el riesgo de no estar cuando lo lleven, paga para asegurarse de que le sera entregado ese mismo dia o en un 
 horario acotado con la opcion express. Otra explicacion puede ser promociones o descuentos en las que el cliente es 
 incentivado a realizar la compra y solicitarlo con esos metodos de envio.''')
+
+
+# H7. El Rating de productos permite entender porque los clientes compran determinados productos.
+df.columns
+# Agrupar por Product y Ratings y contar la cantidad de clientes para cada combinación
+rating_summary = df.groupby(['Product_Type', 'Ratings'])['Total_Purchases'].sum().reset_index(name='Total_Comprado')
+
+# Ordenar por Ratings y Customer_Count en orden descendente
+rating_summary_sorted = rating_summary.sort_values(by=['Ratings', 'Total_Comprado'], ascending=[True, False])
+
+# Obtener el top 3 de productos por cada rating
+#top_3_by_rating = rating_summary_sorted.groupby('Ratings').head(5)
+
+# Configurar el tamaño del gráfico
+plt.figure(figsize=(14, 8))
+
+# Crear el gráfico de barras
+sns.barplot(data=rating_summary_sorted, x='Product_Type', y='Total_Comprado', hue='Ratings', dodge=True)
+
+# Configurar el título y las etiquetas
+plt.title('Cantidad de Clientes para Cada Rating agrupado por tipo de producto')
+plt.xlabel('Rating')
+plt.xticks(rotation=90)
+plt.ylabel('Cantidad de Clientes')
+
+# Mostrar el gráfico
+plt.show()
+
+
+print('''Los tipos de productos que recibieron mejor Ranking y que los clientes comprar mas cantidades son, Water, Non-Fiction, 
+Fiction, Smartphones.''')
+
 
 
 # Ligadas a las características del usuario

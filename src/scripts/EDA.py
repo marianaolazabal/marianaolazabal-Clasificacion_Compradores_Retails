@@ -817,11 +817,12 @@ df.head()
 
 df47382=df[df['Customer_ID']==47382]
 df47382.head()
+df_unique_month = df.drop_duplicates(subset='Transaction_ID')
+ax=df_unique_month['Month'].value_counts()\
+    .plot(kind='barh', title='Cantidad de compras por mes')
 
-
-
-
-
+ax.set_xlabel('Cantidad')
+ax.set_ylabel('Mes')
 
 
 

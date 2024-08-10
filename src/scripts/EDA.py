@@ -52,6 +52,9 @@ plt.show()
 
 # Hipotesis
 
+# Ligadas a las características de la orden
+
+
 # H1. El importe gastado en la orden puede ayudar a identificar patrones de consumo entre los usuarios.
 df_clientes_gasto = df.groupby('Customer_ID')['Total_Amount_log'].sum().reset_index()
 df_clientes_gasto['Customer_ID'].nunique()
@@ -410,6 +413,37 @@ del cliente, dado el alto porcentaje de pedidos que requieren envíos rápidos.'
 df['Product_Category'].unique()
 
 
+# H5. El Feedback permite entender a la satisfaccion del cliente. Podria ser una herramienta de clasificacion funcional.
+
+
+#Debo contar los Feedback de cada TransactionID, de lo contrario estaria contando de mas las que estan repetidas.
+df_unique_customers = df.drop_duplicates(subset='Transaction_ID')
+age_summary = df_unique_customers.groupby('Feedback').size().reset_index(name='Number_of_Customers')
+
+# Crear el gráfico de barras
+plt.figure(figsize=(10, 6))
+plt.bar(age_summary['Feedback'], age_summary['Number_of_Customers'], color='skyblue')
+
+# Configurar el título y las etiquetas
+plt.title('Cantidad de Clientes por Feedback')
+plt.xlabel('Feedback')
+plt.ylabel('Número de Clientes')
+
+# Configurar las etiquetas del eje x para mostrar todas las edades
+plt.xticks(ticks=age_summary['Feedback'], labels=age_summary['Feedback'].astype(str), rotation=90)
+
+# Ajustar el diseño para que el texto sea visible
+plt.tight_layout()
+
+# Mostrar el gráfico
+plt.show()
+
+
+print('''Los clientes están en su mayoría muy satisfechos con el servicio. Sin embargo, hay un porcentaje elevado 
+que lo considera malo o promedio. La satisfacción de los clientes es una de las razones más frecuentes por las que 
+se ve afectado el churn. Estudiar este fenómeno con mayor profundidad y ofrecer programas de compensación podría ayudar 
+a incentivar nuevas compras.''')
+
 
 #H6. Las categorías de productos más compradas pueden indicar intereses y necesidades predominantes entre diferentes grupos de compradores.
 
@@ -624,8 +658,9 @@ las cantidades compradas de cada categoria de producto por nivel de ingreso.''')
 # H12. Las características demográficas del comprador, como edad, género y ubicación, permiten segmentar a los 
 # clientes en grupos específicos.
 
-
-age_summary = df.groupby('Age').size().reset_index(name='Number_of_Customers')
+#Debo contar las edades de cada TransactionID, de lo contrario estaria contando de mas las que estan repetidas.
+df_unique_customers = df.drop_duplicates(subset='Transaction_ID')
+age_summary = df_unique_customers.groupby('Age').size().reset_index(name='Number_of_Customers')
 
 # Crear el gráfico de barras
 plt.figure(figsize=(14, 8))
@@ -646,10 +681,17 @@ plt.tight_layout()
 plt.show()
 
 
+print('''La edad de los clientes muestra que el grupo que mas compras han realizado es el grupo mas joven, de 
+19 a 26. Entender los patrones de consumo de estos e incentivar futuras compras podria ser beneficioso para la empresa. 
+Por otro lado, hay tramos de edades en los que las compras son muy constantes, se podria estudiar en mayor profunidad los 
+intereses de estos para mejorar este mercado.''')
 
 
 
-
+# Ligadas al contexto
+# H13. La estacionalidad de las compras proporcionan información sobre preferencias estacionales y ciclos de compra.
+# H14. Las horas y días de la semana en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
+# H15. El clima puede ser un factor determinante por el cual se dan determinadas compras.
 
 
 

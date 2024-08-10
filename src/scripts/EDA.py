@@ -517,7 +517,17 @@ graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de product
 
 # La mayoria d elos clientes prefieren un metodo de pago online, rapido y eficiente.
 # Visualizar por categoria y productos
-
+print('''Del grafico de torta se desprende que la mayoria de los usuarios prefieren pagar con tarjeta de credito o debito
+lo que podria dar lugar a promociones que ofrezcan beneficios adicionales al usar tarjetas de credito para incentivar
+las ventas. La empresa podria asociarse con bancos y ofrecer promociones exclusivas a los clientes que usen tarjetas de credito
+que provengan de dichos bancos. Lo mismo se podria considerer para las tarjetas de debito.
+Sin emabrgo, hay un porcentaje importante de clientes que pagan en efectivo, por un lado la empresa se
+ahorra la comision del banco pero por otro lado puede presentar un riesgo minimo, si el delivery llega a la direccion
+del cliente y este no tiene el dinero, el costo del envio es un costo perdido. Lo que puede hacer la empresa para mitigar
+este riesgo es ofrecer un descuento a los clientes que pagan en efectivo pero cobrar un importe mayor por el envio
+para cubrir las perdidas del traslado. Tambien puede incentivar transferencia bancaria lo que evitaria el riesgo.
+Pay pal es el metodo menos utilizado, podria deberse a que los clientes no estan familiarizados con su uso,
+la empresa podria ofrecer ayudas o videos instructivos para incentivar el uso del mismo.''')
 
 total_purchases_by_category_Payment_Method = df.groupby(['Product_Category', 'Payment_Method'])['Total_Amount_log'].sum().reset_index()
 
@@ -543,6 +553,10 @@ plt.tight_layout()  # Ajusta el diseño para que todo el texto sea visible
 plt.show()
 
 
+print('''Se destaca en la categoria Electronics el uso de Tarjeta de credito por ensima del resto de los metodos de pago.
+Para los productos electronicos de mayor costo, la empresa podria ofrecer un sistema de financiamiento con tarjeta de credito,
+incentivando asi las ventas.''')
+
 # H9. La frecuencia de compras puede revelar la lealtad del cliente y su comportamiento de compra recurrente.
 
 frecuencia_comp_cliente = df.groupby('Customer_ID')['Transaction_ID'].nunique().reset_index()
@@ -563,6 +577,15 @@ plt.xlabel('Número de Compras')
 plt.ylabel('Número de Clientes')
 plt.show()
 
+print('''En este grafico se calcula primero cuantas compras ha realizado cada cliente, para graficar luego 
+la frecuencia de cada cantidad comprada. Como se puede apreciar del grafico, la mayoria de los clientes han comprado 
+entre 3 y 4 veces. Esto muestra que los clientes estan satisfechos y vuelven a utilizar la plataforma. Sin embargo, 
+hay algunos clientes que han realizado hasta 8 o más compras, pero son mucho menos frecuentes. 
+Esto sugiere un pequeño grupo de clientes muy leales o recurrentes. Se podria considerar un programa de fidelidad 
+o recompensas para estos clientes frecuentes, ofreciendo incentivos para seguir comprando. Por ejemplo, un carrito de compras 
+automatico para aquellos que compran Grocery.
+Para los clientes que no han comprado mas de dos veces podria ser util observar el feedback que dieron, ya que puede deberse
+a instaisfaccion o porque no fueron incentivados a realizar mas compras.''')
 
 categories = df['Product_Category'].unique()
 

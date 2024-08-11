@@ -817,6 +817,72 @@ df.head()
 
 df47382=df[df['Customer_ID']==47382]
 df47382.head()
+
+
+df['Country'].unique()
+
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Función para determinar la estación
+def get_season(date, country):
+    day_of_year = date.dayofyear
+    
+    if country in ['Australia']:  # Hemisferio Sur
+        if 80 <= day_of_year < 172:
+            return 'Otoño'
+        elif 172 <= day_of_year < 264:
+            return 'Invierno'
+        elif 264 <= day_of_year < 355:
+            return 'Primavera'
+        else:
+            return 'Verano'
+    else:  # Hemisferio Norte
+        if 80 <= day_of_year < 172:
+            return 'Primavera'
+        elif 172 <= day_of_year < 264:
+            return 'Verano'
+        elif 264 <= day_of_year < 355:
+            return 'Otoño'
+        else:
+            return 'Invierno'
+
+# Aplicar la función al DataFrame
+df['Season'] = df.apply(lambda row: get_season(row['Date'], row['Country']), axis=1)
+
+
+
+# Filtrar transacciones únicas por cliente, estación, categoría de producto y país
+df_unique_customers = df.drop_duplicates(subset=['Transaction_ID', 'Season', 'Product_Category', 'Country'])
+
+# Agrupar los datos por categoría de producto, estación y país para contar las compras únicas
+country_season_summary = df_unique_customers.groupby(['Product_Category', 'Season', 'Country'])['Transaction_ID'].nunique().reset_index()
+country_season_summary.rename(columns={'Transaction_ID': 'cantidad_compras'}, inplace=True)
+
+# Crear el gráfico de barras apiladas
+fig = px.bar(country_season_summary, 
+             x='Product_Category', 
+             y='cantidad_compras', 
+             color='Season', 
+             text='cantidad_compras',  # Añadir etiquetas de texto en las barras
+             color_discrete_sequence=px.colors.qualitative.Set1,  # Opcional: cambiar la paleta de colores
+             title="Cantidad de Compras por Categoría de Producto, Estación y País",
+             facet_col='Country',  # Crear facetas por país
+             barmode='stack')  # Establecer el modo de barras apiladas
+
+# Mostrar el gráfico
+fig.show()
+
+
+print('''La estacion no parece ser influyente en las decisiones de compra de los usuarios, sin emabrgo, se percibe 
+una diferencia entre las compras realizadas en cada uno de los paises, siendo USA el mercado mas grande, especialmente en 
+Grocery y Electronics.''')
+
+#Transformacion, dejar country y sacar season
+
+
+# H14. Las horas y días de la semana, como el mes en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
+
+
 df_unique_month = df.drop_duplicates(subset='Transaction_ID')
 ax=df_unique_month['Month'].value_counts()\
     .plot(kind='barh', title='Cantidad de compras por mes')
@@ -826,7 +892,16 @@ ax.set_ylabel('Mes')
 
 
 
-# H14. Las horas y días de la semana en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
+plt.figure(figsize=(12, 6))
+gender=sns.countplot(x='Month',data=df)
+
+
+for bars in gender.containers:
+    gender.bar_label(bars)
+
+plt.title('Month Bar plot with Count')
+plt.show()
+
 # H15. El clima puede ser un factor determinante por el cual se dan determinadas compras.
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
 # H17. El barrio ayuda a entender como clasificara  los clientes
@@ -867,6 +942,7 @@ plt.show()
 graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
 
 ######### CAMBIAR LOS FILTROS POR .query ###################
+
 
 
 

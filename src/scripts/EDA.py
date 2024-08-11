@@ -5,9 +5,11 @@ import seaborn as sns
 import statsmodels.api as sm
 #from limpieza_data import dataFrame_limpiado 
 from funciones_generales import pathToData
+from datetime import datetime
 from plots import plot_bar_graphs, grafico_Histograma
 import gc
 import plotly.express as px
+import requests
 
 #TIENE QUE QUEDARME UNA TABLA CON UNA LINEA POR CLIENTEEEEEE
 
@@ -884,30 +886,148 @@ Grocery y Electronics.''')
 
 
 df_unique_month = df.drop_duplicates(subset='Transaction_ID')
-ax=df_unique_month['Month'].value_counts()\
-    .plot(kind='barh', title='Cantidad de compras por mes')
 
-ax.set_xlabel('Cantidad')
-ax.set_ylabel('Mes')
+# Contar el número de transacciones por país y mes
+df_counts = df_unique_month.groupby(['Country', 'Month']).size().reset_index(name='Transaction_Count')
+
+# Crear el gráfico sunburst
+fig = px.sunburst(
+    df_counts,
+    path=['Country', 'Month'],
+    values='Transaction_Count',
+    title='Distribución de Transacciones por País y Mes'
+)
+
+# Mostrar el gráfico
+fig.show()
+
+
+print('''Se observan meses en los que las compras son mas frecuentes entre los paises. Por ejemplo, en USA los meses de
+Enero y Abril tienen una mayor representatividad que otros meses, se puede aprovechar y realizar campa;as para que se compren mas 
+productos en otros meses o incentivas en los meses mas frecuentes compras de otros articulos.''')
+
+df_unique_month.columns
 
 
 
-plt.figure(figsize=(12, 6))
-gender=sns.countplot(x='Month',data=df)
+# Contar el número de transacciones por país y hora
+transaction_counts = df.groupby(['Country', 'Time']).size().reset_index(name='Transaction_Count')
 
-
-for bars in gender.containers:
-    gender.bar_label(bars)
-
-plt.title('Month Bar plot with Count')
+# Crear el gráfico de barras
+plt.figure(figsize=(12, 8))
+sns.barplot(
+    x='Time',
+    y='Transaction_Count',
+    hue='Country',
+    data=transaction_counts,
+    palette='viridis'
+)
+plt.title('Cantidad de Compras Realizadas por Hora y País')
+plt.xlabel('Hora del Día')
+plt.ylabel('Número de Compras')
+plt.xticks(range(24))  # Asegúrate de que todas las horas estén representadas en el eje x
+plt.legend(title='País')
 plt.show()
 
-# H15. El clima puede ser un factor determinante por el cual se dan determinadas compras.
+
+
+# Convertir columnas a formato datetime
+df['Date'] = pd.to_datetime(df['Date'])
+df['Time'] = pd.to_datetime(df['Time'], format='%H:%M:%S').dt.time
+
+# Función para definir el momento del día
+def definirMomentoDia(time):
+    if pd.Timestamp('00:00:00').time() < time <= pd.Timestamp('06:00:00').time():
+        return 'madrugada'
+    elif pd.Timestamp('06:00:00').time() < time <= pd.Timestamp('12:00:00').time():
+        return 'mañana'
+    elif pd.Timestamp('12:00:00').time() < time <= pd.Timestamp('15:00:00').time():
+        return 'medioDia'
+    elif pd.Timestamp('15:00:00').time() < time <= pd.Timestamp('20:00:00').time():
+        return 'tarde'
+    else:
+        return 'noche'
+
+# Aplicar la función a la columna 'Time'
+df['momentoDia'] = df['Time'].apply(definirMomentoDia)
+
+
+
+# Contar el número de transacciones por país y hora
+transaction_counts = df.groupby(['Country', 'momentoDia']).size().reset_index(name='Transaction_Count')
+
+# Crear el gráfico de barras
+plt.figure(figsize=(12, 8))
+sns.barplot(
+    x='momentoDia',
+    y='Transaction_Count',
+    hue='Country',
+    data=transaction_counts,
+    palette='viridis'
+)
+plt.title('Cantidad de Compras Realizadas por Hora y País')
+plt.xlabel('Hora del Día')
+plt.ylabel('Número de Compras')
+plt.legend(title='País')
+plt.show()
+
+
+
+
+df.head()
+
+# Crear la matriz de conteos
+heatmap_data = df.groupby(['day_week', 'Time']).size().unstack(fill_value=0)
+
+# Reordenar las filas y columnas según el orden deseado
+day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+time_order = ['Morning', 'Afternoon', 'Evening']
+heatmap_data = heatmap_data.reindex(day_order).reindex(columns=time_order)
+
+# Crear el gráfico de calor
+fig = px.imshow(
+    heatmap_data,
+    labels=dict(x="Time of Day", y="Day of Week", color="Transaction Count"),
+    x=time_order,
+    y=day_order,
+    color_continuous_scale='Viridis'
+)
+
+fig.update_xaxes(side="top")
+fig.update_layout(title='Número de Transacciones por Día de la Semana y Hora del Día')
+
+# Mostrar el gráfico
+fig.show()
+
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
+
+
+df_unique_month = df.drop_duplicates(subset='Transaction_ID')
+
+# Contar el número de transacciones por país y ciudad
+df_counts = df_unique_month.groupby(['Country', 'City']).size().reset_index(name='Transaction_Count')
+
+# Crear el gráfico sunburst
+fig = px.sunburst(
+    df_counts,
+    path=['Country', 'City'],
+    values='Transaction_Count',
+    title='Distribución de Transacciones por País y Ciudad'
+)
+
+# Ajustar el tamaño del gráfico
+fig.update_layout(
+    autosize=False,
+    width=1000,  # Ajusta el ancho según tus necesidades
+    height=800   # Ajusta la altura según tus necesidades
+)
+
+# Mostrar el gráfico
+fig.show()
+
+
+
 # H17. El barrio ayuda a entender como clasificara  los clientes
-
-
-
 
 
 

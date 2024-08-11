@@ -866,7 +866,7 @@ plt.show()
 
 graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
 
-
+######### CAMBIAR LOS FILTROS POR .query ###################
 
 
 

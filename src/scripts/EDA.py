@@ -77,7 +77,17 @@ pero estos son mucho menos frecuentes.""")
 del df_clientes_gasto
 gc.collect()
 
-# Transformacion Gasto total/Cantidad comprada (Historicamente por el cliente)
+
+
+# Transformacion Gasto total (Historicamente por el cliente)
+
+df_clientes_gastoTotal = df.groupby('Customer_ID')['Total_Amount_log'].sum().reset_index()
+
+# Paso 2: Renombrar la columna
+df_clientes_gastoTotal.rename(columns={'Total_Amount_log': 'Suma_Total_Amount_log_Cliente'}, inplace=True)
+
+# Paso 3: Hacer el merge
+df = df.merge(df_clientes_gastoTotal, on='Customer_ID', how='left')
 
 
 
@@ -349,8 +359,12 @@ fig = px.treemap(df,
 fig.show()
 
 
-#No voy a usar los productos para modelar, sino para separar funcionalmente
+# Transformacion, porcentaje comprado por los clientes en cada una de las categorias
 
+df_grouped_Product_Type = df.groupby(['Product_Type', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+df_pivot_Product_Type = df_grouped_Product_Type.pivot_table(index='Customer_ID', columns='Product_Type', values='Total_Purchases', fill_value=0)
+df_pivot_Product_Type.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Product_Type.columns]
+df = df.merge(df_pivot_Product_Type, on='Customer_ID', how='left')
 
 
 #H4. El tipo de envío solicitado para la entrega del pedido.
@@ -383,10 +397,16 @@ Implicaciones para la Logística: Las empresas deberían asegurar una logística
 del cliente, dado el alto porcentaje de pedidos que requieren envíos rápidos.''')
 
 
-df['Product_Category'].unique()
-
 
 #Porcentaje comprado por cada tipo de envio 
+
+df_grouped_Shipping_Method = df.groupby(['Shipping_Method', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+df_pivot_Shipping_Method = df_grouped_Shipping_Method.pivot_table(index='Customer_ID', columns='Shipping_Method', values='Total_Purchases', fill_value=0)
+df_pivot_Shipping_Method.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Shipping_Method.columns]
+
+df = df.merge(df_pivot_Shipping_Method, on='Customer_ID', how='left')
+
+df.head()
 
 
 # H5. El Feedback permite entender a la satisfaccion del cliente. Podria ser una herramienta de clasificacion funcional.
@@ -421,7 +441,14 @@ se ve afectado el churn. Estudiar este fenómeno con mayor profundidad y ofrecer
 a incentivar nuevas compras.''')
 
 
-#No lo voy a usar para modelar
+#No lo voy a usar para modelar pero si para ver funcionalmente
+
+df_grouped_Feedback = df.groupby(['Feedback', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+df_pivot_Feedback = df_grouped_Feedback.pivot_table(index='Customer_ID', columns='Feedback', values='Total_Purchases', fill_value=0)
+df_pivot_Feedback.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Feedback.columns]
+
+df = df.merge(df_pivot_Feedback, on='Customer_ID', how='left')
+
 
 
 #H6. Las categorías de productos más compradas pueden indicar intereses y necesidades predominantes entre diferentes grupos 
@@ -524,6 +551,11 @@ incentivado a realizar la compra y solicitarlo con esos metodos de envio.''')
 
 
 # Transormacion, pocentaje comprado por el cliente por categoria de producto
+df_grouped_Product_Category = df.groupby(['Product_Category', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+df_pivot_Product_Category = df_grouped_Product_Category.pivot_table(index='Customer_ID', columns='Product_Category', values='Total_Purchases', fill_value=0)
+df_pivot_Product_Category.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Product_Category.columns]
+
+df = df.merge(df_pivot_Product_Category, on='Customer_ID', how='left')
 
 
 # H7. El Rating de productos permite entender porque los clientes compran determinados productos.
@@ -561,14 +593,25 @@ fig.update_layout(
 fig.show()
 
 
-
 print('''El grafico muestra si existe una relacion entre la cantidad comprada por los clientes en un determinado producto 
 y el rating que le dan al producto. Seria de esperar que los productos mas comprados presenten Ratings mayores.
-Se observa una tendencia de puntajes altos para los productos mas comprados, siendo el 4 y el 3 los valores mas presentes.
-En todos los productos predomina el ranking 5, 4 y 3. Lo cual es favorable y brinda a los clientes mayor confianza al 
-comprar los productos.''')
+Se observa que los productos más comprados tienden a concentrarse en ratings de 3, 4 y 5, lo cual es positivo. 
+Esto indica que los productos que tienen un buen volumen de ventas generalmente también tienen una buena recepción en 
+términos de calificación por parte de los clientes.
+Por otro lado, algunos productos con menor volumen de compra se mantienen en el mismo rango de rating, sugiriendo 
+que aunque sean menos comprados, mantienen una calidad percibida consistente.''')
 
-#Transformacion, poner el para el cliente cuantos productos compro en cada rating
+
+
+#Transformacion, poner cuantos productos compra por Rating promedio 
+
+df_grouped_Rating = df.groupby(['Ratings', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+df_pivot_Rating = df_grouped_Rating.pivot_table(index='Customer_ID', columns='Ratings', values='Total_Purchases', fill_value=0)
+df_pivot_Rating.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Rating.columns]
+
+df = df.merge(df_pivot_Rating, on='Customer_ID', how='left')
+df.head()
+
 
 
 # Ligadas a las características del usuario

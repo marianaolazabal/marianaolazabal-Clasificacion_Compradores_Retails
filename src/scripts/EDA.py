@@ -13,13 +13,11 @@ import requests
 
 #TIENE QUE QUEDARME UNA TABLA CON UNA LINEA POR CLIENTEEEEEE
 
-
+# Leo el dataset que obtuve de limpiar los datos en el archivo limpieza_data.py
 csv_path = pathToData()
 df =pd.read_csv(csv_path + 'Limpiado.zip')
 
-#df=dataFrame_limpiado()
-df.head()
-
+#Informacion generica del dataframe
 df.info()
 
 columns_to_convert = ['Transaction_ID', 'Customer_ID', 'Zipcode']
@@ -27,6 +25,8 @@ columns_to_convert = ['Transaction_ID', 'Customer_ID', 'Zipcode']
 # Iterar sobre cada columna y convertir a tipo 'category'
 for column in columns_to_convert:
     df[column] = df[column].astype('category')
+
+# Obtengo descripcion de los siguientes cuantiles
 
 df.describe(percentiles=[.05,.5,.25,.75,.95,.99])
 
@@ -52,21 +52,18 @@ plt.title('Matriz de Correlación')
 plt.show()
 
 
-# Hipotesis
+# **** Hipotesis *****
+
 
 # Ligadas a las características de la orden
 
 
 # H1. El importe gastado en la orden puede ayudar a identificar patrones de consumo entre los usuarios.
+
 df_clientes_gasto = df.groupby('Customer_ID')['Total_Amount_log'].sum().reset_index()
 df_clientes_gasto['Customer_ID'].nunique()
-df_clientes_gasto.head()
-# 2. Renombrar la columna para mayor claridad
+
 df_clientes_gasto.rename(columns={'Total_Amount_log': 'Total_Gastado'}, inplace=True)
-
-
-#plot_bar_graphs(df_clientes_gasto, "Total_Gastado")
-
 
 grafico_Histograma(df_clientes_gasto,'Total_Gastado','Total gastado por cliente','Total_Gastado','Frecuencia')
 
@@ -84,23 +81,18 @@ gc.collect()
 
 
 
-
 # - H2. La cantidad comprada y el precio de productos son factores que permite definir perfiles de compradores.
 
 df_clientes_gasto = df.groupby('Customer_ID')['Total_Purchases'].sum().reset_index()
 df_clientes_gasto['Customer_ID'].nunique()
-df_clientes_gasto.head()
-# 2. Renombrar la columna para mayor claridad
+
 df_clientes_gasto.rename(columns={'Total_Purchases': 'Cantidades_Totales'}, inplace=True)
-
-
-#plot_bar_graphs(df_clientes_gasto, "Total_Gastado")
-
 
 grafico_Histograma(df_clientes_gasto,'Cantidades_Totales','Cantidades totales compradas por cliente','Cantidades_Totales','Frecuencia')
 
 print("""La mayoria de los clientes compran de 10 a 15 unidades, siendo este el punto de mayor frecuencia. A medida que la cantidad aumenta el total comprado 
       disminuye; lo que indica que hay pocos clientes que compran mcuhas unidades""")
+
 
 #La teoría microeconómica de las demandas Marshallianas se utiliza para entender cómo los consumidores toman decisiones de consumo en función 
 # de sus recursos disponibles y sus preferencias. La demanda Marshalliana depende del ingreso del consumidor y de los precios de los bienes disponibles. 
@@ -297,7 +289,6 @@ fig.update_layout(
     yaxis=dict(tickfont=dict(size=14))
 )
 
-# Mostrar el gráfico
 fig.show()
 
 
@@ -320,12 +311,11 @@ atraer más ventas, ya que los clientes son muy sensibles a cambios en el precio
 Para productos con elasticidad baja (valor absoluto bajo), se puede ajustar los precios sin esperar grandes 
 cambios en la demanda, optimizando así los márgenes de ganancia.""")
 
-#Transformacion elasticidad de los productos comprados por el cliente 
+#Lo utilizare para estudiar funcionalmente, pero no para clasificar
+
 
 # H3. Los tipos de productos y las características inherentes a los productos comprados ayudan a explicar patrones de consumo.
-df.head()
-df.columns
-df['Product_Brand'].unique()
+
 fig = px.treemap(df, 
                  path=['Product_Category', 'Product_Type', 'Product_Brand'], 
                  values='Total_Purchases',
@@ -357,29 +347,6 @@ fig = px.treemap(df,
                  color_continuous_scale='RdBu')
 
 fig.show()
-
-df['Product_Type'].unique()
-#customer_counts = df.groupby(['Product_Category', 'Product_Type', 'Product_Brand','Customer_ID'])['Total_Amount'].sum().reset_index()
-#customer_counts.rename(columns={'Customer_ID': 'Customer_Count'}, inplace=True)
-#fig = px.treemap(customer_counts, 
-#                 path=['Product_Category', 'Product_Type', 'Product_Brand'], 
-#                 values='Customer_Count',
-#                 title='Número de clientes que compraron por categoría de producto',
-#                 color='Customer_Count',
-#                 color_continuous_scale='RdBu')
-
-#fig.show()
-
-# Contar las ocurrencias de cada cliente
-customer_counts = df['Customer_ID'].value_counts()
-
-# Obtener el ID del cliente que se repite más veces
-most_frequent_customer_id = customer_counts.idxmax()
-
-print(f"El ID del cliente que se repite más veces es {most_frequent_customer_id}.")
-
-#df47382=df[df['Customer_ID']==47382]
-#df47382.head(10)
 
 
 #No voy a usar los productos para modelar, sino para separar funcionalmente
@@ -1026,75 +993,3 @@ fig.update_layout(
 fig.show()
 
 
-
-# H17. El barrio ayuda a entender como clasificara  los clientes
-
-
-
-
-
-
-############SEGUIR#################
-
-total_purchases_by_category = df.groupby('Product_Category')['Total_Purchases'].sum().reset_index()
-total_purchases_by_category.rename(columns={'Total_Purchases': 'Total_Purchases_Category'}, inplace=True)
-
-# Unir los totales de cada categoría con el DataFrame original
-df = df.merge(total_purchases_by_category, on='Product_Category')
-
-# Calcular el porcentaje de compras para cada tipo de envío
-df['Percentage'] = (df['Total_Purchases'] / df['Total_Purchases_Category']) * 100
-
-# Crear el gráfico de barras con porcentajes
-plt.figure(figsize=(12, 6))
-sns.barplot(x='Product_Category', y='Percentage', hue='Shipping_Method', data=df, ci=None)
-plt.title('Porcentaje de Compras por Categoría y Método de Envío')
-plt.xlabel('Categoría de Producto')
-plt.ylabel('Porcentaje de Compras')
-plt.legend(title='Método de Envío')
-plt.show()
-
-
-
-
-#H7. El método de pago utilizado en la transacción es un factor determinante para analizar tipos de consumidores.
-
-graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
-
-######### CAMBIAR LOS FILTROS POR .query ###################
-
-
-
-
-
-
-
-
-
-
-
-
-
-#PROBAR ESTO
-
-df_prueba = px.data.gapminder().query("country == 'Canada'")
-#Age
-fig = px.scatter(df.query("year==2007"), x="Age", y="Total_Purchases", size="Total_Amount_log", color="continent",
-           hover_name="country", log_x=True, size_max=60)
-fig.show()
-
-
-
-grouped_df = df.groupby('products')['Total_Purchases'].sum().reset_index()
-
-# Creamos el gráfico de barras
-plt.figure(figsize=(60, 26))
-sns.barplot(data=grouped_df, x='products', y='Total_Purchases', palette='viridis')
-plt.title('Cantidad Comprada de Cada Product_Type')
-plt.xlabel('Product_Type')
-plt.ylabel('Cantidad Comprada')
-plt.xticks(rotation=45)  # Rotar etiquetas del eje x si es necesario
-plt.show()
-
-plt.figure(figsize=(5, 5))
-df['Product_Type'].value_counts().head(5).plot(kind='pie',  autopct='%1.1f%%')

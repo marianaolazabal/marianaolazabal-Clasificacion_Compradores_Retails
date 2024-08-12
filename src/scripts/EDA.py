@@ -877,27 +877,6 @@ df_unique_month.columns
 
 
 
-# Contar el número de transacciones por país y hora
-transaction_counts = df.groupby(['Country', 'Time']).size().reset_index(name='Transaction_Count')
-
-# Crear el gráfico de barras
-plt.figure(figsize=(12, 8))
-sns.barplot(
-    x='Time',
-    y='Transaction_Count',
-    hue='Country',
-    data=transaction_counts,
-    palette='viridis'
-)
-plt.title('Cantidad de Compras Realizadas por Hora y País')
-plt.xlabel('Hora del Día')
-plt.ylabel('Número de Compras')
-plt.xticks(range(24))  # Asegúrate de que todas las horas estén representadas en el eje x
-plt.legend(title='País')
-plt.show()
-
-
-
 # Convertir columnas a formato datetime
 df['Date'] = pd.to_datetime(df['Date'])
 df['Time'] = pd.to_datetime(df['Time'], format='%H:%M:%S').dt.time
@@ -939,32 +918,6 @@ plt.legend(title='País')
 plt.show()
 
 
-
-
-df.head()
-
-# Crear la matriz de conteos
-heatmap_data = df.groupby(['day_week', 'Time']).size().unstack(fill_value=0)
-
-# Reordenar las filas y columnas según el orden deseado
-day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-time_order = ['Morning', 'Afternoon', 'Evening']
-heatmap_data = heatmap_data.reindex(day_order).reindex(columns=time_order)
-
-# Crear el gráfico de calor
-fig = px.imshow(
-    heatmap_data,
-    labels=dict(x="Time of Day", y="Day of Week", color="Transaction Count"),
-    x=time_order,
-    y=day_order,
-    color_continuous_scale='Viridis'
-)
-
-fig.update_xaxes(side="top")
-fig.update_layout(title='Número de Transacciones por Día de la Semana y Hora del Día')
-
-# Mostrar el gráfico
-fig.show()
 
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
 

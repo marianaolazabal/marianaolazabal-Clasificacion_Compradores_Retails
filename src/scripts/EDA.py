@@ -1019,35 +1019,6 @@ df_final.head()
 
 
 
-
-# Paso 1: Agrupar por Customer_ID y contar los valores únicos para las columnas 'Country', 'Name', 'Gender', 'Income'
-df_unique_counts = df.groupby('Customer_ID').agg({
-    'Country': 'nunique',
-    'Gender': 'nunique',
-    'Age': 'nunique',
-    'Income': 'nunique',
-    'Transaction_ID': 'count'
-}).reset_index()
-
-# Paso 2: Filtrar los clientes que tienen un solo valor único en todas las columnas
-df_same_attributes_customers = df_unique_counts[
-    (df_unique_counts['Country'] == 1) &
-    (df_unique_counts['Gender'] == 1) &
-    (df_unique_counts['Age'] == 1) &
-    (df_unique_counts['Income'] == 1) &
-    (df_unique_counts['Transaction_ID'] > 1)
-]
-
-# Paso 3: Unir con el DataFrame original para ver más detalles de esos clientes (opcional)
-df_final = pd.merge(df_same_attributes_customers[['Customer_ID']], df, on='Customer_ID', how='inner')
-
-df_final.head()
-
-df_11676=df[df['Customer_ID']==11676]
-
-df_11676.head()
-
-
 df_unique_month = df.drop_duplicates(subset='Transaction_ID')
 
 # Contar el número de transacciones por país y ciudad
@@ -1070,5 +1041,4 @@ fig.update_layout(
 
 # Mostrar el gráfico
 fig.show()
-
 

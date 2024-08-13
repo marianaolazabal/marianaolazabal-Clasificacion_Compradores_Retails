@@ -144,7 +144,27 @@ for column in columns_to_check:
 df_Retail = df_Retail[df_Retail['Transaction_ID'].isin(consistent_transaction_ids)]
 
 df_Retail.head()
+df_Retail.columns
+df_Retail.info()
+#Los datos del cliente deben ser constantes. Si bien es posible cambiar los datos, no seria lo normal tener muchas transacciones con distintos nombres de clientes
 
+df_unique_counts = df_Retail.groupby('Customer_ID').agg({
+    'Name': 'nunique',
+    'Gender': 'nunique',
+    'Income': 'nunique'
+}).reset_index()
+
+# Paso 2: Filtrar los clientes que tienen un solo valor único en todas las columnas
+df_same_attributes_customers = df_unique_counts[
+    (df_unique_counts['Name'] == 1) &
+    (df_unique_counts['Gender'] == 1) &
+    (df_unique_counts['Income'] == 1) 
+]
+
+# Paso 3: Unir con el DataFrame original para ver más detalles de esos clientes (opcional)
+df_Retail = pd.merge(df_same_attributes_customers[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
+
+df_Retail.info()
 
 # - City es la ciudad donde el cliente vive
 
@@ -576,3 +596,4 @@ with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
 
 # Optional: Close the buffer
 csv_buffer.close()
+print("Tamaño inicial del dataFrame " + str(df_Retail.size))

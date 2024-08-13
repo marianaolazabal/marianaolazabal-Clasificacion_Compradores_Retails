@@ -302,53 +302,75 @@ df_Retail_10000=df_Retail[df_Retail['Customer_ID']==10000]
 df_Retail_10000['Gender'].unique()
 df_Retail_10000.head()
 
-
+df_customer_counts = df_Retail.groupby(['Customer_ID']).size().reset_index(name='counts')
+df_multiple_genders_correct = df_customer_counts[df_customer_counts['counts'] > 2]
+df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
+df_Retail_cleaned = df_Retail[~df_Retail['Customer_ID'].isin(df_filtered['Customer_ID'])]
 
 # Paso 1: Identificar los Customer_ID que tienen más de un Gender
-df_gender_counts = df_Retail.groupby('Customer_ID')['Gender'].nunique().reset_index()
-
+df_gender_counts = df_filtered.groupby('Customer_ID')['Gender'].nunique().reset_index()
 df_multiple_genders = df_gender_counts[df_gender_counts['Gender'] > 1]
+df_filtered_multiple_gender = pd.merge(df_multiple_genders[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
 
-df_customer_counts = df_Retail.groupby(['Customer_ID']).size().reset_index(name='counts')
-
-df_multiple_genders_correct = df_customer_counts[df_customer_counts['Customer_ID'] > 2]
-
-# Paso 2: Filtrar los Customer_ID que tienen géneros distintos en sus transacciones
-df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
-
-# Paso 3: Determinar el género que más se repite para cada Customer_ID
-df_mode_gender = df_filtered.groupby('Customer_ID')['Gender'].agg(lambda x: x.mode()[0]).reset_index()
+df_mode_gender = df_filtered_multiple_gender.groupby('Customer_ID')['Gender'].agg(lambda x: x.mode()[0]).reset_index()
 
 # Paso 4: Actualizar el DataFrame original con el género más frecuente
-df_Retail = pd.merge(df_Retail, df_mode_gender, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+df_Retail_updated = pd.merge(df_filtered_multiple_gender, df_mode_gender, on='Customer_ID', suffixes=('', '_Most_Frequent'))
 
 # Reemplazar la columna Gender con el valor más frecuente
-df_Retail['Gender'] = df_Retail['Gender_Most_Frequent']
+df_Retail_updated['Gender'] = df_Retail_updated['Gender_Most_Frequent']
 
 # Eliminar la columna Gender_Most_Frequent si ya no la necesitas
-df_Retail = df_Retail.drop(columns=['Gender_Most_Frequent'])
-
-df_Retail_10000=df_Retail[df_Retail['Customer_ID']==10000]
+df_Retail_updated = df_Retail_updated.drop(columns=['Gender_Most_Frequent'])
+df_Retail_updated.size
+df_Retail_10000=df_Retail_updated[df_Retail_updated['Customer_ID']==10000]
 df_Retail_10000.head()
-df_Retail.size
 
+df_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
 
 
 # - Income
 
-cantidadUnicos=df_Retail['Income'].nunique()
+cantidadUnicos=df_final['Income'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable Income y son Low, High and Medium")
+
+
+df_customer_counts = df_final.groupby(['Customer_ID']).size().reset_index(name='counts')
+df_multiple_genders_correct = df_customer_counts[df_customer_counts['counts'] > 2]
+df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_final, on='Customer_ID', how='inner')
+df_Retail_cleaned = df_final[~df_final['Customer_ID'].isin(df_filtered['Customer_ID'])]
+
+# Paso 1: Identificar los Customer_ID que tienen más de un Gender
+df_income_counts = df_filtered.groupby('Customer_ID')['Income'].nunique().reset_index()
+df_multiple_incomes = df_income_counts[df_income_counts['Income'] > 1]
+df_filtered_multiple_incomes = pd.merge(df_multiple_incomes[['Customer_ID']], df_final, on='Customer_ID', how='inner')
+
+df_mode_income = df_filtered_multiple_incomes.groupby('Customer_ID')['Income'].agg(lambda x: x.mode()[0]).reset_index()
+
+# Paso 4: Actualizar el DataFrame original con el género más frecuente
+df_Retail_updated = pd.merge(df_filtered_multiple_incomes, df_mode_income, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+
+# Reemplazar la columna Income con el valor más frecuente
+df_Retail_updated['Income'] = df_Retail_updated['Income_Most_Frequent']
+
+# Eliminar la columna Income si ya no la necesitas
+df_Retail_updated = df_Retail_updated.drop(columns=['Income_Most_Frequent'])
+df_Retail_updated.size
+df_Retail_10000=df_Retail_updated[df_Retail_updated['Customer_ID']==10000]
+df_Retail_10000.head()
+
+df_Retail_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
 
 
 # - Customer_Segment
 
-cantidadUnicos=df_Retail['Customer_Segment'].nunique()
+cantidadUnicos=df_Retail_final['Customer_Segment'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable Customer_Segment y son Premium, Regular and New")
 
 
 # - Date --> Figura como mm/dd/yyyy
 
-df_Retail_copy=df_Retail.copy()
+df_Retail_copy=df_Retail_final.copy()
 num_rows_df_Retail_copy = df_Retail_copy.shape[0]
 print(f"Number of rows: {num_rows_df_Retail_copy}")
 
@@ -374,7 +396,7 @@ gc.collect()
 
 # Month
 
-unique_months = df_Retail['Month'].cat.categories
+unique_months = df_Retail_final['Month'].cat.categories
 
 def verificarMeses():
     correct_months = ['April', 'August', 'December', 'February', 'January', 'July', 'June',
@@ -399,7 +421,7 @@ if(verificarMeses()):
 
 # - Time ---> Tiempo en el que se hizo la compra. El formato es hh:mm:ss
 
-df_Retail_copy=df_Retail.copy()
+df_Retail_copy=df_Retail_final.copy()
 df_Retail_copy['Time'].head(2)
 
 time_pattern = re.compile(r'^\d{1,2}:\d{2}:\d{2}$')
@@ -424,7 +446,7 @@ gc.collect()
 
 # - Total_Purchases --> Cantidad de artículos comprados por el cliente
 
-df_Retail['Total_Purchases'].dtype
+df_Retail_final['Total_Purchases'].dtype
 print("Verificar normalidad de los datos")
 grafico_Histograma(df_Retail,"Total_Purchases","Total_Purchases","Total comprado","Frecuencia")
 
@@ -433,7 +455,7 @@ print("La variable Total_Purchases es normal, el rango va entre 1 a 10 cantidade
 
 # - Total_Amount --> Total amount spent by the customer (calculated as Amount * Total_Purchases)
 
-grafico_Histograma(df_Retail,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
+grafico_Histograma(df_Retail_final,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
 
 print("El histograma sugiere que los valores en la columna 'Total_Amount' están distribuidos de manera no uniforme, como se puede apreciar en el histograma la variable no presenta una distribución normal. Esto es un problema para realizar comparaciones estadísticas, por lo que es necesario normalizarla.")
 
@@ -442,41 +464,41 @@ print("El histograma sugiere que los valores en la columna 'Total_Amount' están
 # La linea roja es una linea teórica donde los datos siguen una distribución normal. 
 # Si los puntos de la variable a estudiar se alinean aproximadamente a lo largo de la recta roja entonces se puede decir que es normal.
 
-grafico_qqPlot(df_Retail,"Total_Amount")
+grafico_qqPlot(df_Retail_final,"Total_Amount")
 
 print("Como se puede apreciar, los puntos se desvían significativamente de la línea roja, especialmente en los extremos, lo que sugiere que los datos de 'Total_Amount' no siguen una distribución normal.")
 
-graficoDisplot(df_Retail,"Total_Amount")
+graficoDisplot(df_Retail_final,"Total_Amount")
 
 print("La distribucion no sigue una funcion normal, por lo que es necesario la transformacion de la variable al logaritmo")
 
-df_Retail['Total_Amount_log'] = np.log(df_Retail['Total_Amount'])
-df_Retail_norm = df_Retail.drop(columns=['Total_Amount'])
+df_Retail_final['Total_Amount_log'] = np.log(df_Retail_final['Total_Amount'])
+df_Retail_norm = df_Retail_final.drop(columns=['Total_Amount'])
 
 #Verifico nuevamente el qqplot con la variable transformada
 
-grafico_qqPlot(df_Retail,"Total_Amount_log")
+grafico_qqPlot(df_Retail_final,"Total_Amount_log")
 
 print("Verificando la variable luego de la normalizacion, se observa que el problema persiste. Esto puede deberse a la presencia de valores atipicos. A continuacion se estudian estos.")
 
 #Outliers
 
-graficoBoxPlot(df_Retail, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
+graficoBoxPlot(df_Retail_final, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
 
 print("Como se puede ver en el grafico, hay evidencia de valores atipicos. Sin embargo, es posible que estos tengan sentido para el analisis, por lo que optare por dejarlos y estudiar (en el EDA) en mayor profundidad si es conveniente sacarlos o dejarlos.")
 
 
 # - Product_Category -->  Category of the purchased product.
 
-cantidadUnicos=df_Retail['Product_Category'].nunique()
+cantidadUnicos=df_Retail_final['Product_Category'].nunique()
 
 print("Hay solo", cantidadUnicos, "tipo de categorias.", "Estas son Electronics, Books, Home Decor, Grocery, Clothing")
 
 #Verificar si existe y tiene sentido para un mismo producto tener distinta categoria
 
-df_Retail_copy=df_Retail.copy()
+df_Retail_copy=df_Retail_final.copy()
 
-grouped = df_Retail.groupby('products')['Product_Category'].nunique()
+grouped = df_Retail_copy.groupby('products')['Product_Category'].nunique()
 productos_con_categorias_distintas = grouped[grouped > 1]
 
 productos_con_categorias_distintas = productos_con_categorias_distintas.reset_index()
@@ -492,7 +514,7 @@ gc.collect()
 
 # - Product_Brand --> Brand of the purchased product.
 
-unique_ProductBrand = df_Retail['Product_Brand'].cat.categories
+unique_ProductBrand = df_Retail_final['Product_Brand'].cat.categories
 num_marcas = len(unique_ProductBrand)
 print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & Beyond, BlueStar, Coca-Cola, Penguin Books, Pepsi, Random House, Samsung, Sony, Whirepool, Zara")
 
@@ -501,11 +523,11 @@ print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & B
 
 
 # Mostrar los primeros registros para verificar
-df_Retail.head()
+df_Retail_final.head()
 
 pd.set_option('display.max_rows', None)  # Mostrar todas las filas
 
-marca_producto = df_Retail.groupby('Product_Brand')['products'].unique()
+marca_producto = df_Retail_final.groupby('Product_Brand')['products'].unique()
 
 # Mostrar las marcas y los productos únicos asociados
 for marca, productos in marca_producto.items():
@@ -533,15 +555,15 @@ df_mapping = pd.DataFrame({
     'Product_Brand': marcas
 })
 
-df_Retail = df_Retail.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
+df_Retail_final = df_Retail_final.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
 
 # Reemplazar 'Product_Brand' en df_Retail con los valores de 'Product_Brand_new'
-df_Retail['Product_Brand'] = df_Retail['Product_Brand_new'].combine_first(df_Retail['Product_Brand'])
+df_Retail_final['Product_Brand'] = df_Retail_final['Product_Brand_new'].combine_first(df_Retail_final['Product_Brand'])
 
 # Eliminar la columna temporal 'Product_Brand_new'
-df_Retail = df_Retail.drop(columns='Product_Brand_new')
+df_Retail_final = df_Retail_final.drop(columns='Product_Brand_new')
 
-df_Retail_Electronics=df_Retail[df_Retail['Product_Category']=='Electronics']
+df_Retail_Electronics=df_Retail_final[df_Retail_final['Product_Category']=='Electronics']
 df_Retail_Electronics.head(20)
 
 
@@ -549,14 +571,14 @@ df_Retail_Electronics.head(20)
 # - Product_Type --> Type of the purchased product.
 
 
-unique_tipo_productos = df_Retail['Product_Type'].cat.categories
+unique_tipo_productos = df_Retail_final['Product_Type'].cat.categories
 num_tipo_productos = len(unique_tipo_productos)
 print("Hay solo", num_tipo_productos, "tipos de productos. Estos son: Bathroom, Bedding, BlueStar AC, Children's, Chocolate, Headphones, Jacket, Jeans, Juice, Kitchen, Laptop, Lighting, Literature, Mitsubishi 1.5 Ton 3 Star Split AC, Non-Fiction, Shirt, Shoes, Shorts, Smartphone, Snacks, Soft Drink, T-shirt, Tablet, Television, Thriller, Tools, Water")
 
 
 # - Feedback --> Feedback provided by the customer on the purchase.
 
-unique_Feedback = df_Retail['Feedback'].cat.categories
+unique_Feedback = df_Retail_final['Feedback'].cat.categories
 num_feedback = len(unique_Feedback)
 print("Hay solo", num_feedback, "tipos de feedback posibles.", "Estos son: Average, Bad, Excellent, Good")
 
@@ -564,49 +586,49 @@ print("Hay solo", num_feedback, "tipos de feedback posibles.", "Estos son: Avera
 
 # - Shipping_Method --> Method used for shipping the product.
 
-unique_Shipping_Method = df_Retail['Shipping_Method'].cat.categories
+unique_Shipping_Method = df_Retail_final['Shipping_Method'].cat.categories
 num_Shipping_Method = len(unique_Shipping_Method)
 print("Hay solo", num_Shipping_Method, "metodos de Shipping disponibles.", "Estos son: Express, Same-Day, Standard")
 
 
 # - Payment_Method--> Method used for payment.
 
-unique_Payment_Method = df_Retail['Payment_Method'].cat.categories
+unique_Payment_Method = df_Retail_final['Payment_Method'].cat.categories
 num_Payment_Method = len(unique_Payment_Method)
 print("Hay solo", num_Payment_Method, "metodos de pago posibles.", "Estos son: Cash, Credit Card, Debit Card, PayPal")
 
 
 # - Order_Status --> Status of the order (e.g., Pending, Processing, Shipped, Delivered).
 
-unique_Order_Status = df_Retail['Order_Status'].cat.categories
+unique_Order_Status = df_Retail_final['Order_Status'].cat.categories
 num_Order_Status = len(unique_Order_Status)
 print("Hay solo", num_Order_Status, "estatus posibles en las que pueden estar las ordenes.", "Estos son: Delivered, Pending, Processing, Shipped")
 
 
 # Ratings --> ratings given by customers on different products.
 
-unique_Ratings = df_Retail['Ratings'].unique()
+unique_Ratings = df_Retail_final['Ratings'].unique()
 num_Ratings = len(unique_Ratings)
 print("Hay solo", num_Ratings, "posibles valores para Ratings.", "Estos son: 1, 2, 3, 4, 5")
 
 
 # --> Products
-df_Retail['products'] = df_Retail['products'].astype('category')
+df_Retail_final['products'] = df_Retail_final['products'].astype('category')
 
-unique_Products = df_Retail['products'].cat.categories
+unique_Products = df_Retail_final['products'].cat.categories
 num_Products = len(unique_Products)
 print("Hay solo", num_Products, "productos distintos.")
 
 
 
 def dataFrame_limpiado():
-    return df_Retail
+    return df_Retail_final
 
 #guarda el csv en la carpeta data y lo zipea
 csv_file_name = 'Limpiado.csv'
 zip_file_path = csv_path + 'Limpiado.zip'
 csv_buffer = io.StringIO()
-df_Retail.to_csv(csv_buffer, index=False)
+df_Retail_final.to_csv(csv_buffer, index=False)
 
 with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
     # Move the pointer to the start of the buffer
@@ -616,4 +638,4 @@ with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
 
 # Optional: Close the buffer
 csv_buffer.close()
-print("Tamaño inicial del dataFrame " + str(df_Retail.size))
+print("Tamaño inicial del dataFrame " + str(df_Retail_final.size))

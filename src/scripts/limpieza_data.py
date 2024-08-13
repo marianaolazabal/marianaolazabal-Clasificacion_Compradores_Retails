@@ -50,7 +50,7 @@ print("Columnas del dataFrame:")
 print(df_Retail.columns)
 
 
-
+pd.reset_option('display.max_columns')
 # Controles generales
 
 
@@ -147,28 +147,6 @@ df_Retail.head()
 df_Retail.columns
 df_Retail.info()
 
-
-# Estudiando los datos del cliente se observa que para un mismo cliente hay datos inconsistentes. 
-# La plataforma debe estandarizar estos datos en el registro; si bien es posible modificarlos, no resulta 
-# logica que existan muchos casos en que para diferentes transacciones el nombre, genero y el ingreso de las personas cambie. 
-
-df_unique_counts = df_Retail.groupby('Customer_ID').agg({
-    'Name': 'nunique',
-    'Gender': 'nunique',
-    'Income': 'nunique'
-}).reset_index()
-
-# Paso 2: Filtrar los clientes que tienen un solo valor único en todas las columnas
-df_same_attributes_customers = df_unique_counts[
-    (df_unique_counts['Name'] == 1) &
-    (df_unique_counts['Gender'] == 1) &
-    (df_unique_counts['Income'] == 1) 
-]
-
-# Paso 3: Unir con el DataFrame original para ver más detalles de esos clientes (opcional)
-df_Retail = pd.merge(df_same_attributes_customers[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
-
-df_Retail.info()
 
 # - City es la ciudad donde el cliente vive
 
@@ -316,6 +294,44 @@ df_Retail = df_Retail.drop(columns=['Phone'])
 
 cantidadUnicos=df_Retail['Gender'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable genero y son Female and Male")
+
+#Para un mismo cliente no puede haber amas de un genero
+
+df_Retail.size
+df_Retail_10000=df_Retail[df_Retail['Customer_ID']==10000]
+df_Retail_10000['Gender'].unique()
+df_Retail_10000.head()
+
+
+
+# Paso 1: Identificar los Customer_ID que tienen más de un Gender
+df_gender_counts = df_Retail.groupby('Customer_ID')['Gender'].nunique().reset_index()
+
+df_multiple_genders = df_gender_counts[df_gender_counts['Gender'] > 1]
+
+df_customer_counts = df_Retail.groupby(['Customer_ID']).size().reset_index(name='counts')
+
+df_multiple_genders_correct = df_customer_counts[df_customer_counts['Customer_ID'] > 2]
+
+# Paso 2: Filtrar los Customer_ID que tienen géneros distintos en sus transacciones
+df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
+
+# Paso 3: Determinar el género que más se repite para cada Customer_ID
+df_mode_gender = df_filtered.groupby('Customer_ID')['Gender'].agg(lambda x: x.mode()[0]).reset_index()
+
+# Paso 4: Actualizar el DataFrame original con el género más frecuente
+df_Retail = pd.merge(df_Retail, df_mode_gender, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+
+# Reemplazar la columna Gender con el valor más frecuente
+df_Retail['Gender'] = df_Retail['Gender_Most_Frequent']
+
+# Eliminar la columna Gender_Most_Frequent si ya no la necesitas
+df_Retail = df_Retail.drop(columns=['Gender_Most_Frequent'])
+
+df_Retail_10000=df_Retail[df_Retail['Customer_ID']==10000]
+df_Retail_10000.head()
+df_Retail.size
+
 
 
 # - Income

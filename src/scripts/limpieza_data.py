@@ -146,7 +146,11 @@ df_Retail = df_Retail[df_Retail['Transaction_ID'].isin(consistent_transaction_id
 df_Retail.head()
 df_Retail.columns
 df_Retail.info()
-#Los datos del cliente deben ser constantes. Si bien es posible cambiar los datos, no seria lo normal tener muchas transacciones con distintos nombres de clientes
+
+
+# Estudiando los datos del cliente se observa que para un mismo cliente hay datos inconsistentes. 
+# La plataforma debe estandarizar estos datos en el registro; si bien es posible modificarlos, no resulta 
+# logica que existan muchos casos en que para diferentes transacciones el nombre, genero y el ingreso de las personas cambie. 
 
 df_unique_counts = df_Retail.groupby('Customer_ID').agg({
     'Name': 'nunique',

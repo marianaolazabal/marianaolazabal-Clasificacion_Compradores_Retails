@@ -193,14 +193,33 @@ del df_Retail_copy
 gc.collect()
 
 
+df_Retail.size
+
+# Paso 1: Identificar el país más frecuente para cada Customer_ID
+df_mode_country = df_Retail.groupby('Customer_ID')['Country'].agg(lambda x: x.mode()[0]).reset_index()
+
+# Paso 2: Unir el DataFrame original con el DataFrame del país más frecuente
+df_Retail_with_mode = pd.merge(df_Retail, df_mode_country, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+
+# Paso 3: Filtrar para quedarte solo con las filas donde el país coincida con el más frecuente
+df_Retail_cleaned = df_Retail_with_mode[df_Retail_with_mode['Country'] == df_Retail_with_mode['Country_Most_Frequent']]
+
+# Paso 4: Eliminar la columna Country_Most_Frequent si ya no la necesitas
+df_Retail_cleaned = df_Retail_cleaned.drop(columns=['Country_Most_Frequent'])
+
+df_Retail_10000=df_Retail_cleaned[df_Retail_cleaned['Customer_ID']==80175]
+df_Retail_10000.head()
+
+df_Retail_cleaned.size
+
 
 
 # - State es el estado donde el cliente vive
 
 
-df_Retail['State'].unique()
+df_Retail_cleaned['State'].unique()
 
-df_Retail_copy=df_Retail.copy()
+df_Retail_copy=df_Retail_cleaned.copy()
 
 geolocator = Photon(user_agent="geoapiExercises")
 
@@ -249,15 +268,15 @@ gc.collect()
 
 # - Zipcode es el codigo de la direccion del cliente
 
-df_Retail['Zipcode'].unique()
+df_Retail_cleaned['Zipcode'].unique()
 
 
 # - Age
 
-print(getTipoVariable(df_Retail, 'Age'))
+print(getTipoVariable(df_Retail_cleaned, 'Age'))
 
 # Verificar si hay clientes con edad menor a 18
-underage_clients = (df_Retail['Age'] < 18).any()
+underage_clients = (df_Retail_cleaned['Age'] < 18).any()
 
 # Mostrar resultado
 if underage_clients:
@@ -265,52 +284,89 @@ if underage_clients:
 else:
     print("No hay clientes cuya edad sea menor a 18.")
 
+pd.set_option('display.max_columns', None) 
+
+
+df_Retail_10000 = df_Retail_cleaned[df_Retail_cleaned['Customer_ID'] == 10000]
+df_Retail_10000.head()
+
+df_age_counts = df_Retail_cleaned.groupby('Customer_ID')['Age'].nunique().reset_index()
+df_multiple_ages = df_age_counts[df_age_counts['Age'] > 1]
+
+# Paso 2: Filtrar las filas con más de una edad distinta
+df_filtered_multiple_ages = pd.merge(df_multiple_ages[['Customer_ID']], df_Retail_cleaned, on='Customer_ID', how='inner')
+
+# Paso 3: Determinar la edad más frecuente para cada Customer_ID
+df_mode_age = df_filtered_multiple_ages.groupby('Customer_ID')['Age'].agg(lambda x: x.mode()[0]).reset_index()
+
+# Paso 4: Actualizar el DataFrame original con la edad más frecuente
+df_Retail_updated = pd.merge(df_filtered_multiple_ages, df_mode_age, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+
+# Paso 5: Reemplazar la columna Age con el valor más frecuente
+df_Retail_updated['Age'] = df_Retail_updated['Age_Most_Frequent']
+
+# Paso 6: Eliminar la columna Age_Most_Frequent si ya no la necesitas
+df_Retail_updated = df_Retail_updated.drop(columns=['Age_Most_Frequent'])
+
+# Paso 7: Eliminar de df_Retail_cleaned las filas con Customer_ID que tienen múltiples edades
+df_Retail_cleaned = df_Retail_cleaned[~df_Retail_cleaned['Customer_ID'].isin(df_multiple_ages['Customer_ID'])]
+
+# Paso 8: Concatenar los DataFrames
+df_Retail_final_customer = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
+ 
+# Paso 9: Visualizar los datos del Customer_ID 10000 (opcional)
+df_Retail_10000 = df_Retail_final_customer[df_Retail_final_customer['Customer_ID'] == 10000]
+df_Retail_10000.head()
+
+
+
+
 
 # - Year
 
-print(getTipoVariable(df_Retail, 'Year'))
-df_Retail['Year'] = df_Retail['Year'].astype('int')
-print(getTipoVariable(df_Retail, 'Year'))
+print(getTipoVariable(df_Retail_final_customer, 'Year'))
+df_Retail_final_customer['Year'] = df_Retail_final_customer['Year'].astype('int')
+print(getTipoVariable(df_Retail_final_customer, 'Year'))
 
 
 
 # - Name --> Mail del cliente
 
 # Elimino la columna porque no es estadisticamente necesaria
-df_Retail = df_Retail.drop(columns=['Name'])
+df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Name'])
 
 # - Email --> Mail del cliente
 
 #Elimino la columna porque no es estadisticamente necesaria
-df_Retail = df_Retail.drop(columns=['Email'])
+df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Email'])
 
 
 # - Phone --> Phone del cliente
 #Elimino la columna porque no es estadisticamente necesaria
-df_Retail = df_Retail.drop(columns=['Phone'])
+df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Phone'])
 
 
 # - Gender
 
-cantidadUnicos=df_Retail['Gender'].nunique()
+cantidadUnicos=df_Retail_final_customer['Gender'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable genero y son Female and Male")
 
 #Para un mismo cliente no puede haber amas de un genero
 
-df_Retail.size
-df_Retail_10000=df_Retail[df_Retail['Customer_ID']==10000]
+df_Retail_final_customer.size
+df_Retail_10000=df_Retail_final_customer[df_Retail_final_customer['Customer_ID']==10000]
 df_Retail_10000['Gender'].unique()
 df_Retail_10000.head()
 
-df_customer_counts = df_Retail.groupby(['Customer_ID']).size().reset_index(name='counts')
+df_customer_counts = df_Retail_final_customer.groupby(['Customer_ID']).size().reset_index(name='counts')
 df_multiple_genders_correct = df_customer_counts[df_customer_counts['counts'] > 2]
-df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
-df_Retail_cleaned = df_Retail[~df_Retail['Customer_ID'].isin(df_filtered['Customer_ID'])]
+df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_Retail_final_customer, on='Customer_ID', how='inner')
+df_Retail_cleaned = df_Retail_final_customer[~df_Retail_final_customer['Customer_ID'].isin(df_filtered['Customer_ID'])]
 
 # Paso 1: Identificar los Customer_ID que tienen más de un Gender
 df_gender_counts = df_filtered.groupby('Customer_ID')['Gender'].nunique().reset_index()
 df_multiple_genders = df_gender_counts[df_gender_counts['Gender'] > 1]
-df_filtered_multiple_gender = pd.merge(df_multiple_genders[['Customer_ID']], df_Retail, on='Customer_ID', how='inner')
+df_filtered_multiple_gender = pd.merge(df_multiple_genders[['Customer_ID']], df_Retail_final_customer, on='Customer_ID', how='inner')
 
 df_mode_gender = df_filtered_multiple_gender.groupby('Customer_ID')['Gender'].agg(lambda x: x.mode()[0]).reset_index()
 
@@ -639,3 +695,8 @@ with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
 # Optional: Close the buffer
 csv_buffer.close()
 print("Tamaño inicial del dataFrame " + str(df_Retail_final.size))
+
+
+df_Retail_final.head()
+df_Retail_final_10000=df_Retail_final[df_Retail_final['Customer_ID']==10000]
+df_Retail_final_10000.head()

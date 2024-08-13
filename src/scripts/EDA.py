@@ -601,16 +601,9 @@ términos de calificación por parte de los clientes.
 Por otro lado, algunos productos con menor volumen de compra se mantienen en el mismo rango de rating, sugiriendo 
 que aunque sean menos comprados, mantienen una calidad percibida consistente.''')
 
+df.columns
 
-
-#Transformacion, poner cuantos productos compra por Rating promedio 
-
-df_grouped_Rating = df.groupby(['Ratings', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
-df_pivot_Rating = df_grouped_Rating.pivot_table(index='Customer_ID', columns='Ratings', values='Total_Purchases', fill_value=0)
-df_pivot_Rating.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Rating.columns]
-
-df = df.merge(df_pivot_Rating, on='Customer_ID', how='left')
-df.head()
+#El Rating lo usare para insigths
 
 
 
@@ -663,6 +656,27 @@ Para los productos electronicos de mayor costo, la empresa podria ofrecer un sis
 incentivando asi las ventas.''')
 
 #Transformacion, porcentaje comprado por el cliente por cada metodo
+# Paso 1: Agrupar por Customer_ID y Payment_Method y sumar el Amount
+df_grouped = df.groupby(['Customer_ID', 'Payment_Method'])['Total_Amount'].sum().reset_index()
+
+# Paso 2: Calcular el total comprado por cada cliente
+df_total = df_grouped.groupby('Customer_ID')['Total_Amount'].sum().reset_index()
+df_total = df_total.rename(columns={'Total_Amount': 'Total_Amount_Cliente'})
+
+# Paso 3: Unir el total comprado por cliente al DataFrame agrupado
+df_grouped = pd.merge(df_grouped, df_total, on='Customer_ID')
+
+# Paso 4: Calcular el porcentaje de cada método de pago
+df_grouped['Percentage'] = (df_grouped['Total_Amount'] / df_grouped['Total_Amount_Cliente']) * 100
+
+# Paso 5: Pivotar los datos para crear una columna por cada Payment_Method
+df_pivot = df_grouped.pivot(index='Customer_ID', columns='Payment_Method', values='Percentage').reset_index()
+
+# Paso 6: Unir estos cálculos al DataFrame original
+df = pd.merge(df, df_pivot, on='Customer_ID', how='left')
+
+
+df.head()
 
 
 
@@ -696,6 +710,7 @@ automatico para aquellos que compran Grocery.
 Para los clientes que no han comprado mas de dos veces podria ser util observar el feedback que dieron, ya que puede deberse
 a instaisfaccion o porque no fueron incentivados a realizar mas compras.''')
 
+
 categories = df['Product_Category'].unique()
 
 plt.figure(figsize=(14, 10))
@@ -723,7 +738,7 @@ o suplementos deportivos.''')
 
 
 #Transformacion, poner la cantidad de compras realizadas por el cliente en la plataforma
-
+#Quedo como frecuencia_comp_cliente
 
 # H10. El poder adquisitivo del cliente permite identificar patrones de consumo.
 
@@ -891,6 +906,8 @@ Grocery y Electronics.''')
 
 #Transformacion, dejar country y sacar season
 
+df = df.drop(columns=['Season'])
+
 
 # H14. Las horas y días de la semana, como el mes en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
 
@@ -960,9 +977,75 @@ plt.ylabel('Número de Compras')
 plt.legend(title='País')
 plt.show()
 
+#Cantidad de compras realizadas por el cliente en cada momento del dia
+
+# Paso 1: Agrupar por Customer_ID y Payment_Method y sumar el Amount
+df_grouped = df.groupby(['Customer_ID', 'momentoDia'])['Total_Purchases'].sum().reset_index()
+
+# Paso 2: Calcular el total comprado por cada cliente
+df_total = df_grouped.groupby('Customer_ID')['Total_Purchases'].sum().reset_index()
+df_total = df_total.rename(columns={'Total_Purchases': 'Total_Purchases_Cliente'})
+
+# Paso 3: Unir el total comprado por cliente al DataFrame agrupado
+df_grouped = pd.merge(df_grouped, df_total, on='Customer_ID')
+
+# Paso 4: Calcular el porcentaje de cada método de pago
+df_grouped['Percentage'] = (df_grouped['Total_Purchases'] / df_grouped['Total_Purchases_Cliente']) * 100
+
+# Paso 5: Pivotar los datos para crear una columna por cada momentoDia
+df_pivot = df_grouped.pivot(index='Customer_ID', columns='momentoDia', values='Percentage').reset_index()
+
+# Paso 6: Unir estos cálculos al DataFrame original
+df = pd.merge(df, df_pivot, on='Customer_ID', how='left')
+
+df = df.drop(columns=['Time'])
+
 
 
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
+
+
+
+# Paso 1: Agrupar por Customer_ID y contar los países únicos
+df_country_count = df.groupby('Customer_ID')['Country'].nunique().reset_index()
+
+# Paso 2: Filtrar los clientes que solo tienen un país asociado
+df_same_country_customers = df_country_count[df_country_count['Country'] == 1]
+
+# Paso 3: Unir con el DataFrame original para ver más detalles de esos clientes (opcional)
+df_final = pd.merge(df_same_country_customers, df, on='Customer_ID', how='inner')
+
+df_final.head()
+
+
+
+
+# Paso 1: Agrupar por Customer_ID y contar los valores únicos para las columnas 'Country', 'Name', 'Gender', 'Income'
+df_unique_counts = df.groupby('Customer_ID').agg({
+    'Country': 'nunique',
+    'Gender': 'nunique',
+    'Age': 'nunique',
+    'Income': 'nunique',
+    'Transaction_ID': 'count'
+}).reset_index()
+
+# Paso 2: Filtrar los clientes que tienen un solo valor único en todas las columnas
+df_same_attributes_customers = df_unique_counts[
+    (df_unique_counts['Country'] == 1) &
+    (df_unique_counts['Gender'] == 1) &
+    (df_unique_counts['Age'] == 1) &
+    (df_unique_counts['Income'] == 1) &
+    (df_unique_counts['Transaction_ID'] > 1)
+]
+
+# Paso 3: Unir con el DataFrame original para ver más detalles de esos clientes (opcional)
+df_final = pd.merge(df_same_attributes_customers[['Customer_ID']], df, on='Customer_ID', how='inner')
+
+df_final.head()
+
+df_11676=df[df['Customer_ID']==11676]
+
+df_11676.head()
 
 
 df_unique_month = df.drop_duplicates(subset='Transaction_ID')

@@ -262,9 +262,7 @@ def validate_city_country(city, country):
         return validate_city_country(city, country)
 
 
-    
-
-print(validate_city_country('Montevideo','Uruguay'))
+#print(validate_city_country('Montevideo','Uruguay'))
 
 # Extract unique city-country pairs
 unique_city_country_pairs = df_Retail[['City', 'Country']].drop_duplicates()
@@ -274,7 +272,6 @@ unique_city_country_pairs[['Validation', 'API_Response']] = unique_city_country_
     lambda row: validate_city_country(row['City'], row['Country']), axis=1,
     result_type='expand'
 )
-
 
 print(f"Original dataframe shape: {df_Retail_copy.shape}")
 print(f"Unique city-country pairs shape: {unique_city_country_pairs.shape}")
@@ -288,12 +285,119 @@ df_Retail_copy_Berlin.head()
 # Rellenar los valores None en la columna 'Validation' con una cadena vacía
 df_Retail_copy['Validation'] = df_Retail_copy['Validation'].fillna('')
 
-# Luego, aplicar el split y contar las partes
-df_Retail_copy['Parts'] = df_Retail_copy['Validation'].str.split(',').apply(len)
+
+def dividirColumna(row):
+
+    if(row['Validation']==''):
+        split_parts = row['API_Response'].split(',')
+    
+        # Asegúrate de que siempre se devuelvan 6 columnas
+        return pd.Series({
+            'Column1': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
+            'Column2': split_parts[1].strip() if len(split_parts) > 1 else np.nan,
+            'Column3': split_parts[2].strip() if len(split_parts) > 2 else np.nan,
+            'Column4': split_parts[3].strip() if len(split_parts) > 3 else np.nan,
+            'Column5': split_parts[4].strip() if len(split_parts) > 4 else np.nan,
+            'Column6': split_parts[5].strip() if len(split_parts) > 5 else np.nan
+        })
+    else:
+        split_parts = row['Validation'].split(',')
+    
+        # Asegúrate de que siempre se devuelvan 6 columnas
+        return pd.Series({
+            'Column1': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
+            'Column2': split_parts[1].strip() if len(split_parts) > 1 else np.nan,
+            'Column3': split_parts[2].strip() if len(split_parts) > 2 else np.nan,
+            'Column4': split_parts[3].strip() if len(split_parts) > 3 else np.nan,
+            'Column5': split_parts[4].strip() if len(split_parts) > 4 else np.nan,
+            'Column6': split_parts[5].strip() if len(split_parts) > 5 else np.nan
+        })
+
+
+# Aplicar la función al DataFrame
+result = df_Retail_copy.apply(dividirColumna, axis=1)
+
+# Asegúrate de que el DataFrame original tiene las mismas columnas
+df_Retail_copy[['Column1', 'Column2', 'Column3', 'Column4', 'Column5', 'Column6']] = result
 
 df_Retail_copy.head()
+df_Retail_copy['Column2'].unique()
+df_Retail_copy['Column1'] = df_Retail_copy['Column1'].replace('Clarke City', 'Quebec City')
+df_Retail_copy['Column1'] = df_Retail_copy['Column1'].replace('Albury Botanical Gardens', 'Albury')
+df_Retail_copy['Column1'] = df_Retail_copy['Column1'].replace('United States Senate', 'Washington')
+df_Retail_copy['Column1'] = df_Retail_copy['Column1'].replace('München', 'Munich')
+df_Retail_copy['Column1'] = df_Retail_copy['Column1'].replace('Köln', 'Cologne')
+df_Retail_copy['Column1'] = df_Retail_copy['Column1'].replace('Frankfurt am Main', 'Frankfurt')
+
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('2500', 'New South Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('4870', 'New South Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('6000', 'New South Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('N9A 1B2', 'Ontario')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('4350', 'Queensland')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('HU1 3DX', 'England')
+df_Retail_copy.loc[(df_Retail_copy['Country'] == 'Canada') & (df_Retail_copy['Column2'] == 'N6A 3N7'), 'Column2'] = 'Ontario'
+df_Retail_copy.loc[(df_Retail_copy['Country'] == 'United Kingdom') & (df_Retail_copy['Column2'] == 'N6A 3N7'), 'Column2'] = 'England'
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('2600', 'New South Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('3218', 'Victoria')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('4740', 'Queensland')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('BN1 1HH', 'England')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('0800', 'Northern Territory')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('2300', 'New South Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('3350', 'Victoria')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('CF10 2AF', 'Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('G2 1DY', 'Scotland')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('Sept-Îles', 'Quebec')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('Wodonga Place', 'New South Wales')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('Alba / Scotland', 'Scotland')
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('West Terraces and Steps', 'District of Columbia')
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Hamburg') & (df_Retail_copy['Column2'] == 'Deutschland'), 'Column2'] = 'Schleswig-Holstein'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Berlin') & (df_Retail_copy['Column2'] == 'Deutschland'), 'Column2'] = 'Brandenburg'
+df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('United Kingdom', 'England')
+
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Wollongong', 'Australia')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Cymru / Wales', 'Wales')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Queensland', 'Australia')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Western Australia', 'Australia')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Australian Capital Territory', 'Australia')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Australian Capital Territory', 'Australia')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Northern Territory', 'Australia')
+df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Newcastle City Council', 'Australia')
 
 
+df_Retail_copy['Column3'].unique()
+
+
+#2600
+df_Retail_copy_vacio=df_Retail_copy[df_Retail_copy['Column3']=='nan']
+unique_states = df_Retail_copy_vacio['State'].unique().tolist()
+for state in unique_states:
+    print(state)
+df_Retail_copy_vacio.head()
+df_Retail_copy['Country'].unique()
+df_Retail_copy_vacio2=df_Retail_copy_vacio[df_Retail_copy_vacio['Column1']=='Hamburg']
+df_Retail_copy_vacio2.head()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Luego, aplicar el split y contar las partes
+df_Retail_copy['Parts'] = df_Retail_copy['API_Response'].str.split(',').apply(len)
+df_Retail_copy['Parts2'] = df_Retail_copy['Validation'].str.split(',').apply(len)
+df_Retail_copy.head()
 
 
 invalid_rows = df_Retail_copy[df_Retail_copy['Parts'] != 3]
@@ -311,19 +415,58 @@ invalid_rows.head()
 def dividirColumna(row):
     if row['Parts'] == 3:
         # Separar la columna 'Validation' en tres partes
-        split_parts = row['Validation'].split(',')
+        split_parts = row['API_Response'].split(',')
         # Asignar las partes a las nuevas columnas
         return pd.Series({
             'City2': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
             'State2': split_parts[1].strip() if len(split_parts) > 1 else np.nan,
             'Country2': split_parts[2].strip() if len(split_parts) > 2 else np.nan
         })
+    elif row['Parts'] == 5:
+        # Separar la columna 'Validation' en tres partes
+        split_parts = row['API_Response'].split(',')
+        # Asignar las partes a las nuevas columnas
+        return pd.Series({
+            'City2': split_parts[2].strip() if len(split_parts) > 0 else np.nan,
+            'State2': split_parts[3].strip() if len(split_parts) > 1 else np.nan,
+            'Country2': split_parts[4].strip() if len(split_parts) > 2 else np.nan
+        })
+    elif row['Parts'] == 4:
+        # Separar la columna 'Validation' en tres partes
+        split_parts = row['API_Response'].split(',')
+        # Asignar las partes a las nuevas columnas
+        return pd.Series({
+            'City2': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
+            'State2': split_parts[2].strip() if len(split_parts) > 1 else np.nan,
+            'Country2': split_parts[3].strip() if len(split_parts) > 2 else np.nan
+        })
+    elif row['Parts'] == 2:
+        # Separar la columna 'Validation' en tres partes
+        split_parts = row['API_Response'].split(',')
+        # Asignar las partes a las nuevas columnas
+        return pd.Series({
+            'City2': row['City'] ,
+            'State2': row['State'] ,
+            'Country2': row['Country'] 
+        })
     else:
         # Devolver NaN para las columnas si 'Parts' no es igual a 3
         return pd.Series({'City2': np.nan, 'State2': np.nan, 'Country2': np.nan})
 
-# Aplicar la función a cada fila del DataFrame
+
 df_Retail_copy[['City2', 'State2', 'Country2']] = df_Retail_copy.apply(dividirColumna, axis=1)
+
+
+df_Retail_copy.head()
+
+df_Retail_copy_4=df_Retail_copy[(df_Retail_copy['Parts']==1) & (df_Retail_copy['Parts2']==2)]
+df_Retail_copy_4.head()
+
+
+
+
+
+
 
 df_Retail_copy['Parts'].unique()
 df_Retail_copy_1=df_Retail_copy[df_Retail_copy['Parts']==1]
@@ -338,8 +481,8 @@ df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen,
 df_Retail_copy.head()
 df_Retail_copy_3492557=df_Retail_copy[df_Retail_copy['Transaction_ID']==3492557]
 df_Retail_copy_3492557.head()
-
-
+df_Retail_copy_5=df_Retail_copy[df_Retail_copy['Parts'] == 5]
+df_Retail_copy_5.head()
 df_Retail_copy_1.head()
 
 

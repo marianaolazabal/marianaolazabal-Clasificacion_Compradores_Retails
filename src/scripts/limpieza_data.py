@@ -51,6 +51,10 @@ print(df_Retail.columns)
 
 
 pd.reset_option('display.max_columns')
+pd.set_option('display.max_colwidth', None)  # No recorta el contenido de las celdas
+pd.set_option('display.max_rows', None)      # Muestra todas las filas sin resumen
+pd.set_option('display.max_columns', None) 
+
 # Controles generales
 
 
@@ -224,17 +228,40 @@ df_Retail_copy=df_Retail_cleaned.copy()
 geolocator = Photon(user_agent="geoapiExercises")
 
 def validate_city_country(city, country):
+    # Diccionario de equivalencias de nombres de países
+    country_aliases = {
+        "germany": "germany",
+        "deutschland": "germany",
+        # Agrega más equivalencias si es necesario
+    }
+
     try:
-        # Ensure proper formatting of the query
         query = f"{city}, {country}"
         location = geolocator.geocode(query, timeout=10)
-        if location and location.address:
-            return location.address
-        else:
-            return None
+
+        if location:
+            address_parts = location.address.split(', ')
+            found_city = address_parts[0].strip() if len(address_parts) >= 2 else ""
+            found_country = address_parts[-1].strip().lower()
+
+            # Normalizar el país devuelto
+            normalized_country = country_aliases.get(found_country, found_country)
+            normalized_input_country = country_aliases.get(country.lower(), country.lower())
+
+            # Guardar la dirección devuelta por la API
+            api_response = location.address
+
+            # Verificar coincidencia exacta
+            if found_city.lower() == city.lower() and normalized_country == normalized_input_country:
+                return api_response, api_response  # Coincidencia exacta
+            else:
+                return None, api_response  # No coinciden, pero guarda la respuesta de la API
+        return None, None  # Si no se encuentra ninguna ubicación
     except GeocoderTimedOut:
-        time.sleep(1)  # Wait a bit before retrying
+        time.sleep(1)  # Espera un poco antes de reintentar
         return validate_city_country(city, country)
+
+
     
 
 print(validate_city_country('Montevideo','Uruguay'))
@@ -243,8 +270,9 @@ print(validate_city_country('Montevideo','Uruguay'))
 unique_city_country_pairs = df_Retail[['City', 'Country']].drop_duplicates()
 unique_city_country_pairs = unique_city_country_pairs.drop_duplicates()
 # Apply the validation function to the unique city-country pairs
-unique_city_country_pairs['Validation'] = unique_city_country_pairs.apply(
-    lambda row: validate_city_country(row['City'], row['Country']), axis=1
+unique_city_country_pairs[['Validation', 'API_Response']] = unique_city_country_pairs.apply(
+    lambda row: validate_city_country(row['City'], row['Country']), axis=1,
+    result_type='expand'
 )
 
 
@@ -252,16 +280,75 @@ print(f"Original dataframe shape: {df_Retail_copy.shape}")
 print(f"Unique city-country pairs shape: {unique_city_country_pairs.shape}")
 
 df_Retail_copy = df_Retail_copy.merge(unique_city_country_pairs, on=['City', 'Country'], how='left', suffixes=('', '_Validation'))
-
+df_Retail_copy.head()
 print(f"Dataframe shape after merge: {df_Retail_copy.shape}")
+df_Retail_copy_Berlin=df_Retail_copy[df_Retail_copy['Country']=='Germany']
+df_Retail_copy_Berlin.head()
+
+# Rellenar los valores None en la columna 'Validation' con una cadena vacía
+df_Retail_copy['Validation'] = df_Retail_copy['Validation'].fillna('')
+
+# Luego, aplicar el split y contar las partes
+df_Retail_copy['Parts'] = df_Retail_copy['Validation'].str.split(',').apply(len)
+
+df_Retail_copy.head()
 
 
-# Filtra las filas con resultados incorrectos en la validación
-df_incorrectas = df_Retail_copy[df_Retail_copy['Validation'].isna()]
-if(df_incorrectas.empty):
-    print("Todas las ciudades son correctas")
-else:
-    print(df_incorrectas)
+
+
+invalid_rows = df_Retail_copy[df_Retail_copy['Parts'] != 3]
+
+df_Retail_copy_4155845=df_Retail_copy[df_Retail_copy['Transaction_ID']==4155845]
+
+print(df_Retail_copy_4155845['Validation'])
+
+
+# Mostrar las filas problemáticas
+print(invalid_rows[['Validation', 'Parts']])
+invalid_rows.head()
+
+
+def dividirColumna(row):
+    if row['Parts'] == 3:
+        # Separar la columna 'Validation' en tres partes
+        split_parts = row['Validation'].split(',')
+        # Asignar las partes a las nuevas columnas
+        return pd.Series({
+            'City2': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
+            'State2': split_parts[1].strip() if len(split_parts) > 1 else np.nan,
+            'Country2': split_parts[2].strip() if len(split_parts) > 2 else np.nan
+        })
+    else:
+        # Devolver NaN para las columnas si 'Parts' no es igual a 3
+        return pd.Series({'City2': np.nan, 'State2': np.nan, 'Country2': np.nan})
+
+# Aplicar la función a cada fila del DataFrame
+df_Retail_copy[['City2', 'State2', 'Country2']] = df_Retail_copy.apply(dividirColumna, axis=1)
+
+df_Retail_copy['Parts'].unique()
+df_Retail_copy_1=df_Retail_copy[df_Retail_copy['Parts']==1]
+
+# Actualizar las columnas específicas donde API_Response coincide
+df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Clarke City, Sept-Îles, Québec, Canada', ['City2', 'State2', 'Country2']] = ['Quebec City', 'Quebec', 'Canada']
+df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen, Deutschland', ['City2', 'State2', 'Country2']] = ['Frankfurt', 'Hessen', 'Germany']
+df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen, Deutschland', ['City2', 'State2', 'Country2']] = ['Nuremberg', 'Bayern', 'Germany']
+df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen, Deutschland', ['City2', 'State2', 'Country2']] = ['Hannover, Lower Saxony, Deutschland']
+
+
+df_Retail_copy.head()
+df_Retail_copy_3492557=df_Retail_copy[df_Retail_copy['Transaction_ID']==3492557]
+df_Retail_copy_3492557.head()
+
+
+df_Retail_copy_1.head()
+
+
+# Eliminar espacios en blanco al principio y al final de cada nueva columna (opcional)
+df_Retail_copy['City'] = df_Retail_copy['City'].str.strip()
+df_Retail_copy['State'] = df_Retail_copy['State'].str.strip()
+df_Retail_copy['Country'] = df_Retail_copy['Country'].str.strip()
+
+df_Retail = df_Retail.merge(df_Retail_copy, on=['Transaction_ID'], how='left')
 
 del df_Retail_copy
 gc.collect()

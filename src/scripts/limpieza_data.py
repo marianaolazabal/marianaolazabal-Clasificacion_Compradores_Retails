@@ -354,17 +354,12 @@ df_Retail_copy.loc[(df_Retail_copy['City'] == 'Hamburg') & (df_Retail_copy['Colu
 df_Retail_copy.loc[(df_Retail_copy['City'] == 'Berlin') & (df_Retail_copy['Column2'] == 'Deutschland'), 'Column2'] = 'Brandenburg'
 df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('United Kingdom', 'England')
 
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Wollongong', 'Australia')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Cymru / Wales', 'Wales')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Queensland', 'Australia')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Western Australia', 'Australia')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Australian Capital Territory', 'Australia')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Australian Capital Territory', 'Australia')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Northern Territory', 'Australia')
-df_Retail_copy['Column3'] = df_Retail_copy['Column3'].replace('Newcastle City Council', 'Australia')
 
+df_Retail_copy = df_Retail_copy.drop(['Column3', 'Column4', 'Column5', 'Column6', 'City', 'State'], axis=1)
+df_Retail_copy = df_Retail_copy.rename(columns={'Column1': 'City', 'Column2': 'State'})
+df_Retail_copy.head()
 
-df_Retail_copy['Column3'].unique()
+df_Retail_copy['City'].unique()
 
 
 #2600

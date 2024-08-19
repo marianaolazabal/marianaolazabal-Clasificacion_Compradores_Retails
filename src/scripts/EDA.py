@@ -95,14 +95,16 @@ df = df.merge(df_clientes_gastoTotal, on='Customer_ID', how='left')
 
 df_clientes_gasto = df.groupby('Customer_ID')['Total_Purchases'].sum().reset_index()
 df_clientes_gasto['Customer_ID'].nunique()
+df_clientes_gasto.head()
+# 2. Renombrar la columna para mayor claridad
+df_clientes_gasto.rename(columns={'Total_Purchases': 'Cantidades_Totales_cliente'}, inplace=True)
 
-df_clientes_gasto.rename(columns={'Total_Purchases': 'Cantidades_Totales'}, inplace=True)
-
-grafico_Histograma(df_clientes_gasto,'Cantidades_Totales','Cantidades totales compradas por cliente','Cantidades_Totales','Frecuencia')
+grafico_Histograma(df_clientes_gasto,'Cantidades_Totales_cliente','Cantidades totales compradas por cliente','Cantidades_Totales','Frecuencia')
 
 print("""La mayoria de los clientes compran de 10 a 15 unidades, siendo este el punto de mayor frecuencia. A medida que la cantidad aumenta el total comprado 
       disminuye; lo que indica que hay pocos clientes que compran mcuhas unidades""")
 
+df = df.merge(df_clientes_gasto, on='Customer_ID', how='left')
 
 #La teoría microeconómica de las demandas Marshallianas se utiliza para entender cómo los consumidores toman decisiones de consumo en función 
 # de sus recursos disponibles y sus preferencias. La demanda Marshalliana depende del ingreso del consumidor y de los precios de los bienes disponibles. 
@@ -1000,6 +1002,58 @@ df = pd.merge(df, df_pivot, on='Customer_ID', how='left')
 
 df = df.drop(columns=['Time'])
 
+
+#H15. El segmento en el que se encuentra el cliente permite clasificarlos
+
+df_copy = df.copy()
+df_copy=df_copy.drop_duplicates(subset='Customer_ID')
+compras_por_segmento = df_copy.groupby('Customer_Segment').size()
+plt.figure(figsize=(10, 6))
+compras_por_segmento.plot(kind='bar', color='skyblue')
+
+# Añadir título y etiquetas
+plt.title('Número de Compras por Segmento')
+plt.xlabel('Segmento')
+plt.ylabel('Número de Compras')
+
+# Mostrar el gráfico
+plt.show()
+
+
+transaction_counts = df_copy.groupby(['Customer_Segment', 'Cantidades_Totales_cliente']).size().reset_index(name='Transaction_Count_Segment')
+
+# Crear el gráfico de barras
+plt.figure(figsize=(12, 8))
+sns.barplot(
+    x='Cantidades_Totales_cliente',
+    y='Transaction_Count_Segment',
+    hue='Customer_Segment',
+    data=transaction_counts,
+    palette='viridis'
+)
+plt.title('Cantidad de Compras Realizadas por segmento')
+plt.xlabel('Cantidad de compras')
+plt.ylabel('Cantidad de clientes')
+plt.legend(title='Segmento del cliente')
+plt.show()
+
+
+
+#Order_Status hacer graf
+
+df_copy = df.copy()
+df_copy=df_copy.drop_duplicates(subset='Customer_ID')
+compras_por_segmento = df_copy.groupby('Order_Status').size()
+plt.figure(figsize=(10, 6))
+compras_por_segmento.plot(kind='bar', color='skyblue')
+
+# Añadir título y etiquetas
+plt.title('Número de Compras por estado de la compra')
+plt.xlabel('Estado de la compra')
+plt.ylabel('Número de Compras')
+
+# Mostrar el gráfico
+plt.show()
 
 
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes

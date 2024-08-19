@@ -20,6 +20,8 @@ df =pd.read_csv(csv_path + 'Limpiado.zip')
 #Informacion generica del dataframe
 df.info()
 
+df.size
+
 columns_to_convert = ['Transaction_ID', 'Customer_ID', 'Zipcode']
 
 # Iterar sobre cada columna y convertir a tipo 'category'
@@ -218,7 +220,7 @@ df_grouped_by_product_month = df.groupby(['products', 'Month']).agg({
 products = df_grouped_by_product_month['products'].unique()
 
 total_purchases_per_product = df.groupby('products')['Total_Purchases'].sum().reset_index()
-total_purchases_per_product.rename(columns={'Total_Purchases': 'Total_Purchases_All'}, inplace=True)
+total_purchases_per_product.rename(columns={'Total_Purchases': 'Total_Purchases_All_products'}, inplace=True)
 
 df = df.merge(total_purchases_per_product, on='products', how='left')
 
@@ -269,8 +271,8 @@ df_elasticity = pd.DataFrame(elasticity_results)
 # Mostrar los resultados
 df_elasticity.head()
 
-# Unir df_elasticity con df para copiar la columna Total_Purchases_All
-df_elasticity = df_elasticity.merge(df[['products', 'Total_Purchases_All']], left_on='Product', right_on='products', how='left')
+# Unir df_elasticity con df para copiar la columna Total_Purchases_All_products
+df_elasticity = df_elasticity.merge(df[['products', 'Total_Purchases_All_products']], left_on='Product', right_on='products', how='left')
 
 # Eliminar la columna Product duplicada
 df_elasticity.drop(columns=['Product'], inplace=True)
@@ -279,7 +281,7 @@ df_elasticity.head(20)
 df.head(20)
 
 
-df_elasticity_filtro=df_elasticity['Total_Purchases_All'].min()
+df_elasticity_filtro=df_elasticity['Total_Purchases_All_products'].min()
 print(df_elasticity_filtro)
 
 
@@ -322,6 +324,7 @@ Para productos con alta elasticidad negativa (valor absoluto alto), ofrecer desc
 atraer más ventas, ya que los clientes son muy sensibles a cambios en el precio.
 Para productos con elasticidad baja (valor absoluto bajo), se puede ajustar los precios sin esperar grandes 
 cambios en la demanda, optimizando así los márgenes de ganancia.""")
+
 
 #Lo utilizare para estudiar funcionalmente, pero no para clasificar
 
@@ -781,6 +784,7 @@ print('''La edad de los clientes muestra que el grupo que mas compras han realiz
 Por otro lado, hay tramos de edades en los que las compras son muy constantes, se podria estudiar en mayor profunidad los 
 intereses de estos para mejorar este mercado.''')
 
+
 #GENERO
 
 clientes_por_sexo = df.groupby('Gender')['Customer_ID'].nunique().reset_index(name='Total_Clientes')
@@ -938,7 +942,6 @@ productos en otros meses o incentivas en los meses mas frecuentes compras de otr
 df_unique_month.columns
 
 
-
 # Convertir columnas a formato datetime
 df['Date'] = pd.to_datetime(df['Date'])
 df['Time'] = pd.to_datetime(df['Time'], format='%H:%M:%S').dt.time
@@ -1019,7 +1022,6 @@ plt.ylabel('Número de Compras')
 # Mostrar el gráfico
 plt.show()
 
-
 transaction_counts = df_copy.groupby(['Customer_Segment', 'Cantidades_Totales_cliente']).size().reset_index(name='Transaction_Count_Segment')
 
 # Crear el gráfico de barras
@@ -1036,6 +1038,19 @@ plt.xlabel('Cantidad de compras')
 plt.ylabel('Cantidad de clientes')
 plt.legend(title='Segmento del cliente')
 plt.show()
+
+
+
+#Cantidad de compras realizadas por el cliente en cada segmento
+
+df_grouped = df.groupby(['Customer_ID', 'Customer_Segment'])['Total_Purchases'].sum().reset_index()
+
+df_total = df_grouped.groupby('Customer_ID')['Total_Purchases'].sum().reset_index()
+df_total = df_total.rename(columns={'Total_Purchases': 'Total_Purchases_Cliente_Segmento'})
+df_grouped = pd.merge(df_grouped, df_total, on='Customer_ID')
+df_grouped['Percentage_Segmento'] = (df_grouped['Total_Purchases'] / df_grouped['Total_Purchases_Cliente_Segmento']) * 100
+df_pivot = df_grouped.pivot(index='Customer_ID', columns='Customer_Segment', values='Percentage_Segmento').reset_index()
+df = pd.merge(df, df_pivot, on='Customer_ID', how='left')
 
 
 
@@ -1058,30 +1073,41 @@ plt.show()
 
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
 
+#Ciudad donde el cliente compro mas veces.
+
+conteo_compras = df.groupby(['Customer_ID', 'City']).size().reset_index(name='Count')
+ciudad_mas_compras = conteo_compras.loc[conteo_compras.groupby('Customer_ID')['Count'].idxmax()]
+df_actualizado = df.merge(ciudad_mas_compras[['Customer_ID', 'City']], on='Customer_ID', suffixes=('', '_most'))
+df_actualizado['City'] = df_actualizado['City_most']
+df_actualizado = df_actualizado.drop(columns=['City_most'])
+df_actualizado = df_actualizado.rename(columns={'City': 'City_Moda_Cliente'})
+
+df_actualizado.head()
+df_actualizado_66893=df_actualizado[df_actualizado['Customer_ID']==66893]
+df_actualizado_66893.head()
 
 
 # Paso 1: Agrupar por Customer_ID y contar los países únicos
-df_country_count = df.groupby('Customer_ID')['Country'].nunique().reset_index()
+df_country_count = df_actualizado.groupby('Customer_ID')['Country'].nunique().reset_index()
 
 # Paso 2: Filtrar los clientes que solo tienen un país asociado
 df_same_country_customers = df_country_count[df_country_count['Country'] == 1]
 
 # Paso 3: Unir con el DataFrame original para ver más detalles de esos clientes (opcional)
-df_final = pd.merge(df_same_country_customers, df, on='Customer_ID', how='inner')
+df_final = pd.merge(df_same_country_customers, df_actualizado, on='Customer_ID', how='inner')
 
 df_final.head()
 
 
-
-df_unique_month = df.drop_duplicates(subset='Transaction_ID')
+df_unique_month = df_actualizado.drop_duplicates(subset='Transaction_ID')
 
 # Contar el número de transacciones por país y ciudad
-df_counts = df_unique_month.groupby(['Country', 'City']).size().reset_index(name='Transaction_Count')
+df_counts = df_unique_month.groupby(['Country', 'City_Moda_Cliente']).size().reset_index(name='Transaction_Count')
 
 # Crear el gráfico sunburst
 fig = px.sunburst(
     df_counts,
-    path=['Country', 'City'],
+    path=['Country', 'City_Moda_Cliente'],
     values='Transaction_Count',
     title='Distribución de Transacciones por País y Ciudad'
 )
@@ -1096,3 +1122,32 @@ fig.update_layout(
 # Mostrar el gráfico
 fig.show()
 
+df_actualizado.head()
+
+df_actualizado.drop(columns=['Product_Type'], inplace=True)
+df_actualizado.drop(columns=['Address'], inplace=True)
+df_actualizado.drop(columns=['State'], inplace=True)
+df_actualizado.drop(columns=['Zipcode'], inplace=True)
+df_actualizado.drop(columns=['Year'], inplace=True)
+df_actualizado.drop(columns=['Amount'], inplace=True)
+df_actualizado.drop(columns=['Total_Amount'], inplace=True)
+df_actualizado.drop(columns=['Product_Category'], inplace=True)
+df_actualizado.drop(columns=['Date'], inplace=True)
+df_actualizado.drop(columns=['Total_Purchases'], inplace=True)
+df_actualizado.drop(columns=['Product_Brand'], inplace=True)
+df_actualizado.drop(columns=['Shipping_Method'], inplace=True)
+df_actualizado.drop(columns=['Feedback'], inplace=True)
+df_actualizado.drop(columns=['Payment_Method'], inplace=True)
+df_actualizado.drop(columns=['Ratings'], inplace=True)
+df_actualizado.drop(columns=['products'], inplace=True)
+df_actualizado.drop(columns=['Total_Amount_log'], inplace=True)
+df_actualizado.drop(columns=['momentoDia'], inplace=True)
+df_actualizado.drop(columns=['Transaction_ID'], inplace=True)
+df_actualizado.drop(columns=['Order_Status'], inplace=True)
+df_actualizado.drop(columns=['Total_Purchases_All_products'], inplace=True)
+df_actualizado.drop(columns=['Customer_Segment'], inplace=True)
+df_actualizado.drop(columns=['Month'], inplace=True)
+
+df_actualizado.head()
+
+df_actualizado.size

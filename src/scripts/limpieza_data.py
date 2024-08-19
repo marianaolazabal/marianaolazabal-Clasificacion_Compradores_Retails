@@ -513,6 +513,12 @@ df_final.head()
 df_Retail_10000=df_final[df_final['Customer_ID']==10000]
 df_Retail_10000.head()
 
+
+conteo_gender = df_final.groupby('Customer_ID')['Gender'].nunique().reset_index()
+customer_ids_dos_gender = conteo_gender[conteo_gender['Gender'] == 2]['Customer_ID']
+df_filtrado = df_final[~df_final['Customer_ID'].isin(customer_ids_dos_gender)]
+df_final=df_filtrado.copy()
+
 # - Income
 
 cantidadUnicos=df_final['Income'].nunique()
@@ -550,6 +556,11 @@ df_Retail_10000=df_final[df_final['Customer_ID']==10000]
 df_Retail_10000.head()
 
 
+conteo_income = df_final.groupby('Customer_ID')['Income'].nunique().reset_index()
+customer_ids_dos_incomes = conteo_income[conteo_income['Income'] == 2]['Customer_ID']
+df_filtrado_final = df_final[~df_final['Customer_ID'].isin(customer_ids_dos_incomes)]
+df_final=df_filtrado_final.copy()
+df_final.head()
 
 # - Customer_Segment
 

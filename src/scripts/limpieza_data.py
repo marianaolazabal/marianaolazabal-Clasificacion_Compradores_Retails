@@ -203,27 +203,27 @@ df_Retail.size
 df_mode_country = df_Retail.groupby('Customer_ID')['Country'].agg(lambda x: x.mode()[0]).reset_index()
 
 # Paso 2: Unir el DataFrame original con el DataFrame del país más frecuente
-df_Retail_with_mode = pd.merge(df_Retail, df_mode_country, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+df_Retail = pd.merge(df_Retail, df_mode_country, on='Customer_ID', suffixes=('', '_Most_Frequent'))
 
 # Paso 3: Filtrar para quedarte solo con las filas donde el país coincida con el más frecuente
-df_Retail_cleaned = df_Retail_with_mode[df_Retail_with_mode['Country'] == df_Retail_with_mode['Country_Most_Frequent']]
+df_Retail = df_Retail[df_Retail['Country'] == df_Retail['Country_Most_Frequent']]
 
 # Paso 4: Eliminar la columna Country_Most_Frequent si ya no la necesitas
-df_Retail_cleaned = df_Retail_cleaned.drop(columns=['Country_Most_Frequent'])
-
-df_Retail_10000=df_Retail_cleaned[df_Retail_cleaned['Customer_ID']==80175]
+df_Retail = df_Retail.drop(columns=['Country_Most_Frequent'])
+df_Retail.head()
+df_Retail_10000=df_Retail[df_Retail['Customer_ID']==80175]
 df_Retail_10000.head()
 
-df_Retail_cleaned.size
+df_Retail.size
 
 
 
 # - State es el estado donde el cliente vive
 
 
-df_Retail_cleaned['State'].unique()
+df_Retail['State'].unique()
 
-df_Retail_copy=df_Retail_cleaned.copy()
+df_Retail_copy=df_Retail.copy()
 
 geolocator = Photon(user_agent="geoapiExercises")
 
@@ -355,130 +355,31 @@ df_Retail_copy.loc[(df_Retail_copy['City'] == 'Berlin') & (df_Retail_copy['Colum
 df_Retail_copy['Column2'] = df_Retail_copy['Column2'].replace('United Kingdom', 'England')
 
 
-df_Retail_copy = df_Retail_copy.drop(['Column3', 'Column4', 'Column5', 'Column6', 'City', 'State'], axis=1)
+df_Retail_copy = df_Retail_copy.drop(['Column3', 'Column4', 'Column5', 'Column6', 'City', 'State', 'Validation', 'API_Response'], axis=1)
 df_Retail_copy = df_Retail_copy.rename(columns={'Column1': 'City', 'Column2': 'State'})
 df_Retail_copy.head()
 
+df_comb = df_Retail_copy[['City', 'Country', 'State']].drop_duplicates()
+print(df_comb)
+
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Cairns') & (df_Retail_copy['State'] == 'New South Wales'), 'State'] = 'Queensland'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Perth') & (df_Retail_copy['State'] == 'New South Wales'), 'State'] = 'Western Australia'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Toronto') & (df_Retail_copy['State'] == 'Toronto'), 'State'] = 'Ontario'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Wichita') & (df_Retail_copy['State'] == 'Texas'), 'State'] = 'Kansas'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Hamburg') & (df_Retail_copy['State'] == 'Schleswig-Holstein'), 'State'] = 'Hamburg'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Townsville') & (df_Retail_copy['State'] == '4810'), 'State'] = 'Queensland'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Charlotte') & (df_Retail_copy['State'] == 'Florida'), 'State'] = 'North Carolina'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Leicester') & (df_Retail_copy['State'] == 'LE1 5YA'), 'State'] = 'England'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Canberra') & (df_Retail_copy['State'] == 'New South Wales'), 'State'] = 'Australian Capital Territory'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Bendigo') & (df_Retail_copy['State'] == '3550'), 'State'] = 'Victoria'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Mesa') & (df_Retail_copy['State'] == 'Colorado'), 'State'] = 'Arizona'
+df_Retail_copy.loc[(df_Retail_copy['City'] == 'Dresden') & (df_Retail_copy['State'] == 'Sachsen'), 'State'] = 'Saxony'
+df_Retail_copy['City'] = df_Retail_copy['City'].replace('Québec', 'Quebec')
+
+
 df_Retail_copy['City'].unique()
-
-
-#2600
-df_Retail_copy_vacio=df_Retail_copy[df_Retail_copy['Column3']=='nan']
-unique_states = df_Retail_copy_vacio['State'].unique().tolist()
-for state in unique_states:
-    print(state)
-df_Retail_copy_vacio.head()
+df_Retail_copy['State'].unique()
 df_Retail_copy['Country'].unique()
-df_Retail_copy_vacio2=df_Retail_copy_vacio[df_Retail_copy_vacio['Column1']=='Hamburg']
-df_Retail_copy_vacio2.head()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Luego, aplicar el split y contar las partes
-df_Retail_copy['Parts'] = df_Retail_copy['API_Response'].str.split(',').apply(len)
-df_Retail_copy['Parts2'] = df_Retail_copy['Validation'].str.split(',').apply(len)
-df_Retail_copy.head()
-
-
-invalid_rows = df_Retail_copy[df_Retail_copy['Parts'] != 3]
-
-df_Retail_copy_4155845=df_Retail_copy[df_Retail_copy['Transaction_ID']==4155845]
-
-print(df_Retail_copy_4155845['Validation'])
-
-
-# Mostrar las filas problemáticas
-print(invalid_rows[['Validation', 'Parts']])
-invalid_rows.head()
-
-
-def dividirColumna(row):
-    if row['Parts'] == 3:
-        # Separar la columna 'Validation' en tres partes
-        split_parts = row['API_Response'].split(',')
-        # Asignar las partes a las nuevas columnas
-        return pd.Series({
-            'City2': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
-            'State2': split_parts[1].strip() if len(split_parts) > 1 else np.nan,
-            'Country2': split_parts[2].strip() if len(split_parts) > 2 else np.nan
-        })
-    elif row['Parts'] == 5:
-        # Separar la columna 'Validation' en tres partes
-        split_parts = row['API_Response'].split(',')
-        # Asignar las partes a las nuevas columnas
-        return pd.Series({
-            'City2': split_parts[2].strip() if len(split_parts) > 0 else np.nan,
-            'State2': split_parts[3].strip() if len(split_parts) > 1 else np.nan,
-            'Country2': split_parts[4].strip() if len(split_parts) > 2 else np.nan
-        })
-    elif row['Parts'] == 4:
-        # Separar la columna 'Validation' en tres partes
-        split_parts = row['API_Response'].split(',')
-        # Asignar las partes a las nuevas columnas
-        return pd.Series({
-            'City2': split_parts[0].strip() if len(split_parts) > 0 else np.nan,
-            'State2': split_parts[2].strip() if len(split_parts) > 1 else np.nan,
-            'Country2': split_parts[3].strip() if len(split_parts) > 2 else np.nan
-        })
-    elif row['Parts'] == 2:
-        # Separar la columna 'Validation' en tres partes
-        split_parts = row['API_Response'].split(',')
-        # Asignar las partes a las nuevas columnas
-        return pd.Series({
-            'City2': row['City'] ,
-            'State2': row['State'] ,
-            'Country2': row['Country'] 
-        })
-    else:
-        # Devolver NaN para las columnas si 'Parts' no es igual a 3
-        return pd.Series({'City2': np.nan, 'State2': np.nan, 'Country2': np.nan})
-
-
-df_Retail_copy[['City2', 'State2', 'Country2']] = df_Retail_copy.apply(dividirColumna, axis=1)
-
-
-df_Retail_copy.head()
-
-df_Retail_copy_4=df_Retail_copy[(df_Retail_copy['Parts']==1) & (df_Retail_copy['Parts2']==2)]
-df_Retail_copy_4.head()
-
-
-
-
-
-
-
-df_Retail_copy['Parts'].unique()
-df_Retail_copy_1=df_Retail_copy[df_Retail_copy['Parts']==1]
-
-# Actualizar las columnas específicas donde API_Response coincide
-df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Clarke City, Sept-Îles, Québec, Canada', ['City2', 'State2', 'Country2']] = ['Quebec City', 'Quebec', 'Canada']
-df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen, Deutschland', ['City2', 'State2', 'Country2']] = ['Frankfurt', 'Hessen', 'Germany']
-df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen, Deutschland', ['City2', 'State2', 'Country2']] = ['Nuremberg', 'Bayern', 'Germany']
-df_Retail_copy.loc[df_Retail_copy['API_Response'] == 'Frankfurt am Main, Hessen, Deutschland', ['City2', 'State2', 'Country2']] = ['Hannover, Lower Saxony, Deutschland']
-
-
-df_Retail_copy.head()
-df_Retail_copy_3492557=df_Retail_copy[df_Retail_copy['Transaction_ID']==3492557]
-df_Retail_copy_3492557.head()
-df_Retail_copy_5=df_Retail_copy[df_Retail_copy['Parts'] == 5]
-df_Retail_copy_5.head()
-df_Retail_copy_1.head()
 
 
 # Eliminar espacios en blanco al principio y al final de cada nueva columna (opcional)
@@ -486,22 +387,23 @@ df_Retail_copy['City'] = df_Retail_copy['City'].str.strip()
 df_Retail_copy['State'] = df_Retail_copy['State'].str.strip()
 df_Retail_copy['Country'] = df_Retail_copy['Country'].str.strip()
 
-df_Retail = df_Retail.merge(df_Retail_copy, on=['Transaction_ID'], how='left')
+df_Retail_copy.head()
 
-del df_Retail_copy
-gc.collect()
+#del df_Retail_copy
+#gc.collect()
+
 
 # - Zipcode es el codigo de la direccion del cliente
 
-df_Retail_cleaned['Zipcode'].unique()
+df_Retail_copy['Zipcode'].unique()
 
 
 # - Age
 
-print(getTipoVariable(df_Retail_cleaned, 'Age'))
+print(getTipoVariable(df_Retail_copy, 'Age'))
 
 # Verificar si hay clientes con edad menor a 18
-underage_clients = (df_Retail_cleaned['Age'] < 18).any()
+underage_clients = (df_Retail_copy['Age'] < 18).any()
 
 # Mostrar resultado
 if underage_clients:
@@ -512,14 +414,14 @@ else:
 pd.set_option('display.max_columns', None) 
 
 
-df_Retail_10000 = df_Retail_cleaned[df_Retail_cleaned['Customer_ID'] == 10000]
+df_Retail_10000 = df_Retail_copy[df_Retail_copy['Customer_ID'] == 10000]
 df_Retail_10000.head()
 
-df_age_counts = df_Retail_cleaned.groupby('Customer_ID')['Age'].nunique().reset_index()
+df_age_counts = df_Retail_copy.groupby('Customer_ID')['Age'].nunique().reset_index()
 df_multiple_ages = df_age_counts[df_age_counts['Age'] > 1]
 
 # Paso 2: Filtrar las filas con más de una edad distinta
-df_filtered_multiple_ages = pd.merge(df_multiple_ages[['Customer_ID']], df_Retail_cleaned, on='Customer_ID', how='inner')
+df_filtered_multiple_ages = pd.merge(df_multiple_ages[['Customer_ID']], df_Retail_copy, on='Customer_ID', how='inner')
 
 # Paso 3: Determinar la edad más frecuente para cada Customer_ID
 df_mode_age = df_filtered_multiple_ages.groupby('Customer_ID')['Age'].agg(lambda x: x.mode()[0]).reset_index()
@@ -534,10 +436,10 @@ df_Retail_updated['Age'] = df_Retail_updated['Age_Most_Frequent']
 df_Retail_updated = df_Retail_updated.drop(columns=['Age_Most_Frequent'])
 
 # Paso 7: Eliminar de df_Retail_cleaned las filas con Customer_ID que tienen múltiples edades
-df_Retail_cleaned = df_Retail_cleaned[~df_Retail_cleaned['Customer_ID'].isin(df_multiple_ages['Customer_ID'])]
+df_Retail_copy = df_Retail_copy[~df_Retail_copy['Customer_ID'].isin(df_multiple_ages['Customer_ID'])]
 
 # Paso 8: Concatenar los DataFrames
-df_Retail_final_customer = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
+df_Retail_final_customer = pd.concat([df_Retail_copy, df_Retail_updated], ignore_index=True)
  
 # Paso 9: Visualizar los datos del Customer_ID 10000 (opcional)
 df_Retail_10000 = df_Retail_final_customer[df_Retail_final_customer['Customer_ID'] == 10000]
@@ -604,11 +506,12 @@ df_Retail_updated['Gender'] = df_Retail_updated['Gender_Most_Frequent']
 # Eliminar la columna Gender_Most_Frequent si ya no la necesitas
 df_Retail_updated = df_Retail_updated.drop(columns=['Gender_Most_Frequent'])
 df_Retail_updated.size
-df_Retail_10000=df_Retail_updated[df_Retail_updated['Customer_ID']==10000]
-df_Retail_10000.head()
+
 
 df_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
-
+df_final.head()
+df_Retail_10000=df_final[df_final['Customer_ID']==10000]
+df_Retail_10000.head()
 
 # - Income
 
@@ -616,42 +519,47 @@ cantidadUnicos=df_final['Income'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable Income y son Low, High and Medium")
 
 
+
 df_customer_counts = df_final.groupby(['Customer_ID']).size().reset_index(name='counts')
-df_multiple_genders_correct = df_customer_counts[df_customer_counts['counts'] > 2]
-df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_final, on='Customer_ID', how='inner')
+df_multiple_Income_correct = df_customer_counts[df_customer_counts['counts'] > 2]
+df_filtered = pd.merge(df_multiple_Income_correct[['Customer_ID']], df_final, on='Customer_ID', how='inner')
 df_Retail_cleaned = df_final[~df_final['Customer_ID'].isin(df_filtered['Customer_ID'])]
 
 # Paso 1: Identificar los Customer_ID que tienen más de un Gender
-df_income_counts = df_filtered.groupby('Customer_ID')['Income'].nunique().reset_index()
-df_multiple_incomes = df_income_counts[df_income_counts['Income'] > 1]
-df_filtered_multiple_incomes = pd.merge(df_multiple_incomes[['Customer_ID']], df_final, on='Customer_ID', how='inner')
+df_Income_counts = df_filtered.groupby('Customer_ID')['Income'].nunique().reset_index()
+df_multiple_genders = df_Income_counts[df_Income_counts['Income'] > 1]
+df_filtered_multiple_Income = pd.merge(df_multiple_genders[['Customer_ID']], df_final, on='Customer_ID', how='inner')
 
-df_mode_income = df_filtered_multiple_incomes.groupby('Customer_ID')['Income'].agg(lambda x: x.mode()[0]).reset_index()
+df_mode_Income = df_filtered_multiple_Income.groupby('Customer_ID')['Income'].agg(lambda x: x.mode()[0]).reset_index()
 
 # Paso 4: Actualizar el DataFrame original con el género más frecuente
-df_Retail_updated = pd.merge(df_filtered_multiple_incomes, df_mode_income, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+df_Retail_updated = pd.merge(df_filtered_multiple_Income, df_mode_Income, on='Customer_ID', suffixes=('', '_Most_Frequent'))
 
-# Reemplazar la columna Income con el valor más frecuente
+# Reemplazar la columna Gender con el valor más frecuente
 df_Retail_updated['Income'] = df_Retail_updated['Income_Most_Frequent']
 
-# Eliminar la columna Income si ya no la necesitas
+# Eliminar la columna Gender_Most_Frequent si ya no la necesitas
 df_Retail_updated = df_Retail_updated.drop(columns=['Income_Most_Frequent'])
 df_Retail_updated.size
-df_Retail_10000=df_Retail_updated[df_Retail_updated['Customer_ID']==10000]
+
+
+df_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
+
+df_final.head()
+df_Retail_10000=df_final[df_final['Customer_ID']==10000]
 df_Retail_10000.head()
 
-df_Retail_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
 
 
 # - Customer_Segment
 
-cantidadUnicos=df_Retail_final['Customer_Segment'].nunique()
+cantidadUnicos=df_final['Customer_Segment'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable Customer_Segment y son Premium, Regular and New")
 
 
 # - Date --> Figura como mm/dd/yyyy
 
-df_Retail_copy=df_Retail_final.copy()
+df_Retail_copy=df_final.copy()
 num_rows_df_Retail_copy = df_Retail_copy.shape[0]
 print(f"Number of rows: {num_rows_df_Retail_copy}")
 
@@ -677,7 +585,7 @@ gc.collect()
 
 # Month
 
-unique_months = df_Retail_final['Month'].cat.categories
+unique_months = df_final['Month'].cat.categories
 
 def verificarMeses():
     correct_months = ['April', 'August', 'December', 'February', 'January', 'July', 'June',
@@ -702,7 +610,7 @@ if(verificarMeses()):
 
 # - Time ---> Tiempo en el que se hizo la compra. El formato es hh:mm:ss
 
-df_Retail_copy=df_Retail_final.copy()
+df_Retail_copy=df_final.copy()
 df_Retail_copy['Time'].head(2)
 
 time_pattern = re.compile(r'^\d{1,2}:\d{2}:\d{2}$')
@@ -727,7 +635,7 @@ gc.collect()
 
 # - Total_Purchases --> Cantidad de artículos comprados por el cliente
 
-df_Retail_final['Total_Purchases'].dtype
+df_final['Total_Purchases'].dtype
 print("Verificar normalidad de los datos")
 grafico_Histograma(df_Retail,"Total_Purchases","Total_Purchases","Total comprado","Frecuencia")
 
@@ -736,7 +644,7 @@ print("La variable Total_Purchases es normal, el rango va entre 1 a 10 cantidade
 
 # - Total_Amount --> Total amount spent by the customer (calculated as Amount * Total_Purchases)
 
-grafico_Histograma(df_Retail_final,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
+grafico_Histograma(df_final,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
 
 print("El histograma sugiere que los valores en la columna 'Total_Amount' están distribuidos de manera no uniforme, como se puede apreciar en el histograma la variable no presenta una distribución normal. Esto es un problema para realizar comparaciones estadísticas, por lo que es necesario normalizarla.")
 
@@ -745,39 +653,39 @@ print("El histograma sugiere que los valores en la columna 'Total_Amount' están
 # La linea roja es una linea teórica donde los datos siguen una distribución normal. 
 # Si los puntos de la variable a estudiar se alinean aproximadamente a lo largo de la recta roja entonces se puede decir que es normal.
 
-grafico_qqPlot(df_Retail_final,"Total_Amount")
+grafico_qqPlot(df_final,"Total_Amount")
 
 print("Como se puede apreciar, los puntos se desvían significativamente de la línea roja, especialmente en los extremos, lo que sugiere que los datos de 'Total_Amount' no siguen una distribución normal.")
 
-graficoDisplot(df_Retail_final,"Total_Amount")
+graficoDisplot(df_final,"Total_Amount")
 
 print("La distribucion no sigue una funcion normal, por lo que es necesario la transformacion de la variable al logaritmo")
 
-df_Retail_final['Total_Amount_log'] = np.log(df_Retail_final['Total_Amount'])
-df_Retail_norm = df_Retail_final.drop(columns=['Total_Amount'])
+df_final['Total_Amount_log'] = np.log(df_final['Total_Amount'])
+df_Retail_norm = df_final.drop(columns=['Total_Amount'])
 
 #Verifico nuevamente el qqplot con la variable transformada
 
-grafico_qqPlot(df_Retail_final,"Total_Amount_log")
+grafico_qqPlot(df_final,"Total_Amount_log")
 
 print("Verificando la variable luego de la normalizacion, se observa que el problema persiste. Esto puede deberse a la presencia de valores atipicos. A continuacion se estudian estos.")
 
 #Outliers
 
-graficoBoxPlot(df_Retail_final, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
+graficoBoxPlot(df_final, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
 
 print("Como se puede ver en el grafico, hay evidencia de valores atipicos. Sin embargo, es posible que estos tengan sentido para el analisis, por lo que optare por dejarlos y estudiar (en el EDA) en mayor profundidad si es conveniente sacarlos o dejarlos.")
 
 
 # - Product_Category -->  Category of the purchased product.
 
-cantidadUnicos=df_Retail_final['Product_Category'].nunique()
+cantidadUnicos=df_final['Product_Category'].nunique()
 
 print("Hay solo", cantidadUnicos, "tipo de categorias.", "Estas son Electronics, Books, Home Decor, Grocery, Clothing")
 
 #Verificar si existe y tiene sentido para un mismo producto tener distinta categoria
 
-df_Retail_copy=df_Retail_final.copy()
+df_Retail_copy=df_final.copy()
 
 grouped = df_Retail_copy.groupby('products')['Product_Category'].nunique()
 productos_con_categorias_distintas = grouped[grouped > 1]
@@ -795,7 +703,7 @@ gc.collect()
 
 # - Product_Brand --> Brand of the purchased product.
 
-unique_ProductBrand = df_Retail_final['Product_Brand'].cat.categories
+unique_ProductBrand = df_final['Product_Brand'].cat.categories
 num_marcas = len(unique_ProductBrand)
 print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & Beyond, BlueStar, Coca-Cola, Penguin Books, Pepsi, Random House, Samsung, Sony, Whirepool, Zara")
 
@@ -804,11 +712,11 @@ print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & B
 
 
 # Mostrar los primeros registros para verificar
-df_Retail_final.head()
+df_final.head()
 
 pd.set_option('display.max_rows', None)  # Mostrar todas las filas
 
-marca_producto = df_Retail_final.groupby('Product_Brand')['products'].unique()
+marca_producto = df_final.groupby('Product_Brand')['products'].unique()
 
 # Mostrar las marcas y los productos únicos asociados
 for marca, productos in marca_producto.items():
@@ -836,7 +744,7 @@ df_mapping = pd.DataFrame({
     'Product_Brand': marcas
 })
 
-df_Retail_final = df_Retail_final.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
+df_Retail_final = df_final.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
 
 # Reemplazar 'Product_Brand' en df_Retail con los valores de 'Product_Brand_new'
 df_Retail_final['Product_Brand'] = df_Retail_final['Product_Brand_new'].combine_first(df_Retail_final['Product_Brand'])

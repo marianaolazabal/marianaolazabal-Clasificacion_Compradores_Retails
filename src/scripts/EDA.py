@@ -10,6 +10,8 @@ from plots import plot_bar_graphs, grafico_Histograma
 import gc
 import plotly.express as px
 import requests
+import io
+import zipfile
 
 #TIENE QUE QUEDARME UNA TABLA CON UNA LINEA POR CLIENTEEEEEE
 
@@ -1151,3 +1153,22 @@ df_actualizado.drop(columns=['Month'], inplace=True)
 df_actualizado.head()
 
 df_actualizado.size
+
+def dataFrame_modelo():
+    return df_actualizado
+
+#guarda el csv en la carpeta data y lo zipea
+csv_file_name = 'Data_Modelar.csv'
+zip_file_path = csv_path + 'Data_Modelar.zip'
+csv_buffer = io.StringIO()
+df_actualizado.to_csv(csv_buffer, index=False)
+
+with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    # Move the pointer to the start of the buffer
+    csv_buffer.seek(0)
+    # Write the CSV buffer to the ZIP file
+    zipf.writestr(csv_file_name, csv_buffer.getvalue())
+
+# Optional: Close the buffer
+csv_buffer.close()
+print("Tamaño inicial del dataFrame " + str(df_actualizado.size))

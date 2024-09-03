@@ -850,6 +850,23 @@ Por otro lado, hay tramos de edades en los que las compras son muy constantes, s
 intereses de estos para mejorar este mercado.''')
 
 
+# Definir las condiciones para cada rango de edad
+conditions = [
+    (df['Age'] >= 18) & (df['Age'] <= 28),
+    (df['Age'] >= 29) & (df['Age'] <= 39),
+    (df['Age'] >= 40) & (df['Age'] <= 50),
+    (df['Age'] >= 51) & (df['Age'] <= 61),
+    (df['Age'] > 62)
+]
+
+# Definir las categorías correspondientes a cada rango de edad
+categories = ['Joven', 'Adulto_Joven', 'Adulto', 'Adulto_Mayor', 'Veterano']
+
+# Usar np.select() para asignar la categoría basada en las condiciones
+df['Categoria_Edad'] = np.select(conditions, categories, default='Desconocido')
+
+
+
 #GENERO
 
 clientes_por_sexo = df.groupby('Gender')['Customer_ID'].nunique().reset_index(name='Total_Clientes')

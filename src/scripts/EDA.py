@@ -994,7 +994,27 @@ Grocery y Electronics.''')
 
 #Transformacion, dejar country y sacar season
 
-df = df.drop(columns=['Season'])
+#Transformacion, porcentaje comprado por el cliente por cada estacion
+
+# Paso 1: Agrupar por Customer_ID y Season y sumar el Amount
+df_grouped = df.groupby(['Customer_ID', 'Season'])['Total_Amount'].sum().reset_index()
+
+# Paso 2: Calcular el total comprado por cada cliente
+df_total = df_grouped.groupby('Customer_ID')['Total_Amount'].sum().reset_index()
+df_total = df_total.rename(columns={'Total_Amount': 'Total_Amount_Season_Cliente'})
+
+# Paso 3: Unir el total comprado por cliente al DataFrame agrupado
+df_grouped = pd.merge(df_grouped, df_total, on='Customer_ID')
+
+# Paso 4: Calcular el porcentaje de cada método de pago
+df_grouped['Percentage'] = (df_grouped['Total_Amount'] / df_grouped['Total_Amount_Season_Cliente']) * 100
+
+# Paso 5: Pivotar los datos para crear una columna por cada Season
+df_pivot = df_grouped.pivot(index='Customer_ID', columns='Season', values='Percentage').reset_index()
+
+# Paso 6: Unir estos cálculos al DataFrame original
+df = pd.merge(df, df_pivot, on='Customer_ID', how='left')
+
 
 
 # H14. Las horas y días de la semana, como el mes en que se realizan las compras pueden ofrecer información sobre los hábitos y comportamientos de compra.
@@ -1125,14 +1145,19 @@ plt.show()
 
 #Cantidad de compras realizadas por el cliente en cada segmento
 
-df_grouped = df.groupby(['Customer_ID', 'Customer_Segment'])['Total_Purchases'].sum().reset_index()
 
-df_total = df_grouped.groupby('Customer_ID')['Total_Purchases'].sum().reset_index()
-df_total = df_total.rename(columns={'Total_Purchases': 'Total_Purchases_Cliente_Segmento'})
-df_grouped = pd.merge(df_grouped, df_total, on='Customer_ID')
-df_grouped['Percentage_Segmento'] = (df_grouped['Total_Purchases'] / df_grouped['Total_Purchases_Cliente_Segmento']) * 100
-df_pivot = df_grouped.pivot(index='Customer_ID', columns='Customer_Segment', values='Percentage_Segmento').reset_index()
-df = pd.merge(df, df_pivot, on='Customer_ID', how='left')
+# Ordenar el DataFrame por 'Customer_ID' y 'Date' en orden descendente
+df_sorted = df.sort_values(by=['Customer_ID', 'Date'], ascending=[True, False])
+# Seleccionar la primera fila para cada 'Customer_ID' (la más reciente)
+df_latest_segment = df_sorted.drop_duplicates(subset='Customer_ID', keep='first')
+# Crear un DataFrame con solo las columnas necesarias para actualizar el DataFrame original
+df_latest_segment = df_latest_segment[['Customer_ID', 'Customer_Segment']]
+# Hacer el merge del DataFrame original con el DataFrame que contiene el segmento más reciente
+df = df.merge(df_latest_segment, on='Customer_ID', how='left', suffixes=('', '_Latest'))
+# Reemplazar el 'Customer_Segment' con el más reciente
+df['Customer_Segment'] = df['Customer_Segment_Latest']
+# Eliminar la columna temporal creada durante el merge
+df = df.drop(columns='Customer_Segment_Latest')
 
 
 
@@ -1152,7 +1177,7 @@ plt.ylabel('Número de Compras')
 # Mostrar el gráfico
 plt.show()
 
-
+555555555555
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
 
 #Ciudad donde el cliente compro mas veces.

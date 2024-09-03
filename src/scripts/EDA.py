@@ -492,20 +492,15 @@ last_feedback['Satisfaction'] = np.where(last_feedback['Feedback'].isin(['Excell
                                          'Dissatisfied')
 
 df = df.merge(last_feedback[['Customer_ID', 'Satisfaction']], on='Customer_ID', how='left')
-df.head()
-df_10000=df[df['Customer_ID']==10000]
-df_10000.head()
 
 
 
 
-#No lo voy a usar para modelar pero si para ver funcionalmente
+#df_grouped_Feedback = df.groupby(['Feedback', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+#df_pivot_Feedback = df_grouped_Feedback.pivot_table(index='Customer_ID', columns='Feedback', values='Total_Purchases', fill_value=0)
+#df_pivot_Feedback.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Feedback.columns]
 
-df_grouped_Feedback = df.groupby(['Feedback', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
-df_pivot_Feedback = df_grouped_Feedback.pivot_table(index='Customer_ID', columns='Feedback', values='Total_Purchases', fill_value=0)
-df_pivot_Feedback.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Feedback.columns]
-
-df = df.merge(df_pivot_Feedback, on='Customer_ID', how='left')
+#df = df.merge(df_pivot_Feedback, on='Customer_ID', how='left')
 
 
 
@@ -662,14 +657,6 @@ que aunque sean menos comprados, mantienen una calidad percibida consistente.'''
 df.columns
 
 
-#Age and Rating
-
-
-
-
-
-
-
 
 #El Rating lo usare para insigths
 
@@ -695,6 +682,21 @@ para cubrir las perdidas del traslado. Tambien puede incentivar transferencia ba
 Pay pal es el metodo menos utilizado, podria deberse a que los clientes no estan familiarizados con su uso,
 la empresa podria ofrecer ayudas o videos instructivos para incentivar el uso del mismo.''')
 
+
+# Crear un diccionario para mapear los valores de 'Payment_Method'
+payment_mapping = {
+    'Credit Card': 'Credit',
+    'PayPal': 'Credit',
+    'Debit Card': 'Debit'
+}
+
+# Usar map() para transformar los valores, asignando 'Cash' como valor predeterminado
+df['Payment_Method'] = df['Payment_Method'].map(payment_mapping).fillna('Cash')
+graficoTorta('Payment_Method', 'Total_Amount_log', 'Grafico Categoria de productos gastados por los clientes')
+
+
+
+#Transformar Credit Card, Debit card 
 total_purchases_by_category_Payment_Method = df.groupby(['Product_Category', 'Payment_Method'])['Total_Amount_log'].sum().reset_index()
 
 # Paso 2: Calcular el total de compras por categoría

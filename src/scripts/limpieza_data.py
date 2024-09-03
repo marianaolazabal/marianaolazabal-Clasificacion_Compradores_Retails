@@ -18,6 +18,8 @@ from matplotlib.lines import Line2D
 from geopy.geocoders import Photon
 from geopy.exc import GeocoderTimedOut
 from pyzipcode import ZipCodeDatabase
+from fuzzywuzzy import process, fuzz
+from rapidfuzz import process, fuzz
 import statsmodels.api as sm
 import os
 import gc
@@ -458,9 +460,102 @@ print(getTipoVariable(df_Retail_final_customer, 'Year'))
 
 
 # - Name --> Mail del cliente
+df_Retail_final_customer['Name_Upper'] = df_Retail_final_customer['Name'].str.upper()
+
+df_customer_name_counts = df_Retail_final_customer.groupby('Customer_ID')['Name_Upper'].nunique().reset_index(name='num_names')
+
+df_customers_with_multiple_names = df_customer_name_counts[df_customer_name_counts['num_names'] > 1]
+
+
+# Filter original DataFrame for customers with multiple names
+df_filtered_customers = df_Retail_final_customer[df_Retail_final_customer['Customer_ID'].isin(df_customers_with_multiple_names['Customer_ID'])]
+
+# Find similar names within these customers
+def find_similar_names_for_customer(customer_df):
+    names_list = customer_df['Name_Upper'].tolist()
+    similar_names = {}
+    for name in names_list:
+        # Extract similar names, excluding self-matches
+        matches = process.extract(name, names_list, scorer=fuzz.ratio, score_cutoff=80)
+        similar_names[name] = [match for match in matches if match[0] != name]
+    return similar_names
+
+# Dictionary to hold similar names for each customer
+customer_similar_names = {}
+
+# Iterate over each customer with multiple names
+for customer_id in df_customers_with_multiple_names['Customer_ID']:
+    customer_df = df_filtered_customers[df_filtered_customers['Customer_ID'] == customer_id]
+    customer_similar_names[customer_id] = find_similar_names_for_customer(customer_df)
+
+print(customer_similar_names)
+
+
+
+# Count unique names per customer
+df_customer_name_counts = df_Retail_final_customer.groupby('Customer_ID')['Name_Upper'].nunique().reset_index(name='num_names')
+
+# Filter customers with more than one unique name
+df_customers_with_multiple_names = df_customer_name_counts[df_customer_name_counts['num_names'] > 1]
+
+# Filter original DataFrame for customers with multiple names
+df_filtered_customers = df_Retail_final_customer[df_Retail_final_customer['Customer_ID'].isin(df_customers_with_multiple_names['Customer_ID'])]
+
+# Print the number of customers with more than one name before correction
+print(f"Number of customers with more than one name before correction: {len(df_customers_with_multiple_names)}")
+
+
+
+#import re
+
+#def correct_names_based_on_email(df):
+#    updated_names = []
+
+#    for customer_id in df['Customer_ID'].unique():
+#        customer_df = df[df['Customer_ID'] == customer_id]
+#        names = customer_df['Name_Upper'].tolist()
+#        email = customer_df['Email'].iloc[0]  # Assuming email is consistent for each customer
+
+#        for name in names:
+#            if re.search(re.escape(name), email, re.IGNORECASE):
+                # Update all names for this customer to the one found in the email
+#                updated_name = name
+#                break
+#        else:
+            # If no name matches the email, keep the existing names (or handle differently)
+#            updated_name = names[0]
+
+        # Apply the update to the entire customer group
+#        customer_df['Name_Upper'] = updated_name
+#        updated_names.append(customer_df)
+
+#    return pd.concat(updated_names)
+
+# Update names based on email
+#df_corrected_names = correct_names_based_on_email(df_filtered_customers)
+
+
+# Recalculate the number of unique names per customer
+#df_updated_name_counts = df_Retail_final_customer.groupby('Customer_ID')['Name_Upper'].nunique().reset_index(name='num_names')
+
+# Filter customers with more than one unique name
+#df_customers_with_multiple_names_after = df_updated_name_counts[df_updated_name_counts['num_names'] > 1]
+
+# Print the results
+#print(f"Number of customers with more than one name before correction: {len(df_customers_with_multiple_names)}")
+
+# Print the number of customers with more than one name after correction
+#print(f"Number of customers with more than one name after correction: {len(df_customers_with_multiple_names_after)}")
+
+
 
 # Elimino la columna porque no es estadisticamente necesaria
 df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Name'])
+df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Name_Upper'])
+
+num_rows = df_Retail_final_customer.shape[0]
+print(f"Number of rows: {num_rows}")
+
 
 # - Email --> Mail del cliente
 
@@ -469,6 +564,7 @@ df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Email'])
 
 
 # - Phone --> Phone del cliente
+
 #Elimino la columna porque no es estadisticamente necesaria
 df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Phone'])
 
@@ -478,99 +574,82 @@ df_Retail_final_customer = df_Retail_final_customer.drop(columns=['Phone'])
 cantidadUnicos=df_Retail_final_customer['Gender'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable genero y son Female and Male")
 
-#Para un mismo cliente no puede haber amas de un genero
+#Para un mismo cliente no puede haber más de un genero
 
 df_Retail_final_customer.size
 df_Retail_10000=df_Retail_final_customer[df_Retail_final_customer['Customer_ID']==10000]
 df_Retail_10000['Gender'].unique()
 df_Retail_10000.head()
 
-df_customer_counts = df_Retail_final_customer.groupby(['Customer_ID']).size().reset_index(name='counts')
-df_multiple_genders_correct = df_customer_counts[df_customer_counts['counts'] > 2]
-df_filtered = pd.merge(df_multiple_genders_correct[['Customer_ID']], df_Retail_final_customer, on='Customer_ID', how='inner')
-df_Retail_cleaned = df_Retail_final_customer[~df_Retail_final_customer['Customer_ID'].isin(df_filtered['Customer_ID'])]
 
-# Paso 1: Identificar los Customer_ID que tienen más de un Gender
-df_gender_counts = df_filtered.groupby('Customer_ID')['Gender'].nunique().reset_index()
-df_multiple_genders = df_gender_counts[df_gender_counts['Gender'] > 1]
-df_filtered_multiple_gender = pd.merge(df_multiple_genders[['Customer_ID']], df_Retail_final_customer, on='Customer_ID', how='inner')
+# Define a function to apply your rules
+def resolve_gender(group):
+    gender_counts = group['Gender'].value_counts()
+    num_genders = len(gender_counts)
 
-df_mode_gender = df_filtered_multiple_gender.groupby('Customer_ID')['Gender'].agg(lambda x: x.mode()[0]).reset_index()
+    if num_genders == 1:
+        return group['Gender'].iloc[0]
+    elif num_genders == 2:
+        if len(gender_counts) == 2 and all(count == 2 for count in gender_counts):
+            return 'Indeterminate'
+        else:
+            return gender_counts.idxmax()  # Most frequent gender
+    else:
+        return gender_counts.idxmax()  # Most frequent gender
 
-# Paso 4: Actualizar el DataFrame original con el género más frecuente
-df_Retail_updated = pd.merge(df_filtered_multiple_gender, df_mode_gender, on='Customer_ID', suffixes=('', '_Most_Frequent'))
+# Apply the function to each customer group and map the result back to the Gender column
+resolved_gender = df_Retail_final_customer.groupby('Customer_ID').apply(resolve_gender).to_dict()
+df_Retail_final_customer['Gender'] = df_Retail_final_customer['Customer_ID'].map(resolved_gender)
 
-# Reemplazar la columna Gender con el valor más frecuente
-df_Retail_updated['Gender'] = df_Retail_updated['Gender_Most_Frequent']
-
-# Eliminar la columna Gender_Most_Frequent si ya no la necesitas
-df_Retail_updated = df_Retail_updated.drop(columns=['Gender_Most_Frequent'])
-df_Retail_updated.size
-
-
-df_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
-df_final.head()
-df_Retail_10000=df_final[df_final['Customer_ID']==10000]
-df_Retail_10000.head()
+df_Retail_final_customer.size
 
 
-conteo_gender = df_final.groupby('Customer_ID')['Gender'].nunique().reset_index()
-customer_ids_dos_gender = conteo_gender[conteo_gender['Gender'] == 2]['Customer_ID']
-df_filtrado = df_final[~df_final['Customer_ID'].isin(customer_ids_dos_gender)]
-df_final=df_filtrado.copy()
 
 # - Income
 
-cantidadUnicos=df_final['Income'].nunique()
+cantidadUnicos=df_Retail_final_customer['Income'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable Income y son Low, High and Medium")
 
 
+# Define a function to apply your rules
+def resolve_income(group):
+    income_sum = group['Income'].value_counts().sum()
+    income_counts = group['Income'].value_counts()
+    num_incomes = group['Income'].nunique()
 
-df_customer_counts = df_final.groupby(['Customer_ID']).size().reset_index(name='counts')
-df_multiple_Income_correct = df_customer_counts[df_customer_counts['counts'] > 2]
-df_filtered = pd.merge(df_multiple_Income_correct[['Customer_ID']], df_final, on='Customer_ID', how='inner')
-df_Retail_cleaned = df_final[~df_final['Customer_ID'].isin(df_filtered['Customer_ID'])]
+    if num_incomes == 1:
+        return group['Income'].iloc[0]
+    elif num_incomes == 2:
+        if (income_sum==2):
+            return 'Indeterminate'
+        else:
+            return income_counts.idxmax()  # Most frequent income
+    elif num_incomes == 3:
+        if (income_sum==3):
+            return 'Indeterminate'
+        else:
+            return income_counts.idxmax()  # Most frequent income
+    else:
+        return income_counts.idxmax()  # Most frequent income
 
-# Paso 1: Identificar los Customer_ID que tienen más de un Gender
-df_Income_counts = df_filtered.groupby('Customer_ID')['Income'].nunique().reset_index()
-df_multiple_genders = df_Income_counts[df_Income_counts['Income'] > 1]
-df_filtered_multiple_Income = pd.merge(df_multiple_genders[['Customer_ID']], df_final, on='Customer_ID', how='inner')
-
-df_mode_Income = df_filtered_multiple_Income.groupby('Customer_ID')['Income'].agg(lambda x: x.mode()[0]).reset_index()
-
-# Paso 4: Actualizar el DataFrame original con el género más frecuente
-df_Retail_updated = pd.merge(df_filtered_multiple_Income, df_mode_Income, on='Customer_ID', suffixes=('', '_Most_Frequent'))
-
-# Reemplazar la columna Gender con el valor más frecuente
-df_Retail_updated['Income'] = df_Retail_updated['Income_Most_Frequent']
-
-# Eliminar la columna Gender_Most_Frequent si ya no la necesitas
-df_Retail_updated = df_Retail_updated.drop(columns=['Income_Most_Frequent'])
-df_Retail_updated.size
-
-
-df_final = pd.concat([df_Retail_cleaned, df_Retail_updated], ignore_index=True)
-
-df_final.head()
-df_Retail_10000=df_final[df_final['Customer_ID']==10000]
-df_Retail_10000.head()
+# Apply the function to each customer group and map the result back to the Income column
+resolved_income = df_Retail_final_customer.groupby('Customer_ID').apply(resolve_income).to_dict()
+df_Retail_final_customer['Income'] = df_Retail_final_customer['Customer_ID'].map(resolved_income)
 
 
-conteo_income = df_final.groupby('Customer_ID')['Income'].nunique().reset_index()
-customer_ids_dos_incomes = conteo_income[conteo_income['Income'] == 2]['Customer_ID']
-df_filtrado_final = df_final[~df_final['Customer_ID'].isin(customer_ids_dos_incomes)]
-df_final=df_filtrado_final.copy()
-df_final.head()
+df_Retail_final_customer.size
+
+
 
 # - Customer_Segment
 
-cantidadUnicos=df_final['Customer_Segment'].nunique()
+cantidadUnicos=df_Retail_final_customer['Customer_Segment'].nunique()
 print("Hay solo", cantidadUnicos, "valores unicos de la variable Customer_Segment y son Premium, Regular and New")
 
 
 # - Date --> Figura como mm/dd/yyyy
 
-df_Retail_copy=df_final.copy()
+df_Retail_copy=df_Retail_final_customer.copy()
 num_rows_df_Retail_copy = df_Retail_copy.shape[0]
 print(f"Number of rows: {num_rows_df_Retail_copy}")
 
@@ -596,7 +675,7 @@ gc.collect()
 
 # Month
 
-unique_months = df_final['Month'].cat.categories
+unique_months = df_Retail_final_customer['Month'].cat.categories
 
 def verificarMeses():
     correct_months = ['April', 'August', 'December', 'February', 'January', 'July', 'June',
@@ -621,7 +700,7 @@ if(verificarMeses()):
 
 # - Time ---> Tiempo en el que se hizo la compra. El formato es hh:mm:ss
 
-df_Retail_copy=df_final.copy()
+df_Retail_copy=df_Retail_final_customer.copy()
 df_Retail_copy['Time'].head(2)
 
 time_pattern = re.compile(r'^\d{1,2}:\d{2}:\d{2}$')
@@ -646,7 +725,7 @@ gc.collect()
 
 # - Total_Purchases --> Cantidad de artículos comprados por el cliente
 
-df_final['Total_Purchases'].dtype
+df_Retail_final_customer['Total_Purchases'].dtype
 print("Verificar normalidad de los datos")
 grafico_Histograma(df_Retail,"Total_Purchases","Total_Purchases","Total comprado","Frecuencia")
 
@@ -655,7 +734,7 @@ print("La variable Total_Purchases es normal, el rango va entre 1 a 10 cantidade
 
 # - Total_Amount --> Total amount spent by the customer (calculated as Amount * Total_Purchases)
 
-grafico_Histograma(df_final,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
+grafico_Histograma(df_Retail_final_customer,"Total_Amount","Total_Amount","Total gastado","Frecuencia")
 
 print("El histograma sugiere que los valores en la columna 'Total_Amount' están distribuidos de manera no uniforme, como se puede apreciar en el histograma la variable no presenta una distribución normal. Esto es un problema para realizar comparaciones estadísticas, por lo que es necesario normalizarla.")
 
@@ -664,39 +743,39 @@ print("El histograma sugiere que los valores en la columna 'Total_Amount' están
 # La linea roja es una linea teórica donde los datos siguen una distribución normal. 
 # Si los puntos de la variable a estudiar se alinean aproximadamente a lo largo de la recta roja entonces se puede decir que es normal.
 
-grafico_qqPlot(df_final,"Total_Amount")
+grafico_qqPlot(df_Retail_final_customer,"Total_Amount")
 
 print("Como se puede apreciar, los puntos se desvían significativamente de la línea roja, especialmente en los extremos, lo que sugiere que los datos de 'Total_Amount' no siguen una distribución normal.")
 
-graficoDisplot(df_final,"Total_Amount")
+graficoDisplot(df_Retail_final_customer,"Total_Amount")
 
 print("La distribucion no sigue una funcion normal, por lo que es necesario la transformacion de la variable al logaritmo")
 
-df_final['Total_Amount_log'] = np.log(df_final['Total_Amount'])
-df_Retail_norm = df_final.drop(columns=['Total_Amount'])
+df_Retail_final_customer['Total_Amount_log'] = np.log(df_Retail_final_customer['Total_Amount'])
+df_Retail_norm = df_Retail_final_customer.drop(columns=['Total_Amount'])
 
 #Verifico nuevamente el qqplot con la variable transformada
 
-grafico_qqPlot(df_final,"Total_Amount_log")
+grafico_qqPlot(df_Retail_final_customer,"Total_Amount_log")
 
 print("Verificando la variable luego de la normalizacion, se observa que el problema persiste. Esto puede deberse a la presencia de valores atipicos. A continuacion se estudian estos.")
 
 #Outliers
 
-graficoBoxPlot(df_final, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
+graficoBoxPlot(df_Retail_final_customer, "Total_Amount_log", "Total_Amount_log", "Total_Amount_log")
 
 print("Como se puede ver en el grafico, hay evidencia de valores atipicos. Sin embargo, es posible que estos tengan sentido para el analisis, por lo que optare por dejarlos y estudiar (en el EDA) en mayor profundidad si es conveniente sacarlos o dejarlos.")
 
 
 # - Product_Category -->  Category of the purchased product.
 
-cantidadUnicos=df_final['Product_Category'].nunique()
+cantidadUnicos=df_Retail_final_customer['Product_Category'].nunique()
 
 print("Hay solo", cantidadUnicos, "tipo de categorias.", "Estas son Electronics, Books, Home Decor, Grocery, Clothing")
 
 #Verificar si existe y tiene sentido para un mismo producto tener distinta categoria
 
-df_Retail_copy=df_final.copy()
+df_Retail_copy=df_Retail_final_customer.copy()
 
 grouped = df_Retail_copy.groupby('products')['Product_Category'].nunique()
 productos_con_categorias_distintas = grouped[grouped > 1]
@@ -714,7 +793,7 @@ gc.collect()
 
 # - Product_Brand --> Brand of the purchased product.
 
-unique_ProductBrand = df_final['Product_Brand'].cat.categories
+unique_ProductBrand = df_Retail_final_customer['Product_Brand'].cat.categories
 num_marcas = len(unique_ProductBrand)
 print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & Beyond, BlueStar, Coca-Cola, Penguin Books, Pepsi, Random House, Samsung, Sony, Whirepool, Zara")
 
@@ -723,11 +802,11 @@ print("Hay solo", num_marcas, "marcas.", "Estas son: Adidas, Apple, Bed Bath & B
 
 
 # Mostrar los primeros registros para verificar
-df_final.head()
+df_Retail_final_customer.head()
 
 pd.set_option('display.max_rows', None)  # Mostrar todas las filas
 
-marca_producto = df_final.groupby('Product_Brand')['products'].unique()
+marca_producto = df_Retail_final_customer.groupby('Product_Brand')['products'].unique()
 
 # Mostrar las marcas y los productos únicos asociados
 for marca, productos in marca_producto.items():
@@ -737,16 +816,16 @@ for marca, productos in marca_producto.items():
 
 
 def cambioMarca(producto, marca):
-    df_Retail_Electronics.loc[df_Retail_Electronics['products'].str.contains(producto, case=False, na=False), 'Product_Brand'] = marca
+    df_Retail_final_customer.loc[df_Retail_final_customer['products'].str.contains(producto, case=False, na=False), 'Product_Brand'] = marca
 
 # Define los productos y marcas
-productos = ['Samsung Galaxy','Samsung Galaxy Tab','Lenovo Tab','Lenovo ThinkPad','Razer Blade', 'Samsung Notebook', 'Acer Swift', 'Asus ZenBook', 'HP Spectre', 'Dell XPS', 
-              'Huawei P', 'Amazon Fire Tablet', 'Google Pixel', 'LG Gram', 'Microsoft Surface Laptop', 
-              'iPhone', 'LG G', 'Xiaomi Mi', 'Microsoft Surface', 'iPad', 'Asus ZenPad', 'Nokia', 
-              'Huawei MediaPad', 'Acer Iconia Tab', 'Motorola Moto', 'Sony Xperia Tablet', 
+productos = ['Samsung Galaxy','Samsung Galaxy Tab','Lenovo Tab','Lenovo ThinkPad','Razer Blade', 'Samsung Notebook', 'Acer Swift', 'Asus ZenBook', 'HP Spectre', 'Dell XPS',
+              'Huawei P', 'Amazon Fire Tablet', 'Google Pixel', 'LG Gram', 'Microsoft Surface Laptop',
+              'iPhone', 'LG G', 'Xiaomi Mi', 'Microsoft Surface', 'iPad', 'Asus ZenPad', 'Nokia',
+              'Huawei MediaPad', 'Acer Iconia Tab', 'Motorola Moto', 'Sony Xperia Tablet',
               'Google Pixel Slate', 'OnePlus', 'Sony Xperia']
-marcas = ['Samsung','Samsung','Lenovo','Lenovo','Razer', 'Samsung', 'Acer', 'Asus', 'HP', 'Dell', 'Huawei', 'Amazon', 'Google', 'LG', 
-          'Microsoft', 'Apple', 'LG', 'Xiaomi', 'Microsoft', 'Apple', 'Asus', 'Nokia', 
+marcas = ['Samsung','Samsung','Lenovo','Lenovo','Razer', 'Samsung', 'Acer', 'Asus', 'HP', 'Dell', 'Huawei', 'Amazon', 'Google', 'LG',
+          'Microsoft', 'Apple', 'LG', 'Xiaomi', 'Microsoft', 'Apple', 'Asus', 'Nokia',
           'Huawei', 'Acer', 'Motorola', 'Sony', 'Google', 'OnePlus', 'Sony']
 
 # Crear el DataFrame de mapeo
@@ -755,80 +834,78 @@ df_mapping = pd.DataFrame({
     'Product_Brand': marcas
 })
 
-df_Retail_final = df_final.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
+df_Retail_final_customer = df_Retail_final_customer.merge(df_mapping, on='products', how='left', suffixes=('', '_new'))
 
 # Reemplazar 'Product_Brand' en df_Retail con los valores de 'Product_Brand_new'
-df_Retail_final['Product_Brand'] = df_Retail_final['Product_Brand_new'].combine_first(df_Retail_final['Product_Brand'])
+df_Retail_final_customer['Product_Brand'] = df_Retail_final_customer['Product_Brand_new'].combine_first(df_Retail_final_customer['Product_Brand'])
 
 # Eliminar la columna temporal 'Product_Brand_new'
-df_Retail_final = df_Retail_final.drop(columns='Product_Brand_new')
+df_Retail_final_customer = df_Retail_final_customer.drop(columns='Product_Brand_new')
 
-df_Retail_Electronics=df_Retail_final[df_Retail_final['Product_Category']=='Electronics']
-df_Retail_Electronics.head(20)
+df_Retail_Electronics=df_Retail_final_customer[df_Retail_final_customer['Product_Category']=='Electronics']
+df_Retail_Electronics.head()
 
 
 
 # - Product_Type --> Type of the purchased product.
 
-
-unique_tipo_productos = df_Retail_final['Product_Type'].cat.categories
+unique_tipo_productos = df_Retail_final_customer['Product_Type'].cat.categories
 num_tipo_productos = len(unique_tipo_productos)
 print("Hay solo", num_tipo_productos, "tipos de productos. Estos son: Bathroom, Bedding, BlueStar AC, Children's, Chocolate, Headphones, Jacket, Jeans, Juice, Kitchen, Laptop, Lighting, Literature, Mitsubishi 1.5 Ton 3 Star Split AC, Non-Fiction, Shirt, Shoes, Shorts, Smartphone, Snacks, Soft Drink, T-shirt, Tablet, Television, Thriller, Tools, Water")
 
 
 # - Feedback --> Feedback provided by the customer on the purchase.
 
-unique_Feedback = df_Retail_final['Feedback'].cat.categories
+unique_Feedback = df_Retail_final_customer['Feedback'].cat.categories
 num_feedback = len(unique_Feedback)
 print("Hay solo", num_feedback, "tipos de feedback posibles.", "Estos son: Average, Bad, Excellent, Good")
 
 
-
 # - Shipping_Method --> Method used for shipping the product.
 
-unique_Shipping_Method = df_Retail_final['Shipping_Method'].cat.categories
+unique_Shipping_Method = df_Retail_final_customer['Shipping_Method'].cat.categories
 num_Shipping_Method = len(unique_Shipping_Method)
 print("Hay solo", num_Shipping_Method, "metodos de Shipping disponibles.", "Estos son: Express, Same-Day, Standard")
 
 
 # - Payment_Method--> Method used for payment.
 
-unique_Payment_Method = df_Retail_final['Payment_Method'].cat.categories
+unique_Payment_Method = df_Retail_final_customer['Payment_Method'].cat.categories
 num_Payment_Method = len(unique_Payment_Method)
 print("Hay solo", num_Payment_Method, "metodos de pago posibles.", "Estos son: Cash, Credit Card, Debit Card, PayPal")
 
 
 # - Order_Status --> Status of the order (e.g., Pending, Processing, Shipped, Delivered).
 
-unique_Order_Status = df_Retail_final['Order_Status'].cat.categories
+unique_Order_Status = df_Retail_final_customer['Order_Status'].cat.categories
 num_Order_Status = len(unique_Order_Status)
 print("Hay solo", num_Order_Status, "estatus posibles en las que pueden estar las ordenes.", "Estos son: Delivered, Pending, Processing, Shipped")
 
 
 # Ratings --> ratings given by customers on different products.
 
-unique_Ratings = df_Retail_final['Ratings'].unique()
+unique_Ratings = df_Retail_final_customer['Ratings'].unique()
 num_Ratings = len(unique_Ratings)
 print("Hay solo", num_Ratings, "posibles valores para Ratings.", "Estos son: 1, 2, 3, 4, 5")
 
 
 # --> Products
-df_Retail_final['products'] = df_Retail_final['products'].astype('category')
+df_Retail_final_customer['products'] = df_Retail_final_customer['products'].astype('category')
 
-unique_Products = df_Retail_final['products'].cat.categories
+unique_Products = df_Retail_final_customer['products'].cat.categories
 num_Products = len(unique_Products)
 print("Hay solo", num_Products, "productos distintos.")
 
 
 
 def dataFrame_limpiado():
-    return df_Retail_final
+    return df_Retail_final_customer
 
 #guarda el csv en la carpeta data y lo zipea
 csv_file_name = 'Limpiado.csv'
 zip_file_path = csv_path + 'Limpiado.zip'
 csv_buffer = io.StringIO()
-df_Retail_final.to_csv(csv_buffer, index=False)
+df_Retail_final_customer.to_csv(csv_buffer, index=False)
 
 with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
     # Move the pointer to the start of the buffer
@@ -838,9 +915,11 @@ with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
 
 # Optional: Close the buffer
 csv_buffer.close()
-print("Tamaño inicial del dataFrame " + str(df_Retail_final.size))
+print("Tamaño inicial del dataFrame " + str(df_Retail_final_customer.size))
 
 
-df_Retail_final.head()
-df_Retail_final_10000=df_Retail_final[df_Retail_final['Customer_ID']==10000]
+df_Retail_final_customer.head()
+df_Retail_final_10000=df_Retail_final_customer[df_Retail_final_customer['Customer_ID']==10000]
 df_Retail_final_10000.head()
+
+df_Retail_final_customer.size

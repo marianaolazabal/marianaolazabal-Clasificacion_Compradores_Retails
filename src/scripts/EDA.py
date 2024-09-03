@@ -403,7 +403,12 @@ de recibir los productos rápidamente.
 Implicaciones para la Logística: Las empresas deberían asegurar una logística eficiente para mantener la satisfacción 
 del cliente, dado el alto porcentaje de pedidos que requieren envíos rápidos.''')
 
+# Considero agrupar las categorías Same-Day y Express por una nueva categoría llamada Urgent-Delivery y la categoría Standard la mantengo
 
+df['Delivery'] = np.where(df['Shipping_Method'].isin(['Same-Day', 'Express']), 'Urgent-Delivery', 
+                          np.where(df['Shipping_Method'] == 'Standard', 'Standard', 'Other'))
+
+df.head()
 
 #Porcentaje comprado por cada tipo de envio 
 
@@ -609,6 +614,16 @@ Por otro lado, algunos productos con menor volumen de compra se mantienen en el 
 que aunque sean menos comprados, mantienen una calidad percibida consistente.''')
 
 df.columns
+
+
+#Age and Rating
+
+
+
+
+
+
+
 
 #El Rating lo usare para insigths
 

@@ -410,13 +410,16 @@ df['Delivery'] = np.where(df['Shipping_Method'].isin(['Same-Day', 'Express']), '
 
 df.head()
 
-#Porcentaje comprado por cada tipo de envio 
+graficoTorta('Delivery', 'Total_Purchases', 'Gráfico Shipping Method por compras de cliente')
 
-df_grouped_Shipping_Method = df.groupby(['Shipping_Method', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
-df_pivot_Shipping_Method = df_grouped_Shipping_Method.pivot_table(index='Customer_ID', columns='Shipping_Method', values='Total_Purchases', fill_value=0)
-df_pivot_Shipping_Method.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Shipping_Method.columns]
 
-df = df.merge(df_pivot_Shipping_Method, on='Customer_ID', how='left')
+#Porcentaje comprado por cada tipo de envio ********************CAMBIAR A PORCENTAJE **************
+
+df_grouped_Delivery = df.groupby(['Delivery', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+df_pivot_Delivery = df_grouped_Delivery.pivot_table(index='Customer_ID', columns='Delivery', values='Total_Purchases', fill_value=0)
+df_pivot_Delivery.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Delivery.columns]
+
+df = df.merge(df_pivot_Delivery, on='Customer_ID', how='left')
 
 df.head()
 
@@ -426,11 +429,11 @@ df.head()
 
 #Debo contar los Feedback de cada TransactionID, de lo contrario estaria contando de mas las que estan repetidas.
 df_unique_customers = df.drop_duplicates(subset='Transaction_ID')
-age_summary = df_unique_customers.groupby('Feedback').size().reset_index(name='Number_of_Customers')
+feedback_summary = df_unique_customers.groupby('Feedback').size().reset_index(name='Number_of_Customers')
 
 # Crear el gráfico de barras
 plt.figure(figsize=(10, 6))
-plt.bar(age_summary['Feedback'], age_summary['Number_of_Customers'], color='skyblue')
+plt.bar(feedback_summary['Feedback'], feedback_summary['Number_of_Customers'], color='skyblue')
 
 # Configurar el título y las etiquetas
 plt.title('Cantidad de Clientes por Feedback')
@@ -438,7 +441,7 @@ plt.xlabel('Feedback')
 plt.ylabel('Número de Clientes')
 
 # Configurar las etiquetas del eje x para mostrar todas las edades
-plt.xticks(ticks=age_summary['Feedback'], labels=age_summary['Feedback'].astype(str), rotation=90)
+plt.xticks(ticks=feedback_summary['Feedback'], labels=feedback_summary['Feedback'].astype(str), rotation=90)
 
 # Ajustar el diseño para que el texto sea visible
 plt.tight_layout()
@@ -451,6 +454,49 @@ print('''Los clientes están en su mayoría muy satisfechos con el servicio. Sin
 que lo considera malo o promedio. La satisfacción de los clientes es una de las razones más frecuentes por las que 
 se ve afectado el churn. Estudiar este fenómeno con mayor profundidad y ofrecer programas de compensación podría ayudar 
 a incentivar nuevas compras.''')
+
+
+# Convertir la columna de fecha en formato datetime si aún no lo has hecho
+df_unique_customers['Date'] = pd.to_datetime(df_unique_customers['Date'])
+
+# Ordenar por 'Customer_ID' y 'Date' para obtener el último feedback por cliente
+df_unique_customers = df_unique_customers.sort_values(by=['Customer_ID', 'Date'], ascending=[True, False])
+
+# Obtener el último feedback por cliente (es decir, el más reciente)
+last_feedback = df_unique_customers.drop_duplicates(subset=['Customer_ID'], keep='first')
+
+# Agrupar por 'Feedback' y sumar 'Suma_Total_Amount_log_Cliente'
+feedback_summary = last_feedback.groupby('Feedback')['Suma_Total_Amount_log_Cliente'].sum().reset_index()
+
+# Crear el gráfico de barras
+plt.figure(figsize=(10, 6))
+plt.bar(feedback_summary['Feedback'], feedback_summary['Suma_Total_Amount_log_Cliente'], color='skyblue')
+
+# Configurar el título y las etiquetas
+plt.title('Total gastado por Clientes y su Último Feedback')
+plt.xlabel('Feedback')
+plt.ylabel('Total gastado')
+
+# Configurar las etiquetas del eje x para mostrar todas
+plt.xticks(ticks=feedback_summary['Feedback'], labels=feedback_summary['Feedback'].astype(str), rotation=90)
+
+# Ajustar el diseño para que el texto sea visible
+plt.tight_layout()
+
+# Mostrar el gráfico
+plt.show()
+
+
+last_feedback['Satisfaction'] = np.where(last_feedback['Feedback'].isin(['Excellent', 'Good']), 
+                                         'Satisfied', 
+                                         'Dissatisfied')
+
+df = df.merge(last_feedback[['Customer_ID', 'Satisfaction']], on='Customer_ID', how='left')
+df.head()
+df_10000=df[df['Customer_ID']==10000]
+df_10000.head()
+
+
 
 
 #No lo voy a usar para modelar pero si para ver funcionalmente

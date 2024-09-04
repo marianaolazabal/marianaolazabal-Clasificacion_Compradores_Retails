@@ -1177,7 +1177,7 @@ plt.ylabel('Número de Compras')
 # Mostrar el gráfico
 plt.show()
 
-555555555555
+
 # H16. El pais y la ciudad en la que se encuentra el cliente permite segmentar los clientes
 
 #Ciudad donde el cliente compro mas veces.

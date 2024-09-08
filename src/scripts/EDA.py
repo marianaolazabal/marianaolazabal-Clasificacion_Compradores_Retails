@@ -368,10 +368,10 @@ fig.show()
 
 # Transformacion, porcentaje comprado por los clientes en cada una de las categorias
 
-df_grouped_Product_Type = df.groupby(['Product_Type', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
-df_pivot_Product_Type = df_grouped_Product_Type.pivot_table(index='Customer_ID', columns='Product_Type', values='Total_Purchases', fill_value=0)
-df_pivot_Product_Type.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Product_Type.columns]
-df = df.merge(df_pivot_Product_Type, on='Customer_ID', how='left')
+#df_grouped_Product_Type = df.groupby(['Product_Type', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+#df_pivot_Product_Type = df_grouped_Product_Type.pivot_table(index='Customer_ID', columns='Product_Type', values='Total_Purchases', fill_value=0)
+#df_pivot_Product_Type.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Product_Type.columns]
+#df = df.merge(df_pivot_Product_Type, on='Customer_ID', how='left')
 
 
 #H4. El tipo de envío solicitado para la entrega del pedido.
@@ -413,15 +413,34 @@ df.head()
 graficoTorta('Delivery', 'Total_Purchases', 'Gráfico Shipping Method por compras de cliente')
 
 
-#Porcentaje comprado por cada tipo de envio ********************CAMBIAR A PORCENTAJE **************
-
+#Transformacion
+# Paso 1: Agrupar y sumar las compras por cliente y categoría de producto
 df_grouped_Delivery = df.groupby(['Delivery', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
-df_pivot_Delivery = df_grouped_Delivery.pivot_table(index='Customer_ID', columns='Delivery', values='Total_Purchases', fill_value=0)
+
+# Paso 2: Pivotar la tabla para obtener la matriz de clientes y categorías con las compras totales
+df_pivot_Delivery = df_grouped_Delivery.pivot_table(
+    index='Customer_ID',
+    columns='Delivery',
+    values='Total_Purchases',
+    fill_value=0
+)
+
+# Renombrar columnas para identificar las categorías
 df_pivot_Delivery.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Delivery.columns]
 
-df = df.merge(df_pivot_Delivery, on='Customer_ID', how='left')
+# Paso 3: Calcular el total de compras por cliente
+df_pivot_Delivery['Total_Purchases'] = df_pivot_Delivery.sum(axis=1)
 
-df.head()
+# Paso 4: Calcular el porcentaje de compras en cada categoría respecto al total de compras del cliente
+df_percentage_Product_Category = df_pivot_Delivery.copy()
+df_percentage_Product_Category = df_percentage_Product_Category.div(df_percentage_Product_Category['Total_Purchases'], axis=0) * 100
+
+# Eliminar la columna de 'Total_Purchases' del DataFrame de porcentajes
+df_percentage_Product_Category = df_percentage_Product_Category.drop(columns='Total_Purchases')
+
+# Paso 5: Fusionar estos porcentajes de vuelta con el DataFrame original
+df = df.merge(df_percentage_Product_Category, on='Customer_ID', how='left')
+
 
 
 # H5. El Feedback permite entender a la satisfaccion del cliente. Podria ser una herramienta de clasificacion funcional.
@@ -492,6 +511,7 @@ last_feedback['Satisfaction'] = np.where(last_feedback['Feedback'].isin(['Excell
                                          'Dissatisfied')
 
 df = df.merge(last_feedback[['Customer_ID', 'Satisfaction']], on='Customer_ID', how='left')
+
 
 
 
@@ -603,12 +623,172 @@ horario acotado con la opcion express. Otra explicacion puede ser promociones o 
 incentivado a realizar la compra y solicitarlo con esos metodos de envio.''')
 
 
-# Transormacion, pocentaje comprado por el cliente por categoria de producto
-df_grouped_Product_Category = df.groupby(['Product_Category', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
-df_pivot_Product_Category = df_grouped_Product_Category.pivot_table(index='Customer_ID', columns='Product_Category', values='Total_Purchases', fill_value=0)
+
+new_product_category = df.copy()
+
+new_product_category['Product_Category_2'] = np.where(
+    new_product_category['products'].isin([
+        'Drama', 'Self-help', 'Mystery', 'Biography', 'Historical fiction', 'History',
+        'Psychological thriller', 'Adventure', 'Crime', 'Anthologies', 'Dystopian', 'Horror',
+        'Suspense', 'Asus ZenBook', 'Science', 'Travel', 'Literary fiction', 'Fantasy', 'Psychology',
+        'Science fiction', 'Non-fiction literature', 'Poetry', 'Essays', 'Books', 'Thriller',
+        'Contemporary literature', 'Romance', 'Techno-thriller', 'Short stories', 'Action',
+        'Legal thriller', 'Modern literature', 'Political thriller', 'Detective',
+        'Classic literature', 'Memoir', 'Cooking', 'Business'
+    ]), 'Books',
+    np.where(
+        new_product_category['products'].isin([
+            'Samsung Galaxy', 'Motorola Moto', 'iPhone', 'Xiaomi Mi', 'Huawei P',
+            'Sony Xperia', 'Google Pixel', 'LG G'
+        ]), 'Smart_Phone',
+        np.where(
+            new_product_category['products'].isin([
+                'Studio headphones', 'On-ear headphones', 'Curved TV', 'LED TV',
+                'Over-ear headphones', 'OnePlus', 'Bluetooth headphones', 'Noise-cancelling headphones',
+                'Wireless headphones', 'Gaming headphones', 'DJ headphones', 'In-ear headphones'
+            ]), 'Audio',
+            np.where(
+                new_product_category['products'].isin([
+                    'LG Gram', 'Microsoft Surface', 'Lenovo ThinkPad', 'MacBook', 'HP Spectre',
+                    'Microsoft Surface Laptop', 'Samsung Notebook', 'Dell XPS', 'Acer Swift'
+                ]), 'Computer',
+                np.where(
+                    new_product_category['products'].isin([
+                        'OLED TV', 'HDR TV', 'LCD TV', 'QLED TV', 'Android TV', 'Plasma TV', 'Nokia', '4K TV', 'Smart TV'
+                    ]), 'TV',
+                    np.where(
+                        new_product_category['products'].isin([
+                            'Refrigerator', 'Stove', 'Blender', 'Coffee maker', 'Oven', 'Toaster', 'Electric kettle',
+                            'Microwave', 'Food processor', 'Compact refrigerator', 'Top-freezer refrigerator',
+                            'Stainless steel refrigerator', 'Smart refrigerator', 'Side-by-side refrigerator',
+                            'Counter-depth refrigerator', 'Bottom-freezer refrigerator', 'French door refrigerator',
+                            'Black refrigerator', 'Mini fridge', 'Portable AC', 'Window AC', 'Cassette AC', 'Mini-split AC',
+                            'Air conditioner', 'Central AC', 'Floor-standing AC', 'Split AC', 'Inverter AC', 'Ductless AC',
+                            'Package AC'
+                        ]), 'Appliances',
+                        np.where(
+                            new_product_category['products'].isin([
+                                'Dark chocolate', 'Fruit snacks', 'White chocolate', 'Chocolate-covered fruits', 'Nuts',
+                                'Pineapple juice', 'Purified water', 'Affogato', 'Apple juice', 'Mixed fruit juice',
+                                'Pomegranate juice', 'Mineral water', 'Cream soda', 'Alkaline water', 'Grape soda',
+                                'Energy drink', 'Sparkling water', 'Latte', 'Lemon-lime soda', 'Bottled water',
+                                'Distilled water', 'Orange soda', 'Tomato juice', 'Popcorn', 'Coffee beans', 'Grape juice',
+                                'Artesian water', 'Beef jerky', 'Ground coffee', 'Spring water', 'Root beer', 'Orange juice',
+                                'Coffee table', 'Windbreaker', 'Cranberry juice', 'Mango juice', 'Fruit punch', 'Cola',
+                                'Cappuccino', 'Flavored water', 'Instant coffee', 'Coconut water', 'Ginger ale', 'Chocolate bars',
+                                'Grapefruit juice', 'Chocolate cookies', 'Trail mix', 'Chips', 'Espresso', 'Milk chocolate',
+                                'Chocolate-covered nuts', 'Iced tea', 'Granola bars', 'Truffles', 'Mocha', 'Cheese snacks',
+                                'Pretzels', 'Chocolate mousse', 'Chocolate fondue', 'Americano', 'Macchiato', 'Crackers'
+                            ]), 'Food',
+                            np.where(
+                                new_product_category['products'].isin([
+                                    'V-neck tee', 'A-line dress', 'T-shirt', 'Blazer', 'Bomber jacket',
+                                    'Dress shirt', 'Wide-leg jeans', 'Button-down shirt', 'Wrap dress', 'Blouse',
+                                    'Puffer jacket', 'Parka', 'Cargo shorts', 'Board shorts', 'Long-sleeve tee',
+                                    'Chino shorts', 'Cocktail dress', 'Trench coat', 'Off-the-shoulder tee', 'Maxi dress',
+                                    'Polo shirt', 'Fit and flare dress', 'Tank top', 'Graphic tee', 'Boyfriend jeans',
+                                    'Swim trunks', 'Distressed jeans', 'Scoop neck tee', 'Oxfords', 'Wrench',
+                                    'Varsity jacket', 'Bodycon dress', 'Raglan tee', 'Peacoat', 'Plain tee',
+                                    'Denim jacket', 'Khaki shorts', 'Sheath dress', 'Henley tee', 'Crew neck tee',
+                                    'Leather jacket', 'Straight-leg jeans', 'Hoodie', 'Skinny jeans', 'Denim shorts',
+                                    'Casual dress', 'Sweatshirt', 'Cropped jeans', 'Flannel shirt', 'Sundress',
+                                    'Bermuda shorts', 'Clothing', 'Henley shirt', 'High-waisted jeans', 'Flare jeans',
+                                    'Crop top', 'Skorts', 'Shift dress', 'Bootcut jeans', 'Low-rise jeans'
+                                ]), 'Clothing',
+                                np.where(
+                                    new_product_category['products'].isin([
+                                        'Flip flops', 'Sneakers', 'Sandals', 'High heels', 'Slippers',
+                                        'Loafers', 'Boots', 'Espadrilles'
+                                    ]), 'Shoes',
+                                    np.where(
+                                        new_product_category['products'].isin([
+                                            'Picture frames', 'Bookshelf', 'Dining table', 'Under cabinet lighting',
+                                            'Sofa', 'Recessed lighting', 'Mirror', 'Ceiling lights', 'Wardrobe',
+                                            'Nightstand', 'Mirrors', 'Wall sconces', 'Vases', 'Wall art', 'Clocks',
+                                            'Rugs', 'Floor lamps', 'Chandeliers', 'Curtains', 'Pendant lights',
+                                            'Decorative pillows', 'Table lamps', 'Track lighting', 'Desk lamps', 'Quilt',
+                                            'Level', 'Art supplies', 'Sculptures'
+                                        ]), 'Home_Decor',
+                                        np.where(
+                                            new_product_category['products'].isin([
+                                                'Health', 'Toothbrush holder', 'Razer Blade'
+                                            ]), 'Health/PersonalCare',
+                                            np.where(
+                                                new_product_category['products'].isin([
+                                                    'Games', 'Puzzles', 'Plush toys', 'Toys', 'Building blocks',
+                                                    'Educational kits'
+                                                ]), 'Games/Toys',
+                                                np.where(
+                                                    new_product_category['products'].isin([
+                                                        'Sports equipment', 'Athletic shorts', 'Cycling shorts',
+                                                        'Running shoes'
+                                                    ]), 'Sports',
+                                                    np.where(
+                                                        new_product_category['products'].isin([
+                                                            'Soap dispenser', 'Candles', 'Pillowcase set',
+                                                            'Utility knife', 'Bed sheet set', 'Bed skirt',
+                                                            'Blanket', 'Throw pillow', 'Dishwasher', 'Comforter',
+                                                            'Duvet cover', 'Dust ruffle', 'Shower curtain'
+                                                        ]), 'Home_Necessities',
+                                                        np.where(
+                                                            new_product_category['products'].isin([
+                                                                'Hammer', 'Screwdriver set', 'Tape measure',
+                                                                'Saw', 'Drill', 'Pliers', 'Caulking gun'
+                                                            ]), 'Tools',
+                                                            'Furniture'
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+
+df = df.merge(new_product_category[['Customer_ID', 'Product_Category_2']], on='Customer_ID', how='left')
+
+graficoTorta('Product_Category_2', 'Total_Purchases', 'Grafico Categoria de productos gastados por los clientes')
+
+
+#Transformacion
+
+# Paso 1: Agrupar y sumar las compras por cliente y categoría de producto
+df_grouped_Product_Category = df.groupby(['Product_Category_2', 'Customer_ID'])['Total_Purchases'].sum().reset_index()
+
+# Paso 2: Pivotar la tabla para obtener la matriz de clientes y categorías con las compras totales
+df_pivot_Product_Category = df_grouped_Product_Category.pivot_table(
+    index='Customer_ID',
+    columns='Product_Category_2',
+    values='Total_Purchases',
+    fill_value=0
+)
+
+# Renombrar columnas para identificar las categorías
 df_pivot_Product_Category.columns = [f'Cantidades_Totales_{col}' for col in df_pivot_Product_Category.columns]
 
-df = df.merge(df_pivot_Product_Category, on='Customer_ID', how='left')
+# Paso 3: Calcular el total de compras por cliente
+df_pivot_Product_Category['Total_Purchases'] = df_pivot_Product_Category.sum(axis=1)
+
+# Paso 4: Calcular el porcentaje de compras en cada categoría respecto al total de compras del cliente
+df_percentage_Product_Category = df_pivot_Product_Category.copy()
+df_percentage_Product_Category = df_percentage_Product_Category.div(df_percentage_Product_Category['Total_Purchases'], axis=0) * 100
+
+# Eliminar la columna de 'Total_Purchases' del DataFrame de porcentajes
+df_percentage_Product_Category = df_percentage_Product_Category.drop(columns='Total_Purchases')
+
+# Paso 5: Fusionar estos porcentajes de vuelta con el DataFrame original
+df = df.merge(df_percentage_Product_Category, on='Customer_ID', how='left')
+
+df.head()
+
+
 
 
 # H7. El Rating de productos permite entender porque los clientes compran determinados productos.
@@ -1254,6 +1434,9 @@ df_actualizado.drop(columns=['Order_Status'], inplace=True)
 df_actualizado.drop(columns=['Total_Purchases_All_products'], inplace=True)
 df_actualizado.drop(columns=['Customer_Segment'], inplace=True)
 df_actualizado.drop(columns=['Month'], inplace=True)
+df_actualizado.drop(columns=['Delivery'], inplace=True)
+df_actualizado.drop(columns=['Product_Category_2'], inplace=True)
+df_actualizado.drop(columns=['Season'], inplace=True)
 
 df_actualizado.head()
 

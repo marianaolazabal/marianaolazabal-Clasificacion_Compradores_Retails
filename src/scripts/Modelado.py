@@ -27,11 +27,16 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # Leo el dataset que obtuve de limpiar los datos en el archivo limpieza_data.py
 csv_path = pathToData()
-df =pd.read_csv(csv_path + 'Data_Modelar.zip')
+data =pd.read_csv(csv_path + 'Data_Modelar.zip')
 
 #Informacion generica del dataframe
-df.info()
+data.info()
+data.rename(columns={'Suma_Total_Amount_log_Cliente': 'TotalHistorico_GastadoCliente'}, inplace=True)
+data.rename(columns={'Cantidades_Totales_cliente': 'TotalHistorico_CompradoCliente'}, inplace=True)
+data.rename(columns={'Cantidades_Totales_Games/Toys': 'Cantidades_Totales_Games_Toys'}, inplace=True)
+data.rename(columns={'Cantidades_Totales_Health/PersonalCare': 'Cantidades_Totales_Health_PersonalCare'}, inplace=True)
 
+df=data.copy()
 #K-Means
 
 #Nos quedamos unicamente con las variables cuantitativas.
@@ -72,10 +77,7 @@ columnas_cat = ['City_Moda_Cliente', 'Gender', 'Income', 'Country', 'Satisfactio
 # Llama a la función con la lista de columnas
 cambiarTipoCat(columnas_cat)
 
-df.rename(columns={'Suma_Total_Amount_log_Cliente': 'TotalHistorico_GastadoCliente'}, inplace=True)
-df.rename(columns={'Cantidades_Totales_cliente': 'TotalHistorico_CompradoCliente'}, inplace=True)
-df.rename(columns={'Cantidades_Totales_Games/Toys': 'Cantidades_Totales_Games_Toys'}, inplace=True)
-df.rename(columns={'Cantidades_Totales_Health/PersonalCare': 'Cantidades_Totales_Health_PersonalCare'}, inplace=True)
+
 pd.set_option('display.max_columns', None)
 df.head()
 
@@ -270,71 +272,62 @@ print(f'Silhouette Score: {silhouette_avg}')
 
 
 
+## Costo del modelo
+cost = kproto.cost_
+
+print(cost)
+
+
+## Analisis de Características de Cada Cluster
+
+# Estadísticas descriptivas por cluster
+cluster_summary = df_Kp.groupby('cluster').describe(include='all')
+print(cluster_summary)
+
+
+for cluster in df_Kp['cluster'].unique():
+    print(f"Datos en el Cluster {cluster}:")
+    print(df_Kp[df_Kp['cluster'] == cluster])
+    print("\n")
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Supongamos que df es tu DataFrame
-scaler = MinMaxScaler()
-scaled_data = scaler.fit_transform(x)
-
-
-# Si necesitas volver a convertirlo a DataFrame
-scaled_df = pd.DataFrame(scaled_data, columns=x.columns)
-
-scaled_df.head()
-
-# Convertir a array de numpy
-data_array = features.values
-
-# Definir el modelo K-Prototypes
-kproto = KPrototypes(n_clusters=3, init='Huang', random_state=42)
-
-# Ajustar el modelo
-clusters = kproto.fit_predict(data_array, categorical=[0, 2]) #Indica las columnas categorias que son binarias (0 y 2)
-
-# Añadir las etiquetas de cluster al DataFrame original
-features['cluster'] = clusters
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Crear el modelo K-Prototypes
-kproto = KPrototypes(n_clusters=4, init='Cao', verbose=2)
-
-# Ajustar el modelo
-categorical_indices = [df_Kp.columns.get_loc(col) for col in categorical_columns]
-clusters = kproto.fit_predict(features, categorical=categorical_indices)
-
-# Añadir los resultados de cluster al DataFrame original
-df_Kp['Cluster'] = clusters
-
+df_Kp['Customer_ID'] = data['Customer_ID']
+df_Kp['Cantidades_Totales_Appliances'] = data['Cantidades_Totales_Appliances']
+df_Kp['Cantidades_Totales_Audio'] = data['Cantidades_Totales_Audio']
+df_Kp['Cantidades_Totales_Books'] = data['Cantidades_Totales_Books']
+df_Kp['Cantidades_Totales_Clothing'] = data['Cantidades_Totales_Clothing']
+df_Kp['Cantidades_Totales_Computer'] = data['Cantidades_Totales_Computer']
+df_Kp['Cantidades_Totales_Food'] = data['Cantidades_Totales_Food']
+df_Kp['Cantidades_Totales_Furniture'] = data['Cantidades_Totales_Furniture']
+df_Kp['Cantidades_Totales_Games_Toys'] = data['Cantidades_Totales_Games_Toys']
+df_Kp['Cantidades_Totales_Health_PersonalCare'] = data['Cantidades_Totales_Health_PersonalCare']
+df_Kp['Cantidades_Totales_Home_Decor'] = data['Cantidades_Totales_Home_Decor']
+df_Kp['Cantidades_Totales_Home_Necessities'] = data['Cantidades_Totales_Home_Necessities']
+df_Kp['Cantidades_Totales_Shoes'] = data['Cantidades_Totales_Shoes']
+df_Kp['Cantidades_Totales_Smart_Phone'] = data['Cantidades_Totales_Smart_Phone']
+df_Kp['Cantidades_Totales_Sports'] = data['Cantidades_Totales_Sports']
+df_Kp['Cantidades_Totales_TV'] = data['Cantidades_Totales_TV']
+df_Kp['Cantidades_Totales_Tools'] = data['Cantidades_Totales_Tools']
 
 df_Kp.head()
 
 
-# Calcular el Silhouette Score
-silhouette_avg = silhouette_score(df_Kp, clusters)
-print(f'Silhouette Score: {silhouette_avg}')
+def dataFrame_modelo():
+    return df_Kp
+
+#guarda el csv en la carpeta data y lo zipea
+csv_file_name = 'ClusterFinal_df.csv'
+zip_file_path = csv_path + 'ClusterFinal_df.zip'
+csv_buffer = io.StringIO()
+df_Kp.to_csv(csv_buffer, index=False)
+
+with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    # Move the pointer to the start of the buffer
+    csv_buffer.seek(0)
+    # Write the CSV buffer to the ZIP file
+    zipf.writestr(csv_file_name, csv_buffer.getvalue())
+
+# Optional: Close the buffer
+csv_buffer.close()
+print("Tamaño inicial del dataFrame " + str(df_Kp.size))

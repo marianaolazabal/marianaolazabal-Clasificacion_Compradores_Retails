@@ -309,6 +309,21 @@ df_Kp['Cantidades_Totales_Smart_Phone'] = data['Cantidades_Totales_Smart_Phone']
 df_Kp['Cantidades_Totales_Sports'] = data['Cantidades_Totales_Sports']
 df_Kp['Cantidades_Totales_TV'] = data['Cantidades_Totales_TV']
 df_Kp['Cantidades_Totales_Tools'] = data['Cantidades_Totales_Tools']
+df_Kp['Cantidades_Totales_Standard'] = data['Cantidades_Totales_Standard']
+df_Kp['Cantidades_Totales_Urgent-Delivery'] = data['Cantidades_Totales_Urgent-Delivery']
+df_Kp['Cash'] = data['Cash']
+df_Kp['Credit'] = data['Credit']
+df_Kp['Debit'] = data['Debit']
+df_Kp['Invierno'] = data['Invierno']
+df_Kp['Otoño'] = data['Otoño']
+df_Kp['Verano'] = data['Verano']
+df_Kp['Primavera'] = data['Primavera']
+df_Kp['madrugada'] = data['madrugada']
+df_Kp['mañana'] = data['mañana']
+df_Kp['medioDia'] = data['medioDia']
+df_Kp['noche'] = data['noche']
+df_Kp['tarde'] = data['tarde']
+
 
 df_Kp.head()
 

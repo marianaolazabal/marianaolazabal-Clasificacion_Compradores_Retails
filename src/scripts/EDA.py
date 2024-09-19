@@ -1036,7 +1036,7 @@ conditions = [
     (df['Age'] >= 29) & (df['Age'] <= 39),
     (df['Age'] >= 40) & (df['Age'] <= 50),
     (df['Age'] >= 51) & (df['Age'] <= 61),
-    (df['Age'] > 62)
+    (df['Age'] >= 62)
 ]
 
 # Definir las categorías correspondientes a cada rango de edad

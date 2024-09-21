@@ -1045,6 +1045,7 @@ categories = ['Joven', 'Adulto_Joven', 'Adulto', 'Adulto_Mayor', 'Veterano']
 # Usar np.select() para asignar la categoría basada en las condiciones
 df['Categoria_Edad'] = np.select(conditions, categories, default='Desconocido')
 
+df['Categoria_Edad'].unique()
 
 
 #GENERO

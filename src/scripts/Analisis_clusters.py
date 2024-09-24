@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.express as px
 from funciones_generales import pathToData
-
+from plots import plot_bar_graphs, grafico_Histograma
 
 
 csv_path = pathToData()
@@ -62,7 +62,7 @@ data_analizar = data_analizar.copy()
 # Map the 'Country' column values to the new 'mapeo_country' column
 data_analizar.loc[:, 'mapeo_country'] = data_analizar['Country'].map(country_mapping)
 
-print('''En el primer cluster se observa que la mayoria de los clientes estan concentrados en el pais 4.
+print('''En el primer cluster se observa que la mayoria de los clientes estan concentrados en el pais United States.
       El cluster 1 y 2 por su lado tiene una mayor diversidad geografica.''')
 
 cluster_summary['City_Moda_Cliente'].head()
@@ -207,7 +207,6 @@ data_analizar.loc[:, 'mapeo_city'] = data_analizar['City_Moda_Cliente'].map(city
 print('La ciudades parecen ser mas diversas entre los clusters. Sera mejor estudiar la representacion grafica.')
 
 
-
 cluster_summary['Income'].head()
 
 income_mapping={
@@ -328,24 +327,18 @@ print('''En todos los clusters hay presencia de jovenes, en el cluster 2 tambien
 
 
 
-
-
-
-
-
-
 # Analisis del cluster 0
 
 df_cluster0_analisis = data_analizar[data_analizar['cluster'] == 0]
 df_cluster0_analisis.head()
 
 # Contar el número de transacciones por país y mes
-df_counts = df_cluster0_analisis.groupby(['Country', 'City_Moda_Cliente']).size().reset_index(name='Customer_Count')
+df_counts = df_cluster0_analisis.groupby(['mapeo_country', 'mapeo_city']).size().reset_index(name='Customer_Count')
 
 # Crear el gráfico sunburst
 fig = px.sunburst(
     df_counts,
-    path=['Country', 'City_Moda_Cliente'],
+    path=['mapeo_country', 'mapeo_city'],
     values='Customer_Count',
     title='Distribución de clientes por País y Ciudad'
 )
@@ -354,7 +347,13 @@ fig = px.sunburst(
 fig.show()
 
 
-print('La mayoria de las personas que integran el cluster 0 son del pais 4, de la ciudad 87 y 37. Seguido por el pais 1, la ciudad 1')
+print('''La mayoria de las personas que integran el cluster 0 viven en las ciudades de Chicago y Boston de Estados Unidos.
+      Seguido por United Kigdom, la ciudad de Portsmouth.''')
+
+# Como compran? Cuanto compran? Cuanto gastan?
+df_cluster0_analisis.head()
+grafico_Histograma(df_cluster0_analisis,'TotalHistorico_GastadoCliente','Total gastado por cliente','TotalHistorico_GastadoCliente','Frecuencia')
+
 
 #Gender
 

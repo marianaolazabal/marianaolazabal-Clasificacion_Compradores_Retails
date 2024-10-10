@@ -62,6 +62,8 @@ data_analizar = data_analizar.copy()
 # Map the 'Country' column values to the new 'mapeo_country' column
 data_analizar.loc[:, 'mapeo_country'] = data_analizar['Country'].map(country_mapping)
 
+cluster_summary['Country'].head()
+
 print('''En el primer cluster se observa que la mayoria de los clientes estan concentrados en el pais United States.
       El cluster 1 y 2 por su lado tiene una mayor diversidad geografica.''')
 
@@ -220,13 +222,10 @@ data_analizar.loc[:,'mapeo_income']=data_analizar['Income'].map(income_mapping)
 
 
 print('''No hay representatividad de ingresos de nivel 1 en los cluster 1 y 2.
-    El cluster 0 tiene ingresos más bajos en comparación con los otros dos clusters, lo que sugiere que agrupa a
-    clientes de ingresos más modestos. Cluster 1 tiene el ingreso promedio más alto, lo que indica que agrupa a los 
-    clientes de ingresos más altos.
-    Cluster 0 tiene menos dispersión, lo que podría indicar que sus ingresos están más concentrados en un rango 
-    más estrecho, lo cual refuerza la idea de que este grupo está compuesto por personas de ingresos más bajos 
-    y menos variables.''')
+    El cluster 0 tiene ingresos altos en comparación con los otros dos clusters, lo que sugiere que agrupa a
+    clientes de ingresos menos modestos.''')
 
+cluster_summary['Gender'].head()
 
 gender_mapping={
     0:'Male',
@@ -236,7 +235,13 @@ gender_mapping={
 
 data_analizar.loc[:,'mapeo_gender']=data_analizar['Gender'].map(gender_mapping)
 
+print('''Se observa que no hay representatividad de Indeterminados en el cluster 2, es decir, los clientes del cluster son
+      unicamente hombres y mujeres.
+      El cluster 0 y 1 son en mayoria Hombres y en ambos hay representatividad de clientes cuyo genero no ha sido
+      identificado.''')
 
+
+cluster_summary['Satisfaction'].head()
 
 satisfaction_mapping={
     0:'Dissatisfied',
@@ -245,6 +250,10 @@ satisfaction_mapping={
 
 data_analizar.loc[:,'mapeo_satisfaction']=data_analizar['Satisfaction'].map(satisfaction_mapping)
 
+print('''No hay una clara diferenciación de satisfaccion entre los clusters.''')
+
+
+cluster_summary['Categoria_Edad'].head()
 
 df_Kp['Categoria_Edad'].unique()
 
@@ -259,6 +268,7 @@ categoria_Edad_mapping={
 
 data_analizar.loc[:,'mapeo_Categoria_Edad']=data_analizar['Categoria_Edad'].map(categoria_Edad_mapping)
 
+print('''En todos los clusters hay presencia de jovenes, en el cluster 2 tambien se ven adultos jovenes''')
 
 cluster_summary = data.groupby('cluster').describe(include='all')
 print(cluster_summary)
@@ -269,29 +279,6 @@ print('''El cluster 0 es el mas chico y tiene 51.320 observaciones, seguido por 
       El cluster 1 y el cluster 2 tienen muchos más datos que el cluster 0, lo que indica que son más
       representativos en términos de cantidad de observaciones''')
 
-
-data_analizar.groupby('mapeo_country')['Country'].unique()
-
-cluster_summary['Country'].head()
-
-print('''En el primer cluster se observa que la mayoria de los clientes estan concentrados en el pais 4 (United States).
-      El cluster 1 y 2 por su lado tiene una mayor diversidad geografica.''')
-
-cluster_summary['City_Moda_Cliente'].head()
-
-print('La ciudades parecen ser mas diversas entre los clusters. Sera mejor estudiar la representacion grafica.')
-
-data_analizar.groupby('mapeo_income')['Income'].unique()
-
-cluster_summary['Income'].head()
-
-print('''No hay representatividad de ingresos de nivel 1 (High) en los cluster 1 y 2, por lo que se entiende que es un grupo de ingresos más modestos.''')
-
-data_analizar.groupby('mapeo_gender')['Gender'].unique()
-
-cluster_summary['Gender'].head()
-
-print('''El cluster 0 y 1 tienen una alta representatividad del sexo Masculino. En el cluster 2 hay una mayor representatividad del sexo Femenino.''')
 
 cluster_summary['TotalHistorico_GastadoCliente'].head()
 
@@ -315,22 +302,70 @@ print('''La satisfaccion del cliente es igual para todos los clusters, por lo qu
 
 cluster_summary['frecuencia_comp_cliente'].head()
 
-print('''Los clientes del cluster 0 compran con mayor frecuencia que los del cluster 1 y 2. Sin embargo, resulta interesante resaltar que el cluster 1, compra en promedio casi una unidad menos que
-      el cluster 1, pero su desvio es menor y el grupo es mayor, esto podria indicar que si bien el cluster 1 ''')
-
-data_analizar.groupby('mapeo_Categoria_Edad')['Categoria_Edad'].unique()
-
-cluster_summary['Categoria_Edad'].head()
-
-print('''En todos los clusters hay presencia de jovenes, en el cluster 2 tambien se ven adultos jovenes''')
+print('''Los clientes del cluster 0 compran con mayor frecuencia que los del cluster 1 y 2. Sin embargo, resulta interesante resaltar que el cluster 1,
+    compra en promedio casi una unidad menos que
+    el cluster 1, pero su desvio es menor y el grupo es mayor, esto podria indicar que si bien el cluster 1 presenta clientes que compran menos, 
+    desarrollar productos que incentiven a este grupo a consumir en mayor frecuencia podria ser mas eficiente que concentrar esfuerzos en el cluster 0.''')
 
 
 
+# La mayoria de los clientes del cluster estan concentrados en el pais United States
+# El cluster 0 tiene ingresos más altos en comparación con los otros dos clusters, lo que sugiere que agrupa a
+# clientes de ingresos menos modestos.
+# Hay mas hombres que mujeres pero hay representatividad de clientes cuyo genero no ha sido identificado
+# Alta representatividad de grupos Jovenes
+# El cluster 0 presenta un promedio de gasto mayor al de los otros clusters, esto es consistente con los ingresos de los individuos que integran los clusters
+# Los clientes del cluster 0 compran con mayor frecuencia
 
 # Analisis del cluster 0
 
 df_cluster0_analisis = data_analizar[data_analizar['cluster'] == 0]
 df_cluster0_analisis.head()
+
+# La mayoria de los clientes del cluster estan concentrados en el pais United States
+# Estudio de las caracteristicas de USA
+
+df_cluster0_analisis_USA=df_cluster0_analisis[df_cluster0_analisis['mapeo_country']=='United States']
+df_cluster0_analisis_USA.head()
+
+#Gender and Income
+#El gráfico muestra la distribución del porcentaje de gasto total de los clientes dentro de cada grupo de ingreso, desglosado por género
+
+
+df_grouped = df_cluster0_analisis.groupby(['mapeo_income', 'mapeo_gender'])['TotalHistorico_GastadoCliente'].sum().reset_index()
+
+# Agrupamos los datos en función de la columna mapeo_income, lo que significa que estamos creando grupos de clientes 
+# que tienen el mismo nivel de ingresos.
+# Dentro de cada grupo, estamos seleccionando la columna TotalHistorico_GastadoCliente, que contiene el total gastado 
+# por los clientes en ese grupo.
+# El método transform() aplica una operación a cada grupo de forma que se conserva el tamaño original del DataFrame.
+# función anónima (lambda) que toma los valores de gasto dentro de un grupo (representados por x), calcula el total 
+# del gasto en ese grupo (x.sum()) y luego divide cada valor individual dentro del grupo por ese total. 
+# Finalmente, multiplicamos por 100 para obtener un porcentaje.
+
+df_grouped['porcentaje_gasto'] = df_grouped.groupby('mapeo_income')['TotalHistorico_GastadoCliente'].transform(lambda x: x / x.sum() * 100)
+
+# Crear el gráfico
+plt.figure(figsize=(10, 6))
+sns.barplot(x='mapeo_income', y='porcentaje_gasto', hue='mapeo_gender', data=df_grouped)
+
+plt.title('Porcentaje del Gasto Total por Grupo de Ingreso y Género')
+plt.ylabel('Porcentaje del Gasto Total Dentro de cada Grupo de Ingreso')
+plt.xlabel('Grupo de Ingreso')
+plt.legend(title='Género')
+plt.show()
+
+#Los porcentajes indican qué fracción del gasto total en cada grupo es atribuible a los diferentes géneros.
+#El gráfico sugiere que, en todos los grupos de ingresos, los hombres tienen una participación significativamente mayor en el gasto total, especialmente en los grupos de ingresos bajos, medios e indeterminados. Las mujeres tienen una menor participación en todos los grupos de ingresos, mientras que el género indeterminado contribuye con el menor porcentaje en general.
+#Dado que los hombres representan la mayor parte del gasto en todos los grupos de ingresos, especialmente en los segmentos de ingresos bajos, medios e indeterminados, las campañas de marketing podrían orientarse más hacia este público.
+#Ofrecer productos y promociones que se alineen con las preferencias de este grupo sería una estrategia clave, ya que tienen una mayor propensión a gastar.
+#Un enfoque de personalización en el sitio web, mostrando diferentes productos o promociones en función del género del cliente (si se dispone de esta información), podría mejorar la experiencia del usuario y potencialmente aumentar las conversiones de las mujeres.
+# El porcentaje de gasto del género indeterminado es bajo en comparación con los hombres y mujeres en todos los grupos de ingresos. Esto podría indicar que el sitio web no está siendo lo suficientemente inclusivo o atractivo para este grupo.
+#Se podría considerar realizar mejoras en la usabilidad del sitio, asegurándose de que sea inclusivo para personas de todos los géneros, lo que podría incluir ajustes en el lenguaje, las opciones de género en los formularios de registro o la representación de productos y modelos diversos.
+#Estrategias como opciones de financiamiento, descuentos por volumen, o promociones de productos esenciales podrían resonar mejor con estos segmentos, maximizando el valor por cliente en estos grupos.
+#Ofertas como ventas flash, recomendaciones de productos relacionadas, y envíos rápidos o gratuitos podrían aumentar las conversiones y los ingresos.
+#Dado que los hombres son los principales consumidores en todos los grupos, un programa de fidelización dirigido a ellos podría ser muy efectivo. Esto podría incluir recompensas por compras frecuentes, descuentos personalizados o membresías exclusivas para mantener a estos consumidores comprometidos con la plataforma.
+
 
 # Contar el número de transacciones por país y mes
 df_counts = df_cluster0_analisis.groupby(['mapeo_country', 'mapeo_city']).size().reset_index(name='Customer_Count')

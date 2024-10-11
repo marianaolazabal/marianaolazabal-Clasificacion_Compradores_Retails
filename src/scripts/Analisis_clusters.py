@@ -366,6 +366,45 @@ plt.show()
 #Ofertas como ventas flash, recomendaciones de productos relacionadas, y envíos rápidos o gratuitos podrían aumentar las conversiones y los ingresos.
 #Dado que los hombres son los principales consumidores en todos los grupos, un programa de fidelización dirigido a ellos podría ser muy efectivo. Esto podría incluir recompensas por compras frecuentes, descuentos personalizados o membresías exclusivas para mantener a estos consumidores comprometidos con la plataforma.
 
+df_cluster0_analisis.head()
+# 1. Contar el número de personas por país y categoría de edad
+df_counts = df_cluster0_analisis.groupby(['mapeo_country', 'mapeo_Categoria_Edad']).size().reset_index(name='Group_Count')
+
+# 2. Calcular el total de personas por país
+df_totals = df_cluster0_analisis.groupby('mapeo_country').size().reset_index(name='Total')
+
+# 3. Unir los dos DataFrames para calcular los porcentajes
+df_counts = pd.merge(df_counts, df_totals, on='mapeo_country')
+
+# 4. Calcular el porcentaje para cada categoría dentro del país
+df_counts['Percentage'] = (df_counts['Group_Count'] / df_counts['Total']) * 100
+
+# Crear el gráfico sunburst
+fig = px.sunburst(
+    df_counts,
+    path=['mapeo_country', 'mapeo_Categoria_Edad'],
+    values='Percentage',
+    title='Distribución de Edades por País'
+)
+
+# Ajustar el tamaño del gráfico
+fig.update_layout(
+    autosize=False,
+    width=1000,  # Ajusta el ancho según tus necesidades
+    height=800   # Ajusta la altura según tus necesidades
+)
+
+# Mostrar el gráfico
+fig.show()
+
+
+
+
+
+
+
+
+
 
 # Contar el número de transacciones por país y mes
 df_counts = df_cluster0_analisis.groupby(['mapeo_country', 'mapeo_city']).size().reset_index(name='Customer_Count')

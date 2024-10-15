@@ -365,6 +365,8 @@ plt.show()
 #Estrategias como opciones de financiamiento, descuentos por volumen, o promociones de productos esenciales podrían resonar mejor con estos segmentos, maximizando el valor por cliente en estos grupos.
 #Ofertas como ventas flash, recomendaciones de productos relacionadas, y envíos rápidos o gratuitos podrían aumentar las conversiones y los ingresos.
 #Dado que los hombres son los principales consumidores en todos los grupos, un programa de fidelización dirigido a ellos podría ser muy efectivo. Esto podría incluir recompensas por compras frecuentes, descuentos personalizados o membresías exclusivas para mantener a estos consumidores comprometidos con la plataforma.
+#Las ofertas pueden incluir productos exclusivos, tecnologías de punta, artículos de lujo, y envíos rápidos o gratuitos.
+#En lugar de campañas exclusivas para hombres o mujeres, se pueden crear campañas neutras de género que apelen a una audiencia más amplia y diversa.
 
 df_cluster0_analisis.head()
 # 1. Contar el número de personas por país y categoría de edad
@@ -398,6 +400,63 @@ fig.update_layout(
 fig.show()
 
 
+print('''Se observa una alta representatividad de la categoría "Joven", en todos los países. Siendo en Alemania, 
+      Reino Unido, Estados Unidos y Australia una significativa proporción de los clientes que se encuentran en estos 
+      países.
+      Las estrategias de marketing y ofertas para estos países deberían incluir productos orientados a consumidores 
+      jóvenes. Entre estos podría considerarse productos de tecnología, ropa de moda y otros; más adelante en el análisis
+      se estudiará los productos más comprados por este grupo.
+      Canadá y Australia tienen una distribución más balanceada entre las categorías "Joven", "Adulto Joven" y "Adulto", 
+      lo que indica que las campañas en estos países .
+      Algunos países, como Alemania, Canadá y Australia, tienen una notable proporción de "Adulto Joven" y "Adulto". 
+      Las estrategias de marketing deben diversificarse para diferentes segmentos etarios. Considerar productos que
+      productos sean de interés para clientes jóvenes como también productos dirigidos a personas de más edad. 
+      Algunos ejemplos podrían ser, electrodomésticos, productos de salud y bienestar, entre otros.
+      ''')
+
+
+#ver los productos comprados por nivel de ingreso
+
+df_cluster0_analisis.head()
+#Cantidades_Totales_Appliances, Cantidades_Totales_Audio, Cantidades_Totales_Books, Cantidades_Totales_Clothing	
+# Cantidades_Totales_Computer, Cantidades_Totales_Food, Cantidades_Totales_Furniture, Cantidades_Totales_Games_Toys	
+# Cantidades_Totales_Health_PersonalCare, Cantidades_Totales_Home_Decor, Cantidades_Totales_Home_Necessities	
+# Cantidades_Totales_Shoes, Cantidades_Totales_Smart_Phone, Cantidades_Totales_Sports, Cantidades_Totales_TV	
+# Cantidades_Totales_Tools
+
+
+sns.violinplot(x=df_cluster0_analisis["mapeo_income"], y=df_cluster0_analisis["Cantidades_Totales_Appliances"])
+
+
+df_cluster0_analisis_jovenes=df_cluster0_analisis[df_cluster0_analisis['mapeo_Categoria_Edad']=='Joven']
+
+
+categorias = [
+    'Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
+    'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
+    'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
+    'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
+    'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
+    'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
+    'Cantidades_Totales_TV', 'Cantidades_Totales_Tools'
+]
+
+df_long = pd.melt(df_cluster0_analisis_jovenes, id_vars=['mapeo_income'], value_vars=categorias, 
+                  var_name='Categoria', value_name='Cantidad_Comprada')
+
+# Crear el barplot
+plt.figure(figsize=(16, 10))
+sns.barplot(data=df_long, x='mapeo_income', y='Cantidad_Comprada', hue='Categoria')
+
+# Ajustar etiquetas
+plt.title('Cantidad Comprada por Categoría y Tipo de Ingreso')
+plt.xlabel('Tipo de Ingreso', fontsize=14)
+plt.ylabel('Cantidad Comprada', fontsize=12)
+plt.xticks(rotation=45, fontsize=12)
+plt.legend(title='Categoría', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+plt.tight_layout()
+plt.show()
 
 
 
@@ -443,3 +502,7 @@ ax.tick_params(axis='x', rotation=90, size=7)
 
 print('El Income de las personas en el cluster 0 parece no ser determinante')
 
+
+
+
+#https://python-graph-gallery.com/11-grouped-barplot/

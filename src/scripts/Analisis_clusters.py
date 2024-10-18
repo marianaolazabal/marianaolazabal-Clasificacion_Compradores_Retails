@@ -425,7 +425,187 @@ df_cluster0_analisis.head()
 # Cantidades_Totales_Tools
 
 
-sns.violinplot(x=df_cluster0_analisis["mapeo_income"], y=df_cluster0_analisis["Cantidades_Totales_Appliances"])
+#sns.violinplot(x=df_cluster0_analisis["mapeo_income"], y=df_cluster0_analisis["Cantidades_Totales_Appliances"])
+
+sns.boxplot(data=df_cluster0_analisis, x="TotalHistorico_GastadoCliente", y="mapeo_gender", hue="mapeo_Categoria_Edad")
+
+print('''Como se puede apreciar en el gráfico, la distribución de gasto en los jóvenes es muy parecida, tanto para mujeres como hombres.
+En el caso de Adulto-Joven, las mujeres gastan un poco más que los hombres.
+En los adultos, adultos mayores y veteranos, los hombres gastan más.
+El grupo de género indeterminado se encuentra con una distribución menos dispersa, no presenta casi datos atípicos y en general gastan lo mismo o en el caso de los adultos y veteranos, más que los otros
+géneros. Se recomienda replantear la descripción de género para ser más inclusivo con el grupo y aplicar publicidades destinadas a aumentar la participación de personas de este grupo.''')
+
+sns.boxplot(data=df_cluster0_analisis, x="TotalHistorico_GastadoCliente", y="mapeo_gender", hue="mapeo_income")
+
+
+print('''En el caso de la distribucion del gasto por genero y grupo de ingresos, se observa que las personas que pertenecen al genero Femenino y el grupo de ingresos altos, tienden a gastar mas
+que los hombres y personas del genero indeterminado. Teniendo en cuenta el grafico anterior, podria ser beneficioso realizar campañas de marketing apuntadas a ofrecer productos premium, a personas dentro de
+estas categorias.
+''')
+
+df_cluster0_analisis_jovenes=df_cluster0_analisis[df_cluster0_analisis['mapeo_Categoria_Edad']=='Joven']
+
+
+categorias = [
+    'Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books',
+    'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food',
+    'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys',
+    'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor',
+    'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes',
+    'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports',
+    'Cantidades_Totales_TV', 'Cantidades_Totales_Tools'
+]
+
+df_long = pd.melt(df_cluster0_analisis, id_vars=['mapeo_income'], value_vars=categorias,
+                  var_name='Categoria', value_name='Cantidad_Comprada')
+
+# Crear el barplot
+plt.figure(figsize=(16, 10))
+sns.barplot(data=df_long, x='mapeo_income', y='Cantidad_Comprada', hue='Categoria')
+
+# Ajustar etiquetas
+plt.title('Cantidad Comprada por Categoría y Tipo de Ingreso')
+plt.xlabel('Tipo de Ingreso', fontsize=14)
+plt.ylabel('Cantidad Comprada', fontsize=12)
+plt.xticks(rotation=45, fontsize=12)
+plt.legend(title='Categoría', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+plt.tight_layout()
+plt.show()
+
+
+print('''Las categorías de Food y Clothing son las más compradas en todos los grupos de ingresos. Lo que hace que sea crucial prestar atención al stock de estos productos para garantizar su disponibilidad.
+También se destaca la categoría de Books, en todos los segmentos de mercado.
+
+Una estrategia efectiva podría ser ofrecer devoluciones en la categoría de ropa, permitiendo a los clientes seleccionar
+lo que les gusta, probarse las prendas y devolver lo que no les interesa. Además, se podría fomentar el alquiler y la compra de libros, optimizando los envíos de ambas categorías y ofreciendo envío
+gratuito a los clientes que realicen devoluciones y alquilen o compren libros.
+
+El grupo de ingresos bajos muestra interés por productos de decoración para el hogar. Ofrecer artículos decorativos que complementen la comida podría potenciar las ventas,
+como bandejas decorativas, platos y jarras.
+
+Las categorías de tecnología, como smartphones y televisores, están presentes en todos los grupos. Dado que estos productos suelen tener precios más elevados, sería beneficioso explorar
+estrategias para impulsar las ventas en estas categorías. En particular, los teléfonos móviles, que requieren poco espacio de almacenamiento y son fáciles de transportar, podrían beneficiarse
+de opciones de financiamiento. También se podría considerar la inclusión de suscripciones a plataformas de streaming, audiolibros o juegos para incentivar la compra.
+
+Finalmente, es recomendable evaluar la categoría de Sports, ya sea eliminándola o investigando más a fondo su baja popularidad.''')
+
+
+df_cluster0_analisis.head()
+
+
+sns.scatterplot(
+    data=df_cluster0_analisis, x="TotalHistorico_CompradoCliente", y="TotalHistorico_GastadoCliente", hue="frecuencia_comp_cliente", size="frecuencia_comp_cliente",
+    sizes=(20, 200), legend="full"
+)
+
+
+print('''El gráfico muestra una clara correlación positiva entre la cantidad total comprada y el gasto histórico del cliente. Ademas muestra como el tamaño de los circulos aumentan conforme aumenta la frecuencia de compra.
+A medida que aumenta el TotalHistorico_CompradoCliente, también lo hace el TotalHistorico_GastadoCliente y con ello la frecuencia de compra. Esto sugiere que los clientes que compran más también tienden a gastar más.
+Los clientes que realizan compras más frecuentes o de mayor volumen también representan un mayor valor para el negocio en términos de ingresos.
+Aunque la correlación es positiva, hay una dispersión significativa entre los clientes que tienen un valor de TotalHistorico_CompradoCliente similar, lo que indica que algunos clientes gastan más que otros para un número similar de compras. Esto puede estar influenciado por factores como el tipo de producto comprado o la elección de productos premium frente a económicos.
+Se observa una concentración de clientes que han gastado históricamente alrededor de 45 unidades y que también han comprado en cantidades elevadas.
+Estos clientes pueden ser candidatos ideales para programas de fidelización, recompensas o servicios premium, ya que han demostrado un alto compromiso con la tienda.
+En la parte inferior izquierda del gráfico, se encuentra un grupo considerable de clientes con un TotalHistorico_CompradoCliente relativamente bajo (15-25) y un gasto histórico entre 20 y 35. Estos clientes podrían estar realizando compras más esporádicas o comprando productos más económicos.
+Este grupo podría ser un objetivo para aumentar su gasto y frecuencia de compra mediante campañas de marketing dirigidas, como promociones o descuentos específicos.
+Segmentación basada en comportamiento: Usar esta correlación para segmentar a los clientes en categorías de alto y bajo valor podría ayudar a personalizar estrategias de retención y adquisición.''')
+
+
+
+sns.scatterplot(data=df_cluster0_analisis, x="Cantidades_Totales_Standard", y="TotalHistorico_GastadoCliente")
+
+sns.scatterplot(data=df_cluster0_analisis, x="Cantidades_Totales_Urgent-Delivery", y="TotalHistorico_GastadoCliente")
+
+#Cash
+#Credit
+#Debit
+
+ax = sns.countplot(x="Cash", data=df_cluster0_analisis)
+
+ax = sns.countplot(x="Cash", hue="mapeo_income", data=df_cluster0_analisis)
+
+g = sns.catplot(x="Cash", hue="mapeo_income", col="mapeo_gender",
+
+                data=df_cluster0_analisis, kind="count",
+
+                height=4, aspect=.7)
+
+
+fig = px.bar(df_cluster0_analisis, x='mapeo_income', y='Cash')
+fig.show()
+
+fig = px.bar(df_cluster0_analisis, x="mapeo_income", y="Cash", color="mapeo_gender", title="Long-Form Input")
+fig.show()
+
+
+fig = px.bar(df_cluster0_analisis, 
+             x="mapeo_income", 
+             y=["Cash", "Credit", "Debit"], 
+             pattern_shape="mapeo_gender", 
+             pattern_shape_sequence=[".", "x", "+"])  # Colores oscuros Bordes blancos para mayor contraste
+
+fig.show()
+
+
+df_cluster0_analisis.head()
+fig = px.bar(df_cluster0_analisis, x="mapeo_income", y=["Cash", "Credit", "Debit"], color="mapeo_gender", barmode="group",
+             facet_row="mapeo_Categoria_Edad", facet_col="mapeo_satisfaction",
+             category_orders={"mapeo_satisfaction": ["Dissatisfied", "Satisfied"],
+                              "time": ["Joven", "Joven-Adulto", "Adulto", "Veterano"]})
+fig.show()
+
+
+
+df_summarized = df.groupby("continent", observed=True).agg("sum").reset_index()
+
+
+
+#Estudiar la distribucion de los datos en cash, credit y debit
+#Ver como pagan los distintos generos y los distintos income
+#Ver que se compra
+
+
+df_cluster0_analisis_cash=df_cluster0_analisis[df_cluster0_analisis['Cash']>0]
+df_cluster0_analisis_Crash_Credit=df_cluster0_analisis_cash[df_cluster0_analisis_cash['Credit']>0]
+df_cluster0_analisis_Crash_Credit_Debit=df_cluster0_analisis_Crash_Credit[df_cluster0_analisis_Crash_Credit['Debit']>0]
+
+sns.histplot(data=df_cluster0_analisis_Crash_Credit_Debit, x="Cash", hue="mapeo_income", multiple="stack")
+
+
+#Invierno
+#Otoño
+#Verano
+#Primavera
+
+
+#madrugada
+#mañana
+#medioDia
+#noche
+#tarde
+
+
+#conclusiones al momento, ver de hacer notificaciones push a las mujeres de altos y medios ingresos en algun momento del dia, en algunas festividades o momentos del año de productos premium de tal categoria
+#ver de promover nuevos tv y smartphone a las personas de altos ingresos y promover vijeos modelos a personas de bajos ingresos, ofrecer financiamientos y descuentos si son comprador frecuente
+#ofrecer los dias y momentos del dia que mas se compra comida
+#ofrecer cuando se compra ropa, productos de decoracion y libros para comprar o alquilar, con devolucion gratis si compra ropa y uno de los otros dos (para optimizar el envio). Descontar el envio en la compra si compra
+#ropa y deco y libro
+#ofrecer pagar con transferencia los que pagan en cash o descuento para tarjetas de forma de incentivar compras en los que pagan con cash y credito.
+#ver por pais como se distribuye geneor e income. En usa sabemos que son hombres, ver en que gastan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 df_cluster0_analisis_jovenes=df_cluster0_analisis[df_cluster0_analisis['mapeo_Categoria_Edad']=='Joven']
@@ -460,7 +640,7 @@ plt.show()
 
 
 
-
+sns.pairplot(df_cluster0_analisis, hue='mapeo_income', palette='coolwarm')
 
 
 
@@ -506,3 +686,4 @@ print('El Income de las personas en el cluster 0 parece no ser determinante')
 
 
 #https://python-graph-gallery.com/11-grouped-barplot/
+#https://plotly.com/python/bar-charts/

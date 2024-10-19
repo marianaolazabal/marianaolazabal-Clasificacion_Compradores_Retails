@@ -515,48 +515,204 @@ Segmentación basada en comportamiento: Usar esta correlación para segmentar a 
 sns.scatterplot(data=df_cluster0_analisis, x="Cantidades_Totales_Standard", y="TotalHistorico_GastadoCliente")
 
 sns.scatterplot(data=df_cluster0_analisis, x="Cantidades_Totales_Urgent-Delivery", y="TotalHistorico_GastadoCliente")
+df_cluster0_analisis.columns
 
 #Cash
 #Credit
 #Debit
 
-ax = sns.countplot(x="Cash", data=df_cluster0_analisis)
-
-ax = sns.countplot(x="Cash", hue="mapeo_income", data=df_cluster0_analisis)
-
-g = sns.catplot(x="Cash", hue="mapeo_income", col="mapeo_gender",
-
-                data=df_cluster0_analisis, kind="count",
-
-                height=4, aspect=.7)
 
 
-fig = px.bar(df_cluster0_analisis, x='mapeo_income', y='Cash')
-fig.show()
+# Agrupar y derretir el DataFrame
+df_grouped = df_cluster0_analisis.groupby(['mapeo_income', 'mapeo_gender'])[['Cash', 'Credit', 'Debit']].sum().reset_index()
+df_melted = df_grouped.melt(id_vars=['mapeo_income', 'mapeo_gender'], value_vars=['Cash', 'Credit', 'Debit'], 
+                            var_name='Método de Pago', value_name='Total')
 
-fig = px.bar(df_cluster0_analisis, x="mapeo_income", y="Cash", color="mapeo_gender", title="Long-Form Input")
-fig.show()
+# Crear un FacetGrid con un gráfico separado por cada sexo
+g = sns.FacetGrid(df_melted, col='mapeo_gender', height=5, aspect=1.2)
+
+# Especificar el orden de los métodos de pago
+order_pago = ['Cash', 'Credit', 'Debit']
+
+# Aplicar el gráfico de barras a cada faceta
+g.map(sns.barplot, 'mapeo_income', 'Total', 'Método de Pago', order=df_melted['mapeo_income'].unique(), hue_order=order_pago, palette='dark:#1f77b4')
+
+# Añadir etiquetas y títulos a cada gráfico
+g.set_axis_labels('Categoría de Ingresos', 'Total Gasto')
+g.set_titles('Gasto total por sexo: {col_name}')
+g.add_legend()
+
+# Rotar las etiquetas del eje x para que sean más legibles
+for ax in g.axes.flat:
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+
+# Mostrar el gráfico
+plt.show()
 
 
-fig = px.bar(df_cluster0_analisis, 
-             x="mapeo_income", 
-             y=["Cash", "Credit", "Debit"], 
-             pattern_shape="mapeo_gender", 
-             pattern_shape_sequence=[".", "x", "+"])  # Colores oscuros Bordes blancos para mayor contraste
-
-fig.show()
-
-
-df_cluster0_analisis.head()
-fig = px.bar(df_cluster0_analisis, x="mapeo_income", y=["Cash", "Credit", "Debit"], color="mapeo_gender", barmode="group",
-             facet_row="mapeo_Categoria_Edad", facet_col="mapeo_satisfaction",
-             category_orders={"mapeo_satisfaction": ["Dissatisfied", "Satisfied"],
-                              "time": ["Joven", "Joven-Adulto", "Adulto", "Veterano"]})
-fig.show()
+#Invierno
+#Otoño
+#Verano
+#Primavera
 
 
 
-df_summarized = df.groupby("continent", observed=True).agg("sum").reset_index()
+
+# Agrupar y derretir el DataFrame
+df_grouped_estacion = df_cluster0_analisis.groupby(['mapeo_income', 'mapeo_gender'])[['Invierno', 'Otoño', 'Verano', 'Primavera']].sum().reset_index()
+df_melted_estacion = df_grouped_estacion.melt(id_vars=['mapeo_income', 'mapeo_gender'], value_vars=['Invierno', 'Otoño', 'Verano', 'Primavera'], 
+                            var_name='Estación', value_name='Total')
+
+# Crear un FacetGrid con un gráfico separado por cada sexo
+g = sns.FacetGrid(df_melted_estacion, col='mapeo_gender', height=5, aspect=1.2)
+
+# Especificar el orden de los métodos de pago
+order_estacion = ['Invierno', 'Otoño', 'Verano', 'Primavera']
+
+# Aplicar el gráfico de barras a cada faceta
+g.map(sns.barplot, 'mapeo_income', 'Total', 'Estación', order=df_melted_estacion['mapeo_income'].unique(), hue_order=order_estacion, palette='dark:#1f77b4')
+
+# Añadir etiquetas y títulos a cada gráfico
+g.set_axis_labels('Categoría de Ingresos', 'Total Gasto')
+g.set_titles('Gasto total por sexo: {col_name}')
+g.add_legend()
+
+# Rotar las etiquetas del eje x para que sean más legibles
+for ax in g.axes.flat:
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+
+# Mostrar el gráfico
+plt.show()
+
+
+
+
+#madrugada
+#mañana
+#medioDia
+#noche
+#tarde
+#TotalHistorico_GastadoCliente
+
+
+
+# Agrupar y derretir el DataFrame
+df_grouped_momento = df_cluster0_analisis.groupby(['mapeo_income', 'mapeo_gender'])[['madrugada', 'mañana', 'medioDia', 'noche', 'tarde']].sum().reset_index()
+df_melted_momento = df_grouped_momento.melt(id_vars=['mapeo_income', 'mapeo_gender'], value_vars=['madrugada', 'mañana', 'medioDia', 'noche', 'tarde'], 
+                            var_name='Momento del día', value_name='Total')
+
+# Crear un FacetGrid con un gráfico separado por cada sexo
+g = sns.FacetGrid(df_melted_momento, col='mapeo_gender', height=5, aspect=1.2)
+
+# Especificar el orden de los métodos de pago
+order_momentoDia = ['madrugada', 'mañana', 'medioDia', 'noche', 'tarde']
+
+# Aplicar el gráfico de barras a cada faceta
+g.map(sns.barplot, 'mapeo_income', 'Total', 'Momento del día', order=df_melted_momento['mapeo_income'].unique(), hue_order=order_momentoDia, palette='dark:#1f77b4')
+
+# Añadir etiquetas y títulos a cada gráfico
+g.set_axis_labels('Categoría de Ingresos', 'Total Gasto')
+g.set_titles('Gasto total por sexo: {col_name}')
+g.add_legend()
+
+# Rotar las etiquetas del eje x para que sean más legibles
+for ax in g.axes.flat:
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+
+# Mostrar el gráfico
+plt.show()
+
+
+
+
+#Estacion y momento del dia
+
+#Cuanto se gasta en Invierno y cuanto de eso se gasta en la mañana, mediodia, tarde y denoche
+#Cuanto se gasta en Otoño y cuanto de eso se gasta en la mañana, mediodia, tarde y denoche
+#Cuanto se gasta en Primavera y cuanto de eso se gasta en la mañana, mediodia, tarde y denoche
+#Cuanto se gasta en Verano y cuanto de eso se gasta en la mañana, mediodia, tarde y denoche
+
+
+# Agrupar por género y nivel de ingreso, y sumar las estaciones
+suma_estaciones_income_gender = df_cluster0_analisis.groupby(['mapeo_gender', 'mapeo_income'])[['Invierno', 'Otoño', 'Primavera', 'Verano']].sum()
+
+# Crear un DataFrame para visualización
+suma_estaciones_income_gender = suma_estaciones_income_gender.unstack(level=0)  # Para hacer que el género sea una subcategoría
+
+# Crear el gráfico
+suma_estaciones_income_gender.plot(kind='bar', stacked=True, figsize=(12, 8))
+
+plt.title('Suma de cada estación por género y nivel de ingreso')
+plt.xlabel('Nivel de Ingreso')
+plt.ylabel('Suma')
+plt.xticks(rotation=45)
+plt.legend(title='Género', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()  # Ajustar el espacio
+plt.show()
+
+
+print('''''')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Agrupar por género y nivel de ingreso, y sumar las estaciones
+suma_momentoDia_income_gender = df_cluster0_analisis.groupby(['mapeo_gender', 'mapeo_income'])[['madrugada', 'mañana', 'medioDia', 'noche', 'tarde']].sum()
+
+# Crear un DataFrame para visualización
+suma_momentoDia_income_gender = suma_momentoDia_income_gender.unstack(level=0)  # Para hacer que el género sea una subcategoría
+
+# Crear el gráfico
+suma_momentoDia_income_gender.plot(kind='bar', stacked=True, figsize=(12, 8))
+
+plt.title('Suma del gasto por momento del día, por género y nivel de ingreso')
+plt.xlabel('Nivel de Ingreso')
+plt.ylabel('Suma')
+plt.xticks(rotation=45)
+plt.legend(title='Género', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()  # Ajustar el espacio
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

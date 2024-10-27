@@ -672,7 +672,8 @@ print("Top 10 de categorías más compradas:")
 print(top_10_medioDia)
 
 # Solo Australia --- Alemania, Reino Unido, Estados Unidos y Australia 
-
+#Hacer push de notificaciones a las mujeres jovenes o jovenes adultas en Australia de productos de comida y libros en la madrugada, mañana o noche
+#FALTA VER INGRESOOOOOOS
 
 df_cluster0_analisis_f_JA_medioDia_Alemania=df_cluster0_analisis_f_JA_medioDia[df_cluster0_analisis_f_JA_medioDia['mapeo_country']=='Australia']
 

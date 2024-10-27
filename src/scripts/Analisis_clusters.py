@@ -356,17 +356,31 @@ plt.legend(title='Género')
 plt.show()
 
 #Los porcentajes indican qué fracción del gasto total en cada grupo es atribuible a los diferentes géneros.
-#El gráfico sugiere que, en todos los grupos de ingresos, los hombres tienen una participación significativamente mayor en el gasto total, especialmente en los grupos de ingresos bajos, medios e indeterminados. Las mujeres tienen una menor participación en todos los grupos de ingresos, mientras que el género indeterminado contribuye con el menor porcentaje en general.
-#Dado que los hombres representan la mayor parte del gasto en todos los grupos de ingresos, especialmente en los segmentos de ingresos bajos, medios e indeterminados, las campañas de marketing podrían orientarse más hacia este público.
-#Ofrecer productos y promociones que se alineen con las preferencias de este grupo sería una estrategia clave, ya que tienen una mayor propensión a gastar.
-#Un enfoque de personalización en el sitio web, mostrando diferentes productos o promociones en función del género del cliente (si se dispone de esta información), podría mejorar la experiencia del usuario y potencialmente aumentar las conversiones de las mujeres.
-# El porcentaje de gasto del género indeterminado es bajo en comparación con los hombres y mujeres en todos los grupos de ingresos. Esto podría indicar que el sitio web no está siendo lo suficientemente inclusivo o atractivo para este grupo.
-#Se podría considerar realizar mejoras en la usabilidad del sitio, asegurándose de que sea inclusivo para personas de todos los géneros, lo que podría incluir ajustes en el lenguaje, las opciones de género en los formularios de registro o la representación de productos y modelos diversos.
-#Estrategias como opciones de financiamiento, descuentos por volumen, o promociones de productos esenciales podrían resonar mejor con estos segmentos, maximizando el valor por cliente en estos grupos.
-#Ofertas como ventas flash, recomendaciones de productos relacionadas, y envíos rápidos o gratuitos podrían aumentar las conversiones y los ingresos.
-#Dado que los hombres son los principales consumidores en todos los grupos, un programa de fidelización dirigido a ellos podría ser muy efectivo. Esto podría incluir recompensas por compras frecuentes, descuentos personalizados o membresías exclusivas para mantener a estos consumidores comprometidos con la plataforma.
+#El gráfico sugiere que, en todos los grupos de ingresos, los hombres tienen una participación significativamente mayor en el 
+# gasto total, especialmente en los grupos de ingresos bajos, medios e indeterminados. Las mujeres tienen una menor participación 
+# en todos los grupos de ingresos, mientras que el género indeterminado contribuye con el menor porcentaje en general.
+#Dado que los hombres representan la mayor parte del gasto en todos los grupos de ingresos, especialmente en los segmentos de 
+# ingresos bajos, medios e indeterminados, las campañas de marketing podrían orientarse más hacia este público.
+#Ofrecer productos y promociones que se alineen con las preferencias de este grupo sería una estrategia clave, ya que tienen 
+# una mayor propensión a gastar.
+#Un enfoque de personalización en el sitio web, mostrando diferentes productos o promociones en función del género del cliente 
+# (si se dispone de esta información), podría mejorar la experiencia del usuario y potencialmente aumentar las conversiones de 
+# las mujeres.
+# El porcentaje de gasto del género indeterminado es bajo en comparación con los hombres y mujeres en todos los grupos 
+# de ingresos. Esto podría indicar que el sitio web no está siendo lo suficientemente inclusivo o atractivo para este grupo.
+#Se podría considerar realizar mejoras en la usabilidad del sitio, asegurándose de que sea inclusivo para personas de todos 
+# los géneros, lo que podría incluir ajustes en el lenguaje, las opciones de género en los formularios de registro o la 
+# representación de productos y modelos diversos.
+#Estrategias como opciones de financiamiento, descuentos por volumen, o promociones de productos esenciales podrían resonar 
+# mejor con estos segmentos, maximizando el valor por cliente en estos grupos.
+#Ofertas como ventas flash, recomendaciones de productos relacionadas, y envíos rápidos o gratuitos podrían aumentar las 
+# conversiones y los ingresos.
+#Dado que los hombres son los principales consumidores en todos los grupos, un programa de fidelización dirigido a ellos 
+# podría ser muy efectivo. Esto podría incluir recompensas por compras frecuentes, descuentos personalizados o membresías 
+# exclusivas para mantener a estos consumidores comprometidos con la plataforma.
 #Las ofertas pueden incluir productos exclusivos, tecnologías de punta, artículos de lujo, y envíos rápidos o gratuitos.
-#En lugar de campañas exclusivas para hombres o mujeres, se pueden crear campañas neutras de género que apelen a una audiencia más amplia y diversa.
+#En lugar de campañas exclusivas para hombres o mujeres, se pueden crear campañas neutras de género que apelen a una audiencia 
+# más amplia y diversa.
 
 df_cluster0_analisis.head()
 # 1. Contar el número de personas por país y categoría de edad
@@ -438,9 +452,10 @@ géneros. Se recomienda replantear la descripción de género para ser más incl
 sns.boxplot(data=df_cluster0_analisis, x="TotalHistorico_GastadoCliente", y="mapeo_gender", hue="mapeo_income")
 
 
-print('''En el caso de la distribucion del gasto por genero y grupo de ingresos, se observa que las personas que pertenecen al genero Femenino y el grupo de ingresos altos, tienden a gastar mas
-que los hombres y personas del genero indeterminado. Teniendo en cuenta el grafico anterior, podria ser beneficioso realizar campañas de marketing apuntadas a ofrecer productos premium, a personas dentro de
-estas categorias.
+print('''En el caso de la distribucion del gasto por genero y grupo de ingresos, se observa que las personas que pertenecen al 
+genero Femenino y el grupo de ingresos altos, tienden a gastar mas que los hombres y personas del genero indeterminado. 
+Teniendo en cuenta el grafico anterior, podria ser beneficioso realizar campañas de marketing apuntadas a ofrecer 
+productos premium, a personas dentro de estas categorias.
 ''')
 
 df_cluster0_analisis_jovenes=df_cluster0_analisis[df_cluster0_analisis['mapeo_Categoria_Edad']=='Joven']
@@ -623,6 +638,62 @@ for ax in g.axes.flat:
 plt.show()
 
 
+print('''Ofrecer a las mujeres dentro de la categoria Adulto Joven de ingresos medios y altos, productos que sean de su interes,
+hacerlo en la madrugada y la mañana, cuando mas se compra. Para ello es necesario estudiar los productos que se compran.
+Estudiar si las personas que compran al medioDia y en la tarde son de otro grupo de edad y que productos se compra.''')
+
+
+df_cluster0_analisis_f=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Female']
+df_cluster0_analisis_f_JA = df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_Categoria_Edad'].isin(['Adulto_Joven', 'Joven'])]
+df_cluster0_analisis_f_JA_madrugada = df_cluster0_analisis_f_JA[(df_cluster0_analisis_f_JA['madrugada'] > 0.0) | (df_cluster0_analisis_f_JA['mañana'] > 0.0 ) | (df_cluster0_analisis_f_JA['noche']> 0.0)]
+df_cluster0_analisis_f_JA_madrugada.head()
+
+def top10 (df_top):
+    totals = df_top[['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
+                 'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
+                 'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
+                 'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
+                'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
+                'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
+                'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']].sum()
+    
+    return totals
+
+
+top_10 = top10(df_cluster0_analisis_f_JA_madrugada).sort_values(ascending=False).head(10)
+print("Top 10 de categorías más compradas:")
+print(top_10)
+
+
+df_cluster0_analisis_f_JA_medioDia = df_cluster0_analisis_f_JA[(df_cluster0_analisis_f_JA['medioDia'] > 0.0) | (df_cluster0_analisis_f_JA['tarde'] > 0.0)]
+
+top_10_medioDia = top10(df_cluster0_analisis_f_JA_medioDia).sort_values(ascending=False).head(10)
+print("Top 10 de categorías más compradas:")
+print(top_10_medioDia)
+
+# Solo Australia --- Alemania, Reino Unido, Estados Unidos y Australia 
+
+
+df_cluster0_analisis_f_JA_medioDia_Alemania=df_cluster0_analisis_f_JA_medioDia[df_cluster0_analisis_f_JA_medioDia['mapeo_country']=='Australia']
+
+top_10_medioDia = top10(df_cluster0_analisis_f_JA_medioDia_Alemania).sort_values(ascending=False).head(10)
+print("Top 10 de categorías más compradas:")
+print(top_10_medioDia)
+
+
+print('''No hay personas del sexo femenino en la categoria Adulto_Joven o Joven que compren en la medioDia o tarde en Australia''')
+
+
+df_cluster0_analisis_f_JA_madrugada_Alemania=df_cluster0_analisis_f_JA_madrugada[df_cluster0_analisis_f_JA_madrugada['mapeo_country']=='Australia']
+
+top_10_medioDia = top10(df_cluster0_analisis_f_JA_madrugada_Alemania).sort_values(ascending=False).head(10)
+print("Top 10 de categorías más compradas:")
+print(top_10_medioDia)
+
+print('''No hay personas del sexo femenino en la categoria Adulto_Joven o Joven que compren en la madrugada, mañana o noche en Australia''')
+
+
+
 
 
 #Estacion y momento del dia
@@ -633,25 +704,6 @@ plt.show()
 #Cuanto se gasta en Verano y cuanto de eso se gasta en la mañana, mediodia, tarde y denoche
 
 
-# Agrupar por género y nivel de ingreso, y sumar las estaciones
-suma_estaciones_income_gender = df_cluster0_analisis.groupby(['mapeo_gender', 'mapeo_income'])[['Invierno', 'Otoño', 'Primavera', 'Verano']].sum()
-
-# Crear un DataFrame para visualización
-suma_estaciones_income_gender = suma_estaciones_income_gender.unstack(level=0)  # Para hacer que el género sea una subcategoría
-
-# Crear el gráfico
-suma_estaciones_income_gender.plot(kind='bar', stacked=True, figsize=(12, 8))
-
-plt.title('Suma de cada estación por género y nivel de ingreso')
-plt.xlabel('Nivel de Ingreso')
-plt.ylabel('Suma')
-plt.xticks(rotation=45)
-plt.legend(title='Género', bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.tight_layout()  # Ajustar el espacio
-plt.show()
-
-
-print('''''')
 
 
 

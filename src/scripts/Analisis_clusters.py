@@ -644,9 +644,42 @@ Estudiar si las personas que compran al medioDia y en la tarde son de otro grupo
 
 
 df_cluster0_analisis_f=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Female']
-df_cluster0_analisis_f_JA = df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_Categoria_Edad'].isin(['Adulto_Joven', 'Joven'])]
-df_cluster0_analisis_f_JA_madrugada = df_cluster0_analisis_f_JA[(df_cluster0_analisis_f_JA['madrugada'] > 0.0) | (df_cluster0_analisis_f_JA['mañana'] > 0.0 ) | (df_cluster0_analisis_f_JA['noche']> 0.0)]
-df_cluster0_analisis_f_JA_madrugada.head()
+
+#Como se distribuyen las mujeres en cada pais
+
+ax = sns.countplot(x="mapeo_country", data=df_cluster0_analisis_f)
+
+#Hay más representatividad en United States y United Kingdom
+#Como se distribuye las edades en estos paises
+
+df_cluster0_analisis_f_USA=df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_country']=='United States']
+
+ax = sns.countplot(x="mapeo_Categoria_Edad", data=df_cluster0_analisis_f_USA)
+
+#En USA hay mayor representatividad de mujeres Jovenes y Adultas
+#A que hora compran estos grupos?
+
+df_cluster0_analisis_f_USA_hora = df_cluster0_analisis_f_USA[df_cluster0_analisis_f_USA['mapeo_Categoria_Edad'].isin(['Adulto_Joven', 'Joven'])]
+
+df_long = df_cluster0_analisis_f_USA_hora.melt(value_vars=["madrugada", "mañana", "medioDia", "noche", "tarde"], 
+                                               var_name="Hora", value_name="Frecuencia")
+
+df_suma = df_long.groupby("Hora")["Frecuencia"].sum().reset_index()
+
+# Crear el gráfico de barras con la suma de frecuencias por Hora
+ax = sns.barplot(x="Hora", y="Frecuencia", data=df_suma)
+
+#En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana
+#Que ingresos tienen
+df_cluster0_analisis_f_USA_ingresos= df_cluster0_analisis_f_USA_hora[(df_cluster0_analisis_f_USA_hora['madrugada'] > 0.0) | (df_cluster0_analisis_f_USA_hora['mañana'] > 0.0 )]
+
+ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos)
+
+#En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana y tienen ingresos altos
+#Top 10 productos comprados
+
+df_cluster0_analisis_f_USA_ingresos_altos= df_cluster0_analisis_f_USA_ingresos[df_cluster0_analisis_f_USA_ingresos['mapeo_income']=='High']
+
 
 def top10 (df_top):
     totals = df_top[['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
@@ -660,24 +693,93 @@ def top10 (df_top):
     return totals
 
 
-top_10 = top10(df_cluster0_analisis_f_JA_madrugada).sort_values(ascending=False).head(10)
+top_10 = top10(df_cluster0_analisis_f_USA_ingresos_altos).sort_values(ascending=False).head(10)
 print("Top 10 de categorías más compradas:")
 print(top_10)
 
 
-df_cluster0_analisis_f_JA_medioDia = df_cluster0_analisis_f_JA[(df_cluster0_analisis_f_JA['medioDia'] > 0.0) | (df_cluster0_analisis_f_JA['tarde'] > 0.0)]
+#En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana y tienen ingresos altos, compran 
+# Food -- Es lo que mas compra el grupo 
+# clothing, books -- Seguido por ropa y libros
+# Home_Decor, Furniture, Appliances -- Estos articulos podrian llegar a ser mas costosos y de alta rotacion. Son personas que les interesa 
+# la moda y las tendencias. Considerar ofrecer productos que estan en tendencia y son de calidad.
+# Audio, Smart_Phone y TV -- Productos caros. Un pequeño aumento en las cantidades compradas, ofrece un cambio significativo para la empresa, 
+# especialmente productos como los celulares, que son facil de transportar y ocupan poco lugar de guardado en los depositos. Se podria ofrecer 
+# productos de ultima generacion, con plan de recambio. Compra de un servicio tecnologico, que le brinde al cliente la posibilidad de tener todos los
+# años, el ultimo celular a cambio de su telefono usado (para reparar y revender a los usuarios de menor ingreso).
+# Ofrecer audifonos a menor costo, si se compra un celular, o parlantes en caso de un TV. 
+# Plataforma para comprar y revender libros. El usuario puede comprar un libro nuevo que este disponible en el sitio web o puede llevarse otro libro usado,
+# revendiendo uno que ya compro en la pagina.
+# Considerar integrar libro e-books a la plataforma.
+# Compran en credito
 
-top_10_medioDia = top10(df_cluster0_analisis_f_JA_medioDia).sort_values(ascending=False).head(10)
+df_totals1=df_cluster0_analisis_f_USA_ingresos_altos
+def top10(df_top):
+    # Seleccionar las columnas de categorías y métodos de pago
+    categorias = ['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
+                  'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
+                  'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
+                  'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
+                  'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
+                  'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
+                  'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']
+    
+    # Crear un DataFrame solo con las columnas de interés
+    df_totals1 = df_top[categorias + ['Cash', 'Credit', 'Debit']]
+    
+
+    # Convertir el DataFrame a formato largo para tener cada categoría y método de pago en filas separadas
+    df_long = df_totals1.melt(id_vars=['Cash', 'Credit', 'Debit'], 
+                             value_vars=categorias, 
+                             var_name="Categoria", 
+                             value_name="Cantidad_Total")
+    
+    # Ordenar primero por "Cantidad_Total" y luego por el valor de cada método de pago
+    df_sorted = df_long.sort_values(by=["Cantidad_Total", "Cash", "Credit", "Debit"], ascending=False)
+    
+    # Seleccionar el Top 10
+    top_10 = df_sorted.head(10)
+    
+    return top_10
+
+# Ejecutar la función y ver los resultados
+top_10 = top10(df_cluster0_analisis_f_USA_ingresos_altos)
+print("Top 10 de categorías más compradas por métodos de pago:")
+print(top_10)
+
+
+df_totals1.head()
+
+
+
+
+
+
+
+
+
+
+
+top_10_group = top10(df_cluster0_analisis_f_USA_ingresos_altos).groupby(['Cash', 'Credit', 'Debit']).sort_values(ascending=False).head(10)
 print("Top 10 de categorías más compradas:")
-print(top_10_medioDia)
+print(top_10)
 
-# Solo Australia --- Alemania, Reino Unido, Estados Unidos y Australia 
-#Hacer push de notificaciones a las mujeres jovenes o jovenes adultas en Australia de productos de comida y libros en la madrugada, mañana o noche
+
+df_cluster0_analisis_f_USA_hora.columns
+
+
+df_cluster0_analisis_f_JA = df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_Categoria_Edad'].isin(['Adulto_Joven', 'Joven'])]
+df_cluster0_analisis_f_JA_madrugada = df_cluster0_analisis_f_JA[(df_cluster0_analisis_f_JA['madrugada'] > 0.0) | (df_cluster0_analisis_f_JA['mañana'] > 0.0 ) | (df_cluster0_analisis_f_JA['noche']> 0.0)]
+df_cluster0_analisis_f_JA_madrugada.head()
+
+
+# Solo Australia --- 
+
 #FALTA VER INGRESOOOOOOS
 
-df_cluster0_analisis_f_JA_medioDia_Alemania=df_cluster0_analisis_f_JA_medioDia[df_cluster0_analisis_f_JA_medioDia['mapeo_country']=='Australia']
+df_cluster0_analisis_f_JA_medioDia_Australia=df_cluster0_analisis_f_JA_medioDia[df_cluster0_analisis_f_JA_medioDia['mapeo_country']=='Australia']
 
-top_10_medioDia = top10(df_cluster0_analisis_f_JA_medioDia_Alemania).sort_values(ascending=False).head(10)
+top_10_medioDia = top10(df_cluster0_analisis_f_JA_medioDia_Australia).sort_values(ascending=False).head(10)
 print("Top 10 de categorías más compradas:")
 print(top_10_medioDia)
 
@@ -685,16 +787,29 @@ print(top_10_medioDia)
 print('''No hay personas del sexo femenino en la categoria Adulto_Joven o Joven que compren en la medioDia o tarde en Australia''')
 
 
-df_cluster0_analisis_f_JA_madrugada_Alemania=df_cluster0_analisis_f_JA_madrugada[df_cluster0_analisis_f_JA_madrugada['mapeo_country']=='Australia']
+df_cluster0_analisis_f_JA_madrugada_Australia=df_cluster0_analisis_f_JA_madrugada[df_cluster0_analisis_f_JA_madrugada['mapeo_country']=='Australia']
 
-top_10_medioDia = top10(df_cluster0_analisis_f_JA_madrugada_Alemania).sort_values(ascending=False).head(10)
+top_10_medioDia = top10(df_cluster0_analisis_f_JA_madrugada_Australia).sort_values(ascending=False).head(10)
 print("Top 10 de categorías más compradas:")
 print(top_10_medioDia)
 
 print('''No hay personas del sexo femenino en la categoria Adulto_Joven o Joven que compren en la madrugada, mañana o noche en Australia''')
 
 
+ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_JA_madrugada_Australia)
 
+
+print('''Hacer push de notificaciones de productos de comida y libros, en la madrugada, mañana o noche, a las mujeres de ingresos medios y bajos,
+ que se encuentren en la categoría jovenes o jovenes adultas, viven o residen en Australia.''')
+
+
+#Solo Alemania
+
+df_cluster0_analisis_Alemania=df_cluster0_analisis[df_cluster0_analisis_f_JA_medioDia['mapeo_country']=='Australia']
+
+# Reino Unido
+
+# Estados Unidos
 
 
 #Estacion y momento del dia

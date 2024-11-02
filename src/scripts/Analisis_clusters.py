@@ -643,6 +643,7 @@ hacerlo en la madrugada y la mañana, cuando mas se compra. Para ello es necesar
 Estudiar si las personas que compran al medioDia y en la tarde son de otro grupo de edad y que productos se compra.''')
 
 
+print('''*******Grupo femenino************''')
 df_cluster0_analisis_f=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Female']
 
 #Como se distribuyen las mujeres en cada pais
@@ -652,12 +653,15 @@ ax = sns.countplot(x="mapeo_country", data=df_cluster0_analisis_f)
 #Hay más representatividad en United States y United Kingdom
 #Como se distribuye las edades en estos paises
 
+print('''*******Grupo femenino en Estados Unidos************''')
 df_cluster0_analisis_f_USA=df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_country']=='United States']
 
 ax = sns.countplot(x="mapeo_Categoria_Edad", data=df_cluster0_analisis_f_USA)
 
 #En USA hay mayor representatividad de mujeres Jovenes y Adultas
 #A que hora compran estos grupos?
+
+print('''*******Grupo femenino joven y adulto joven en Estados Unidos************''')
 
 df_cluster0_analisis_f_USA_hora = df_cluster0_analisis_f_USA[df_cluster0_analisis_f_USA['mapeo_Categoria_Edad'].isin(['Adulto_Joven', 'Joven'])]
 
@@ -678,213 +682,271 @@ ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos)
 #En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana y tienen ingresos altos
 #Top 10 productos comprados
 
-df_cluster0_analisis_f_USA_ingresos_altos= df_cluster0_analisis_f_USA_ingresos[df_cluster0_analisis_f_USA_ingresos['mapeo_income']=='High']
 
-
+#----------------------------------
 def top10 (df_top):
+    
     totals = df_top[['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
-                 'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
-                 'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
-                 'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
-                'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
-                'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
-                'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']].sum()
+            'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
+            'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
+            'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
+            'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
+            'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
+            'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']].sum()
     
     return totals
 
+#----------------------------------
 
-top_10 = top10(df_cluster0_analisis_f_USA_ingresos_altos).sort_values(ascending=False).head(10)
-print("Top 10 de categorías más compradas:")
-print(top_10)
+def estuadio_ingresos (df, valor):
 
+    df_top= df[df['mapeo_income']==valor]
 
+    top_10 = top10(df_top).sort_values(ascending=False).head(10)
+    print("Top 10 de categorías más compradas:")
+    print(top_10)
 
-
-df_totals1=df_cluster0_analisis_f_USA_ingresos_altos
-def top10(df_top):
-    # Seleccionar las columnas de categorías y métodos de pago
-    categorias = ['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
-                  'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
-                  'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
-                  'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
-                  'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
-                  'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
-                  'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']
-    
-    # Crear un DataFrame solo con las columnas de interés
-    df_totals1 = df_top[categorias + ['Cash', 'Credit', 'Debit']]
-    
-
-    # Convertir el DataFrame a formato largo para tener cada categoría y método de pago en filas separadas
-    df_long = df_totals1.melt(id_vars=['Cash', 'Credit', 'Debit'], 
-                             value_vars=categorias, 
-                             var_name="Categoria", 
-                             value_name="Cantidad_Total")
-    
-    # Ordenar primero por "Cantidad_Total" y luego por el valor de cada método de pago
-    df_sorted = df_long.sort_values(by=["Cantidad_Total", "Cash", "Credit", "Debit"], ascending=False)
-    
-    # Seleccionar el Top 10
-    top_10 = df_sorted.head(10)
-    
-    return top_10
-
-# Ejecutar la función y ver los resultados
-top_10 = top10(df_cluster0_analisis_f_USA_ingresos_altos)
-print("Top 10 de categorías más compradas por métodos de pago:")
-print(top_10)
+    return df_top
 
 
-df_cluster0_analisis_f_USA_ingresos_altos.head()
+#----------------------------------
+
+def mensaje(num):
+    if(num==1):
+        return '''Análisis de comportamiento de compra en mujeres jóvenes y adultas en USA:
+        En los Estados Unidos, hay una alta representación de mujeres jóvenes y adultas con ingresos elevados que compran principalmente 
+        en las primeras horas del día, especialmente durante la madrugada y la mañana. 
+        Estas consumidoras se enfocan en diversas categorías de productos, con particular preferencia por alimentos, ropa y libros.
+        Los Alimentos son la categoría más comprada por este grupo.
+        Ropa y libros, le siguen en popularidad. Existe una oportunidad para ofrecer estos productos con una plataforma que permita tanto 
+        la compra de artículos nuevos como la reventa de productos usados, incentivando así un ciclo de consumo sostenible. 
+        También podría considerarse la integración de libros electrónicos (e-books) en la plataforma.
+        Decoración del hogar, muebles y electrodomésticos: Aunque estos productos tienden a ser más costosos, presentan alta rotación. 
+        Esto sugiere que estas compradoras buscan productos en tendencia, de calidad y que reflejen un interés en la moda y el diseño. 
+        Sería beneficioso ofrecer artículos de vanguardia que satisfagan esta demanda.
+        Productos electrónicos (audio, smartphones y televisores): Estos productos, aunque presentan pocas cantidades vendidas, tienen un impacto 
+        significativo en los ingresos de la empresa, ya que pequeños aumentos en las unidades vendidas pueden significar cambios mayores en la rentabilidad de la empresa. 
+        En particular, los smartphones son altamente rentables, ya que ocupan poco espacio de almacenamiento y son fáciles de transportar. 
+        Una estrategia atractiva podría ser la oferta de un plan de recambio anual, en el cual las clientas puedan obtener el último modelo de teléfono 
+        al entregar su dispositivo usado, que a su vez podría repararse y revenderse a clientes de ingresos más bajos. 
+        Además, se podrían ofrecer descuentos en audífonos al comprar un smartphone o parlantes con la compra de un televisor.
+        La mayoría de estas consumidoras opta por pagar con crédito.
+        Las ciudades con mayor representatividad en este grupo son Boston y Chicago. Aunque el nivel de satisfacción es bueno en ambas, 
+        se observa una porción de clientes insatisfechas. Esto abre una oportunidad para investigar las causas de esta insatisfacción, diferenciando 
+        las características de estos grupos para mejorar la experiencia de compra. Si no se cuenta con más información al respecto, podría ser útil 
+        enviar un cuestionario de satisfacción acompañado de un incentivo, como un descuento en alimentos, libros o ropa, para animar la participación.
+        Como estas compradoras tienden a realizar sus compras en la madrugada y la mañana, sería conveniente implementar un carrito de compras programado. 
+        Este podría optimizar el tiempo de búsqueda, sugiriendo automáticamente productos que suelen comprar y dejando espacio para descubrir nuevos 
+        artículos o recomendaciones personalizadas en función de sus preferencias. Esto permitiría una experiencia de compra eficiente y atractiva.
+        '''
+    elif(num==2):
+        return '''Análisis de satisfacción y optimización de envíos en diferentes categorías de productos:.
+        Se observa que las clientas de ingresos altos están muy satisfechas con el servicio de entrega para productos de electrodomésticos (Appliances). 
+        Sin embargo, en las categorías de Books y Food, la diferencia en satisfacción es menor, lo que podría indicar problemas en el servicio de envío 
+        específico para estos productos. En la categoría de Clothing, el índice de satisfacción es significativamente mejor, lo que sugiere que el proceso 
+        de entrega para ropa se maneja con mayor eficacia que en las otras categorías.
+        Para optimizar la satisfacción de las clientas y mejorar la eficiencia en los envíos, podría ser beneficioso implementar una plataforma de 
+        alquiler de libros online. Esto permitiría a las clientas alquilar libros junto con sus compras de ropa, combinando envíos y disminuyendo 
+        la carga logística en momentos de alta demanda.
+        En caso de que la empresa experimente saturación de entregas en ciertos momentos del día, podría ser útil incentivar la compra de artículos 
+        menos urgentes, como libros, junto con productos de alta demanda. Esto permitiría agrupar envíos y liberar recursos para atender otras categorías 
+        con mayor rapidez.
+        Para ofrecer mayor conveniencia a las clientas, podría implementarse un sistema de casilleros en lugares estratégicos de la ciudad. 
+        De esta forma, las clientas podrían retirar sus pedidos en el horario que más les convenga, reduciendo la presión sobre el sistema de entregas 
+        y mejorando la experiencia del cliente al permitirle flexibilidad en la recogida de sus productos.
+        ''' 
+    elif(num==3):
+        return '''El gráfico muestra que los clientes insatisfechos representan casi el 80% de la cantidad de clientes satisfechos, lo cual indica una 
+        deficiencia significativa en el servicio de envíos. Este dato sugiere que es crucial mejorar la calidad de entrega, especialmente en las 
+        ciudades de Chicago y Boston, donde se concentra la mayor cantidad de clientes.
+        Foco en Chicago y Boston: Dado que estas ciudades presentan el mayor volumen de clientes, es prioritario optimizar el servicio de entrega 
+        en estas áreas para reducir la insatisfacción. Identificar las causas de los problemas actuales en la logística de envío (como demoras, 
+        entregas fallidas o falta de opciones flexibles) sería fundamental para mejorar la experiencia de los clientes y fortalecer la retención.
+        Expansión en San Francisco: La ciudad de San Francisco es un mercado con gran potencial de crecimiento, especialmente por su población 
+        predominantemente joven, que valora la flexibilidad y las opciones de conveniencia. Implementar casilleros de recogida en puntos estratégicos 
+        de la ciudad podría mejorar la experiencia del cliente, permitiéndole retirar sus pedidos en el momento que más le convenga y facilitar el 
+        proceso de devolución. Estos casilleros podrían situarse en ubicaciones clave, como estaciones de transporte público, gimnasios y áreas de 
+        trabajo, para adaptarse al estilo de vida activo y dinámico de estos clientes.
+        Además de brindar conveniencia a los clientes, los casilleros reducirían la presión sobre el sistema de entregas al disminuir el número de 
+        envíos a domicilio y facilitar la logística de devoluciones. Los clientes podrían gestionar sus devoluciones fácilmente mientras realizan 
+        otras actividades cotidianas, lo que aumentaría la eficiencia operativa y mejoraría la satisfacción general con el servicio.
+        '''
+
+    elif(num==4):
+        return
+    elif(num==5):
+        return
+    elif(num==6):
+        return
+
+#----------------------------------
 
 
-#como es el nivel de satisfaccion?
-df_counts = df_cluster0_analisis_f_USA_ingresos_altos.groupby(['mapeo_city', 'mapeo_satisfaction']).size().reset_index(name='Group_Count')
+def f_joven_USA_ing (df_f_USA_ingresos, valor):
 
-# Crear el gráfico sunburst
-fig = px.sunburst(
-    df_counts,
-    path=['mapeo_city', 'mapeo_satisfaction'],
-    values='Group_Count',
-    title='Distribución de Transacciones por País y Mes'
-)
+    def top10_metodoPago(df_top):
+        # Seleccionar las columnas de categorías y métodos de pago
+        categorias = ['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
+                    'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
+                    'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
+                    'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
+                    'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
+                    'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
+                    'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']
+        
+        # Crear un DataFrame solo con las columnas de interés
+        df_totals1 = df_top[categorias + ['Cash', 'Credit', 'Debit']]
+        
 
-# Mostrar el gráfico
-fig.show()
+        # Convertir el DataFrame a formato largo para tener cada categoría y método de pago en filas separadas
+        df_long = df_totals1.melt(id_vars=['Cash', 'Credit', 'Debit'], 
+                                value_vars=categorias, 
+                                var_name="Categoria", 
+                                value_name="Cantidad_Total")
+        
+        # Ordenar primero por "Cantidad_Total" y luego por el valor de cada método de pago
+        df_sorted = df_long.sort_values(by=["Cantidad_Total", "Cash", "Credit", "Debit"], ascending=False)
+        
+        # Seleccionar el Top 10
+        top_10 = df_sorted.head(10)
+        
+        return top_10
 
-
-
-print('''Análisis de comportamiento de compra en mujeres jóvenes y adultas en USA:
-      En los Estados Unidos, hay una alta representación de mujeres jóvenes y adultas con ingresos elevados que compran principalmente 
-      en las primeras horas del día, especialmente durante la madrugada y la mañana. 
-      Estas consumidoras se enfocan en diversas categorías de productos, con particular preferencia por alimentos, ropa y libros.
-      Los Alimentos son la categoría más comprada por este grupo.
-      Ropa y libros, le siguen en popularidad. Existe una oportunidad para ofrecer estos productos con una plataforma que permita tanto 
-      la compra de artículos nuevos como la reventa de productos usados, incentivando así un ciclo de consumo sostenible. 
-      También podría considerarse la integración de libros electrónicos (e-books) en la plataforma.
-      Decoración del hogar, muebles y electrodomésticos: Aunque estos productos tienden a ser más costosos, presentan alta rotación. 
-      Esto sugiere que estas compradoras buscan productos en tendencia, de calidad y que reflejen un interés en la moda y el diseño. 
-      Sería beneficioso ofrecer artículos de vanguardia que satisfagan esta demanda.
-      Productos electrónicos (audio, smartphones y televisores): Estos productos, aunque presentan pocas cantidades vendidas, tienen un impacto 
-      significativo en los ingresos de la empresa, ya que pequeños aumentos en las unidades vendidas pueden significar cambios mayores en la rentabilidad de la empresa. 
-      En particular, los smartphones son altamente rentables, ya que ocupan poco espacio de almacenamiento y son fáciles de transportar. 
-      Una estrategia atractiva podría ser la oferta de un plan de recambio anual, en el cual las clientas puedan obtener el último modelo de teléfono 
-      al entregar su dispositivo usado, que a su vez podría repararse y revenderse a clientes de ingresos más bajos. 
-      Además, se podrían ofrecer descuentos en audífonos al comprar un smartphone o parlantes con la compra de un televisor.
-      La mayoría de estas consumidoras opta por pagar con crédito.
-      Las ciudades con mayor representatividad en este grupo son Boston y Chicago. Aunque el nivel de satisfacción es bueno en ambas, 
-      se observa una porción de clientes insatisfechas. Esto abre una oportunidad para investigar las causas de esta insatisfacción, diferenciando 
-      las características de estos grupos para mejorar la experiencia de compra. Si no se cuenta con más información al respecto, podría ser útil 
-      enviar un cuestionario de satisfacción acompañado de un incentivo, como un descuento en alimentos, libros o ropa, para animar la participación.
-      Como estas compradoras tienden a realizar sus compras en la madrugada y la mañana, sería conveniente implementar un carrito de compras programado. 
-      Este podría optimizar el tiempo de búsqueda, sugiriendo automáticamente productos que suelen comprar y dejando espacio para descubrir nuevos 
-      artículos o recomendaciones personalizadas en función de sus preferencias. Esto permitiría una experiencia de compra eficiente y atractiva.
-      ''')
-
-
-
-#--------------------------------------------------------------------------------------------------
-
-categorias = [
-    'Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
-    'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
-    'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
-    'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
-    'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
-    'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
-    'Cantidades_Totales_TV', 'Cantidades_Totales_Tools'
-]
-
-# Usamos idxmax en las columnas de categorías para obtener la categoría con el valor máximo
-df_cluster0_analisis_f_USA_ingresos_altos['Modalidad_Preferida_producto'] = df_cluster0_analisis_f_USA_ingresos_altos[categorias].idxmax(axis=1)
-
-# Opcional: Limpiamos el nombre de la categoría eliminando el prefijo "Cantidades_Totales_"
-df_cluster0_analisis_f_USA_ingresos_altos['Modalidad_Preferida_producto'] = df_cluster0_analisis_f_USA_ingresos_altos['Modalidad_Preferida_producto'].str.replace('Cantidades_Totales_', '', regex=False)
-
-df_cluster0_analisis_f_USA_ingresos_altos.head()
-
-# Contamos la cantidad de clientes por satisfacción y modalidad preferida
-df_count = df_cluster0_analisis_f_USA_ingresos_altos.groupby(['mapeo_satisfaction', 'Modalidad_Preferida_producto']).size().reset_index(name='Total_Clientes')
-
-# Creamos el gráfico
-plt.figure(figsize=(10, 6))
-sns.barplot(data=df_count, x='Modalidad_Preferida_producto', y='Total_Clientes', hue='mapeo_satisfaction')
-
-plt.title('Preferencia de Modalidad de producto por Satisfacción del Cliente')
-plt.ylabel('Número de Clientes')
-plt.xlabel('Modalidad de Producto Preferido')
-plt.legend(title='Satisfacción')
-plt.show()
+    # Ejecutar la función y ver los resultados
+    top_10_metodoPago = top10_metodoPago(df_f_USA_ingresos)
+    print("Top 10 de categorías más compradas por métodos de pago:")
+    print(top_10_metodoPago)
 
 
 
-print('''Análisis de satisfacción y optimización de envíos en diferentes categorías de productos:.
-      Se observa que las clientas de ingresos altos están muy satisfechas con el servicio de entrega para productos de electrodomésticos (Appliances). 
-      Sin embargo, en las categorías de Books y Food, la diferencia en satisfacción es menor, lo que podría indicar problemas en el servicio de envío 
-      específico para estos productos. En la categoría de Clothing, el índice de satisfacción es significativamente mejor, lo que sugiere que el proceso 
-      de entrega para ropa se maneja con mayor eficacia que en las otras categorías.
-      Para optimizar la satisfacción de las clientas y mejorar la eficiencia en los envíos, podría ser beneficioso implementar una plataforma de 
-      alquiler de libros online. Esto permitiría a las clientas alquilar libros junto con sus compras de ropa, combinando envíos y disminuyendo 
-      la carga logística en momentos de alta demanda.
-      En caso de que la empresa experimente saturación de entregas en ciertos momentos del día, podría ser útil incentivar la compra de artículos 
-      menos urgentes, como libros, junto con productos de alta demanda. Esto permitiría agrupar envíos y liberar recursos para atender otras categorías 
-      con mayor rapidez.
-      Para ofrecer mayor conveniencia a las clientas, podría implementarse un sistema de casilleros en lugares estratégicos de la ciudad. 
-      De esta forma, las clientas podrían retirar sus pedidos en el horario que más les convenga, reduciendo la presión sobre el sistema de entregas 
-      y mejorando la experiencia del cliente al permitirle flexibilidad en la recogida de sus productos.
-      ''')
+    #como es el nivel de satisfaccion?
+    df_counts = df_f_USA_ingresos.groupby(['mapeo_city', 'mapeo_satisfaction']).size().reset_index(name='Group_Count')
+
+    # Crear el gráfico sunburst
+    fig = px.sunburst(
+        df_counts,
+        path=['mapeo_city', 'mapeo_satisfaction'],
+        values='Group_Count',
+        title='Distribución de Transacciones por País y Mes'
+    )
+
+    # Mostrar el gráfico
+    fig.show()
+
+
+    if(valor=='High'):
+        print(mensaje(1))
+    elif(valor=='Low'):
+        print(mensaje(4))
+    elif(valor=='Indeterminate'):
+        print(mensaje(7))
+    else:
+        return ''
 
 
 
-# Supongamos que tienes tu DataFrame llamado df
-# Creamos una columna que indica la modalidad de envío preferida por cada cliente
-df_cluster0_analisis_f_USA_ingresos_altos['Modalidad_Preferida'] = df_cluster0_analisis_f_USA_ingresos_altos.apply(
-    lambda x: 'Standard' if x['Cantidades_Totales_Standard'] > x['Cantidades_Totales_Urgent-Delivery'] else 'Urgent-Delivery', 
-    axis=1
-)
+    #--------------------------------------------------------------------------------------------------
 
-# Contamos la cantidad de clientes por satisfacción y modalidad preferida
-df_count = df_cluster0_analisis_f_USA_ingresos_altos.groupby(['mapeo_satisfaction', 'Modalidad_Preferida']).size().reset_index(name='Total_Clientes')
+    categorias = [
+        'Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books', 
+        'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food', 
+        'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys', 
+        'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor', 
+        'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes', 
+        'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports', 
+        'Cantidades_Totales_TV', 'Cantidades_Totales_Tools'
+    ]
 
-# Creamos el gráfico
-plt.figure(figsize=(10, 6))
-sns.barplot(data=df_count, x='Modalidad_Preferida', y='Total_Clientes', hue='mapeo_satisfaction')
+    # Usamos idxmax en las columnas de categorías para obtener la categoría con el valor máximo
+    df_f_USA_ingresos['Modalidad_Preferida_producto'] = df_f_USA_ingresos[categorias].idxmax(axis=1)
 
-plt.title('Preferencia de Modalidad de Envío por Satisfacción del Cliente')
-plt.ylabel('Número de Clientes')
-plt.xlabel('Modalidad de Envío Preferida')
-plt.legend(title='Satisfacción')
-plt.show()
+    # Opcional: Limpiamos el nombre de la categoría eliminando el prefijo "Cantidades_Totales_"
+    df_f_USA_ingresos['Modalidad_Preferida_producto'] = df_f_USA_ingresos['Modalidad_Preferida_producto'].str.replace('Cantidades_Totales_', '', regex=False)
 
+    df_f_USA_ingresos.head()
 
-df_cluster0_analisis_f_USA_ingresos_altos.head()
+    # Contamos la cantidad de clientes por satisfacción y modalidad preferida
+    df_count = df_f_USA_ingresos.groupby(['mapeo_satisfaction', 'Modalidad_Preferida_producto']).size().reset_index(name='Total_Clientes')
 
+    # Creamos el gráfico
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=df_count, x='Modalidad_Preferida_producto', y='Total_Clientes', hue='mapeo_satisfaction')
 
-
-
-print('''El gráfico muestra que los clientes insatisfechos representan casi el 80% de la cantidad de clientes satisfechos, lo cual indica una 
-      deficiencia significativa en el servicio de envíos. Este dato sugiere que es crucial mejorar la calidad de entrega, especialmente en las 
-      ciudades de Chicago y Boston, donde se concentra la mayor cantidad de clientes.
-      Foco en Chicago y Boston: Dado que estas ciudades presentan el mayor volumen de clientes, es prioritario optimizar el servicio de entrega 
-      en estas áreas para reducir la insatisfacción. Identificar las causas de los problemas actuales en la logística de envío (como demoras, 
-      entregas fallidas o falta de opciones flexibles) sería fundamental para mejorar la experiencia de los clientes y fortalecer la retención.
-      Expansión en San Francisco: La ciudad de San Francisco es un mercado con gran potencial de crecimiento, especialmente por su población 
-      predominantemente joven, que valora la flexibilidad y las opciones de conveniencia. Implementar casilleros de recogida en puntos estratégicos 
-      de la ciudad podría mejorar la experiencia del cliente, permitiéndole retirar sus pedidos en el momento que más le convenga y facilitar el 
-      proceso de devolución. Estos casilleros podrían situarse en ubicaciones clave, como estaciones de transporte público, gimnasios y áreas de 
-      trabajo, para adaptarse al estilo de vida activo y dinámico de estos clientes.
-      Además de brindar conveniencia a los clientes, los casilleros reducirían la presión sobre el sistema de entregas al disminuir el número de 
-      envíos a domicilio y facilitar la logística de devoluciones. Los clientes podrían gestionar sus devoluciones fácilmente mientras realizan 
-      otras actividades cotidianas, lo que aumentaría la eficiencia operativa y mejoraría la satisfacción general con el servicio.
-      ''')
+    plt.title('Preferencia de Modalidad de producto por Satisfacción del Cliente')
+    plt.ylabel('Número de Clientes')
+    plt.xlabel('Modalidad de Producto Preferido')
+    plt.legend(title='Satisfacción')
+    plt.show()
 
 
+    if(valor=='High'):
+        print(mensaje(2))
+    elif(valor=='Low'):
+        print(mensaje(5))
+    elif(valor=='Indeterminate'):
+        print(mensaje(8))
+    else:
+        return ''
+
+
+    # Supongamos que tienes tu DataFrame llamado df
+    # Creamos una columna que indica la modalidad de envío preferida por cada cliente
+    df_f_USA_ingresos['Modalidad_Preferida'] = df_f_USA_ingresos.apply(
+        lambda x: 'Standard' if x['Cantidades_Totales_Standard'] > x['Cantidades_Totales_Urgent-Delivery'] else 'Urgent-Delivery', 
+        axis=1
+    )
+
+    # Contamos la cantidad de clientes por satisfacción y modalidad preferida
+    df_count = df_f_USA_ingresos.groupby(['mapeo_satisfaction', 'Modalidad_Preferida']).size().reset_index(name='Total_Clientes')
+
+    # Creamos el gráfico
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=df_count, x='Modalidad_Preferida', y='Total_Clientes', hue='mapeo_satisfaction')
+
+    plt.title('Preferencia de Modalidad de Envío por Satisfacción del Cliente')
+    plt.ylabel('Número de Clientes')
+    plt.xlabel('Modalidad de Envío Preferida')
+    plt.legend(title='Satisfacción')
+    plt.show()
+
+
+    df_f_USA_ingresos.head()
+
+    if(valor=='High'):
+        print(mensaje(3))
+    elif(valor=='Low'):
+        print(mensaje(6))
+    elif(valor=='Indeterminate'):
+        print(mensaje(9))
+    else:
+        return ''
+
+print('''*******Grupo femenino joven y adulto joven en Estados Unidos con ingresos altos************''')
+
+df_f_USA_ingAltos=estuadio_ingresos(df_cluster0_analisis_f_USA_ingresos, 'High')
+f_joven_USA_ing (df_f_USA_ingAltos, 'High')
+
+
+print('''*******Grupo femenino joven y adulto joven en Estados Unidos con ingresos bajos************''')
+
+df_f_USA_ingBajos=estuadio_ingresos(df_cluster0_analisis_f_USA_ingresos, 'Low')
+f_joven_USA_ing (df_f_USA_ingBajos, 'Low')
+
+
+print('''*******Grupo femenino joven y adulto joven en Estados Unidos con ingresos indeterminados************''')
+
+df_f_USA_ingIndeterminados=estuadio_ingresos(df_cluster0_analisis_f_USA_ingresos, 'Indeterminate')
+f_joven_USA_ing (df_f_USA_ingIndeterminados, 'Indeterminate')
 
 
 
 
 
 
+
+
+# Hacer generico para los distintos grupos de edades dentro de f-USA, desp los distintos generos y por ultimo los paises.
+#PONER TODO DENTRO DE UNA FUNCION PARA PODER REPETIRLO PARA EL CLUSTER 1 y 2
 
 
 

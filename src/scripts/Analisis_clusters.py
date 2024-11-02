@@ -646,19 +646,7 @@ Estudiar si las personas que compran al medioDia y en la tarde son de otro grupo
 print('''*******Grupo femenino************''')
 df_cluster0_analisis_f=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Female']
 
-#Como se distribuyen las mujeres en cada pais
 
-ax = sns.countplot(x="mapeo_country", data=df_cluster0_analisis_f)
-
-#Hay más representatividad en United States y United Kingdom
-#Como se distribuye las edades en estos paises
-
-print('''*******Grupo femenino en Estados Unidos************''')
-df_cluster0_analisis_f_USA=df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_country']=='United States']
-
-ax = sns.countplot(x="mapeo_Categoria_Edad", data=df_cluster0_analisis_f_USA)
-
-#En USA hay mayor representatividad de mujeres Jovenes y Adultas
 #A que hora compran estos grupos?
 
 def f_joven_USA_Hora(df_usar, valor1, valor2):
@@ -783,8 +771,7 @@ def mensaje(num):
 
 #----------------------------------
 
-
-def f_joven_USA_ing (df_f_USA_ingresos, valor):
+def f_joven_USA_ing (df_f_USA_ingresos, ingreso, valor, valor1):
 
     def top10_metodoPago(df_top):
         # Seleccionar las columnas de categorías y métodos de pago
@@ -836,12 +823,15 @@ def f_joven_USA_ing (df_f_USA_ingresos, valor):
     fig.show()
 
 
-    if(valor=='High'):
-        print(mensaje(1))
-    elif(valor=='Low'):
-        print(mensaje(4))
-    elif(valor=='Indeterminate'):
-        print(mensaje(7))
+    if(ingreso=='High'):
+        if(valor=='Joven'):
+            print(mensaje(1))
+    elif(ingreso=='Low'):
+        if(valor=='Joven'):
+            print(mensaje(4))
+    elif(ingreso=='Indeterminate'):
+        if(valor=='Joven'):
+            print(mensaje(7))
     else:
         return ''
 
@@ -882,14 +872,17 @@ def f_joven_USA_ing (df_f_USA_ingresos, valor):
 
 
     if(valor=='High'):
-        print(mensaje(2))
+        if(valor1=='Joven'):
+            print(mensaje(2))
     elif(valor=='Low'):
-        print(mensaje(5))
+        if(valor1=='Joven'):
+            print(mensaje(5))
     elif(valor=='Indeterminate'):
-        print(mensaje(8))
+        if(valor1=='Joven'):
+            print(mensaje(8))
     else:
         return ''
-
+    
 
     # Supongamos que tienes tu DataFrame llamado df
     # Creamos una columna que indica la modalidad de envío preferida por cada cliente
@@ -915,11 +908,14 @@ def f_joven_USA_ing (df_f_USA_ingresos, valor):
     df_f_USA_ingresos.head()
 
     if(valor=='High'):
-        print(mensaje(3))
+        if(valor1=='Joven'):
+            print(mensaje(3))
     elif(valor=='Low'):
-        print(mensaje(6))
+        if(valor1=='Joven'):
+            print(mensaje(6))
     elif(valor=='Indeterminate'):
-        print(mensaje(9))
+        if(valor1=='Joven'):
+            print(mensaje(9))
     else:
         return ''
 
@@ -927,21 +923,38 @@ def analisisIngresos (df, edad1, edad2):
     print(f"*******Grupo femenino {edad1} y {edad2} en Estados Unidos con ingresos altos************")
 
     df_f_USA_ingAltos=estuadio_ingresos(df, 'High')
-    f_joven_USA_ing (df_f_USA_ingAltos, 'High')
+    f_joven_USA_ing (df_f_USA_ingAltos, 'High', edad1, edad2)
 
 
     print(f"*******Grupo femenino {edad1} y {edad2} en Estados Unidos con ingresos bajos************")
 
     df_f_USA_ingBajos=estuadio_ingresos(df, 'Low')
-    f_joven_USA_ing (df_f_USA_ingBajos, 'Low')
+    f_joven_USA_ing (df_f_USA_ingBajos, 'Low', edad1, edad2)
 
 
     print(f"*******Grupo femenino {edad1} y {edad2} en Estados Unidos con ingresos indeterminados************")
 
     df_f_USA_ingIndeterminados=estuadio_ingresos(df, 'Indeterminate')
-    f_joven_USA_ing (df_f_USA_ingIndeterminados, 'Indeterminate')
+    f_joven_USA_ing (df_f_USA_ingIndeterminados, 'Indeterminate', edad1, edad2)
 
 
+
+# FALTA GENERO y PAIS
+#Como se distribuyen las mujeres en cada pais
+def estudioPais(df_cluster0_analisis_f):
+    ax = sns.countplot(x="mapeo_country", data=df_cluster0_analisis_f)
+
+    #Hay más representatividad en United States y United Kingdom
+    #Como se distribuye las edades en estos paises
+
+    print('''*******Grupo femenino en Estados Unidos************''')
+    #Cambiar USA por una variable generica que tome los primeros cinco paises con mas ventas.
+    df_cluster0_analisis_f_USA=df_cluster0_analisis_f[df_cluster0_analisis_f['mapeo_country']=='United States']
+
+    ax = sns.countplot(x="mapeo_Categoria_Edad", data=df_cluster0_analisis_f_USA)
+
+    #En USA hay mayor representatividad de mujeres Jovenes y Adultas
+    return df_cluster0_analisis_f_USA
 
 
 #En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana y tienen ingresos altos
@@ -949,28 +962,16 @@ def analisisIngresos (df, edad1, edad2):
 
 
 print('''*******Grupo femenino joven y adulto joven en Estados Unidos************''')
-
+df_cluster0_analisis_f_USA=estudioPais(df_cluster0_analisis_f)
 df_cluster0_analisis_f_USA_ingresos_jov=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto_Joven', 'Joven')
-analisisIngresos(df_cluster0_analisis_f_USA_ingresos_jov)
-
-# Crear gráfico de ingresos para las filas filtradas
-ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos_jov)
-
-print('''*******Grupo femenino adulto y adulto mayor en Estados Unidos************''')
-
-df_cluster0_analisis_f_USA_ingresos_adul=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto', 'Adulto_Mayor')
-analisisIngresos(df_cluster0_analisis_f_USA_ingresos_adul)
-ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos_adul)
-
-print('''*******Grupo femenino joven y adulto joven en Estados Unidos************''')
-
-df_cluster0_analisis_f_USA_ingresos_vet=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto_Mayor', 'Veterano')
-analisisIngresos(df_cluster0_analisis_f_USA_ingresos_vet)
-ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos_vet)
+analisisIngresos(df_cluster0_analisis_f_USA_ingresos_jov,'Adulto_Joven', 'Joven')
 
 
 
+print('''*******Grupo femenino adulto y Veterano en Estados Unidos************''')
 
+df_cluster0_analisis_f_USA_ingresos_adul=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto', 'Veterano')
+analisisIngresos(df_cluster0_analisis_f_USA_ingresos_adul,'Adulto', 'Veterano')
 
 
 

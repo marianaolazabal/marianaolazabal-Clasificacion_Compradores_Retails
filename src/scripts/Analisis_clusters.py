@@ -661,26 +661,28 @@ ax = sns.countplot(x="mapeo_Categoria_Edad", data=df_cluster0_analisis_f_USA)
 #En USA hay mayor representatividad de mujeres Jovenes y Adultas
 #A que hora compran estos grupos?
 
-print('''*******Grupo femenino joven y adulto joven en Estados Unidos************''')
+def f_joven_USA_Hora(df_usar, valor1, valor2):
+    # Filtrar por categoría de edad
+    df_cluster0_analisis_f_USA_hora = df_usar[df_usar['mapeo_Categoria_Edad'].isin([valor1, valor2])]
 
-df_cluster0_analisis_f_USA_hora = df_cluster0_analisis_f_USA[df_cluster0_analisis_f_USA['mapeo_Categoria_Edad'].isin(['Adulto_Joven', 'Joven'])]
+    # Convertir a formato largo para obtener la frecuencia por cada momento del día
+    df_long = df_cluster0_analisis_f_USA_hora.melt(value_vars=["madrugada", "mañana", "medioDia", "noche", "tarde"], 
+                                                   var_name="Hora", value_name="Frecuencia")
 
-df_long = df_cluster0_analisis_f_USA_hora.melt(value_vars=["madrugada", "mañana", "medioDia", "noche", "tarde"], 
-                                               var_name="Hora", value_name="Frecuencia")
+    # Sumar las frecuencias por hora para el gráfico de barras
+    df_suma = df_long.groupby("Hora")["Frecuencia"].sum().reset_index()
 
-df_suma = df_long.groupby("Hora")["Frecuencia"].sum().reset_index()
+    # Crear gráfico de barras
+    ax = sns.barplot(x="Hora", y="Frecuencia", data=df_suma)
 
-# Crear el gráfico de barras con la suma de frecuencias por Hora
-ax = sns.barplot(x="Hora", y="Frecuencia", data=df_suma)
+    # Identificar los momentos del día con mayores compras
+    max_frecuencias = df_suma[df_suma["Frecuencia"] == df_suma["Frecuencia"].max()]["Hora"].values
+    condiciones = df_cluster0_analisis_f_USA_hora[max_frecuencias].sum(axis=1) > 0.0
+    
+    # Filtrar por los momentos de mayor compra identificados
+    df_cluster0_analisis_f_USA_ingresos = df_cluster0_analisis_f_USA_hora[condiciones]
 
-#En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana
-#Que ingresos tienen
-df_cluster0_analisis_f_USA_ingresos= df_cluster0_analisis_f_USA_hora[(df_cluster0_analisis_f_USA_hora['madrugada'] > 0.0) | (df_cluster0_analisis_f_USA_hora['mañana'] > 0.0 )]
-
-ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos)
-
-#En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana y tienen ingresos altos
-#Top 10 productos comprados
+    return df_cluster0_analisis_f_USA_ingresos
 
 
 #----------------------------------
@@ -921,29 +923,67 @@ def f_joven_USA_ing (df_f_USA_ingresos, valor):
     else:
         return ''
 
-print('''*******Grupo femenino joven y adulto joven en Estados Unidos con ingresos altos************''')
+def analisisIngresos (df, edad1, edad2):
+    print(f"*******Grupo femenino {edad1} y {edad2} en Estados Unidos con ingresos altos************")
 
-df_f_USA_ingAltos=estuadio_ingresos(df_cluster0_analisis_f_USA_ingresos, 'High')
-f_joven_USA_ing (df_f_USA_ingAltos, 'High')
-
-
-print('''*******Grupo femenino joven y adulto joven en Estados Unidos con ingresos bajos************''')
-
-df_f_USA_ingBajos=estuadio_ingresos(df_cluster0_analisis_f_USA_ingresos, 'Low')
-f_joven_USA_ing (df_f_USA_ingBajos, 'Low')
+    df_f_USA_ingAltos=estuadio_ingresos(df, 'High')
+    f_joven_USA_ing (df_f_USA_ingAltos, 'High')
 
 
-print('''*******Grupo femenino joven y adulto joven en Estados Unidos con ingresos indeterminados************''')
+    print(f"*******Grupo femenino {edad1} y {edad2} en Estados Unidos con ingresos bajos************")
 
-df_f_USA_ingIndeterminados=estuadio_ingresos(df_cluster0_analisis_f_USA_ingresos, 'Indeterminate')
-f_joven_USA_ing (df_f_USA_ingIndeterminados, 'Indeterminate')
+    df_f_USA_ingBajos=estuadio_ingresos(df, 'Low')
+    f_joven_USA_ing (df_f_USA_ingBajos, 'Low')
 
 
+    print(f"*******Grupo femenino {edad1} y {edad2} en Estados Unidos con ingresos indeterminados************")
 
+    df_f_USA_ingIndeterminados=estuadio_ingresos(df, 'Indeterminate')
+    f_joven_USA_ing (df_f_USA_ingIndeterminados, 'Indeterminate')
 
 
 
 
+#En USA hay mayor representatividad de mujeres Jovenes y Adultas, compran en la madrugada y en la mañana y tienen ingresos altos
+#Top 10 productos comprados
+
+
+print('''*******Grupo femenino joven y adulto joven en Estados Unidos************''')
+
+df_cluster0_analisis_f_USA_ingresos_jov=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto_Joven', 'Joven')
+analisisIngresos(df_cluster0_analisis_f_USA_ingresos_jov)
+
+# Crear gráfico de ingresos para las filas filtradas
+ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos_jov)
+
+print('''*******Grupo femenino adulto y adulto mayor en Estados Unidos************''')
+
+df_cluster0_analisis_f_USA_ingresos_adul=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto', 'Adulto_Mayor')
+analisisIngresos(df_cluster0_analisis_f_USA_ingresos_adul)
+ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos_adul)
+
+print('''*******Grupo femenino joven y adulto joven en Estados Unidos************''')
+
+df_cluster0_analisis_f_USA_ingresos_vet=f_joven_USA_Hora(df_cluster0_analisis_f_USA,'Adulto_Mayor', 'Veterano')
+analisisIngresos(df_cluster0_analisis_f_USA_ingresos_vet)
+ax = sns.countplot(x="mapeo_income", data=df_cluster0_analisis_f_USA_ingresos_vet)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # Hacer generico para los distintos grupos de edades dentro de f-USA, desp los distintos generos y por ultimo los paises.
 #PONER TODO DENTRO DE UNA FUNCION PARA PODER REPETIRLO PARA EL CLUSTER 1 y 2

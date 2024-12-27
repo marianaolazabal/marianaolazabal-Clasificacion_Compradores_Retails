@@ -295,8 +295,6 @@ def estuadio_ingresos (df, valor, edad, pais, genero, cluster):
    top_10 = top10(df_genero_ingreso_edad).sort_values(ascending=False).head(10)
    print("Top 10 de categorías más compradas:")
    print(top_10)
-
-   mensaje_estuadio_ingresos(valor, edad, pais,genero, cluster)
 #----------------------------------
 
 

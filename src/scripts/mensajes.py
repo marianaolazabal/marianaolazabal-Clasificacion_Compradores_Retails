@@ -156,12 +156,7 @@ def mensajeGenero_edad_Hora(pais, genero, edad, cluster):
   if(cluster==0):
     if(pais=='United States'):
         if(genero=='Female'):
-            if(edad=='Adulto_Joven'):
-               print(f'''
-La mayoría de las personas que viven en United States, del genero Femenino, dentro de la categoría Adulto_Joven
-compran en la mañana y la madrugada, seguido por la tarde.''')
-            elif(edad=='Joven'):
-               print(f'''
+            print(f'''
 La mayoría de las personas que viven en United States, del genero Femenino, dentro de la categoría Joven
 compran en la madrugada y la mañana, seguido por la tarde. La diferencia con el grupo Adulto_Joven es que compran
 en mayor porcentaje en la madrugada. Esto podría estar indicando que son personas que trabajan tarde o estudian y realizan
@@ -174,7 +169,7 @@ con esto, identificar si hay grupos de oficio que expliquen comportamientos de c
 compran en la madrugada, la tarde y la mañana.''')
 
 
-def mensaje_estuadio_ingresos(ingreso, edad, pais, genero, cluster):
+def mensaje_estuadio_ingresos(cluster):
  
     if(cluster==0):
         print('''
@@ -221,7 +216,108 @@ Recomendaciones Estratégicas
 
     Adaptación a Segmentos y Regiones:
         Aprovechar el alto nivel de satisfacción en ciudades como Birmingham y Brighton para replicar prácticas exitosas en áreas de bajo desempeño.
-        En regiones con alta representatividad de clientas de ingresos bajos, considerar el lanzamiento de campañas con descuentos y promociones para estimular el consumo.''')
+        En regiones con alta representatividad de clientas de ingresos bajos, considerar el lanzamiento de campañas con descuentos y promociones para estimular el consumo.
+              
+    Del análisis del top 10 de productos más comprados, se identifica que las categorías Food y Books son las más populares entre el grupo femenino Adulto-Joven con ingresos altos en Estados Unidos. 
+Este grupo se concentra principalmente en la ciudad de Chicago y, en general, está satisfecho con el servicio. 
+Sin embargo, se observa un porcentaje de personas dentro de este segmento que se encuentra insatisfecho. 
+Se recomienda investigar a fondo las causas de esta inconformidad.
+
+Del análisis del top 10 de productos más comprados, se identifica que las categorías Food y Ropa son las más populares entre el grupo femenino Adulto-Joven con ingresos bajos en Estados Unidos. 
+Este grupo se encuentra mayoritariamente en la ciudad de Chicago, donde la mayoría reporta estar satisfecha con el servicio. 
+Sin embargo, se destaca un porcentaje significativo de clientas que manifiestan insatisfacción, lo que sugiere la necesidad de investigar en profundidad las posibles causas detrás de este descontento.
+Además, se identificó a clientas de este segmento ubicadas en otras ciudades como Baltimore, Charlotte y Dallas. 
+Todas ellas reportaron estar satisfechas con el servicio, lo que contrasta con los resultados observados en Chicago.
+A medida que se mejore la representatividad de estas ciudades en el análisis, será posible evaluar las diferencias entre estas ubicaciones y explorar factores específicos que puedan estar contribuyendo a la insatisfacción en Chicago.
+
+                      Del análisis se desprende que las categorías de productos más comprados son Food y Furniture. 
+Sin embargo, la percepción del servicio varía significativamente según la ubicación geográfica.
+En el caso de Chicago, las opiniones del grupo están divididas entre satisfacción e insatisfacción, lo que sugiere que existen factores específicos que generan experiencias inconsistentes. 
+Por otro lado, en Charlotte, se destaca una insatisfacción total dentro de este segmento, lo cual evidencia un problema más profundo que requiere atención inmediata.
+Estos hallazgos apuntan a la necesidad de realizar un análisis detallado de las condiciones en ambas ciudades, considerando aspectos como el nivel de servicio, la disponibilidad de productos, el tiempo de entrega, y las expectativas de los clientes. 
+Una investigación más exhaustiva podría ayudar a identificar las causas subyacentes de la insatisfacción y proporcionar soluciones adaptadas a las necesidades específicas de cada mercado.
+
+Análisis de comportamiento de compra en mujeres jóvenes y adultas en USA:
+En los Estados Unidos, hay una alta representación de mujeres jóvenes y adultas con ingresos elevados que compran principalmente
+en las primeras horas del día, especialmente durante la madrugada y la mañana.
+Estas consumidoras se enfocan en diversas categorías de productos, con particular preferencia por alimentos, ropa y libros.
+Los Alimentos son la categoría más comprada por este grupo.
+Ropa y libros, le siguen en popularidad. Existe una oportunidad para ofrecer estos productos con una plataforma que permita tanto
+la compra de artículos nuevos como la reventa de productos usados, incentivando así un ciclo de consumo sostenible.
+También podría considerarse la integración de libros electrónicos (e-books) en la plataforma.
+Decoración del hogar, muebles y electrodomésticos: Aunque estos productos tienden a ser más costosos, presentan alta rotación.
+Esto sugiere que estas compradoras buscan productos en tendencia, de calidad y que reflejen un interés en la moda y el diseño.
+Sería beneficioso ofrecer artículos de vanguardia que satisfagan esta demanda.
+Productos electrónicos (audio, smartphones y televisores): Estos productos, aunque presentan pocas cantidades vendidas, tienen un impacto
+significativo en los ingresos de la empresa, ya que pequeños aumentos en las unidades vendidas pueden significar cambios mayores en la rentabilidad de la empresa.
+En particular, los smartphones son altamente rentables, ya que ocupan poco espacio de almacenamiento y son fáciles de transportar.
+Una estrategia atractiva podría ser la oferta de un plan de recambio anual, en el cual las clientas puedan obtener el último modelo de teléfono
+al entregar su dispositivo usado, que a su vez podría repararse y revenderse a clientes de ingresos más bajos.
+Además, se podrían ofrecer descuentos en audífonos al comprar un smartphone o parlantes con la compra de un televisor.
+La mayoría de estas consumidoras opta por pagar con crédito.
+Las ciudades con mayor representatividad en este grupo son Boston y Chicago. Aunque el nivel de satisfacción es bueno en ambas,
+se observa una porción de clientes insatisfechas. Esto abre una oportunidad para investigar las causas de esta insatisfacción, diferenciando
+las características de estos grupos para mejorar la experiencia de compra. Si no se cuenta con más información al respecto, podría ser útil
+enviar un cuestionario de satisfacción acompañado de un incentivo, como un descuento en alimentos, libros o ropa, para animar la participación.
+Como estas compradoras tienden a realizar sus compras en la madrugada y la mañana, sería conveniente implementar un carrito de compras programado.
+Este podría optimizar el tiempo de búsqueda, sugiriendo automáticamente productos que suelen comprar y dejando espacio para descubrir nuevos
+artículos o recomendaciones personalizadas en función de sus preferencias. Esto permitiría una experiencia de compra eficiente y atractiva.
+
+Se observa una alta representatividad de clientes en Chicago, seguida de Boston, donde los niveles de satisfacción e insatisfacción presentan una distribución muy equilibrada.
+Al igual que en otros grupos analizados, los productos más populares son Comida, Libros y Ropa. 
+Este comportamiento podría indicar que la plataforma ofrece una amplia y atractiva variedad de productos dentro de estas categorías, lo que capta el interés de un público diverso. 
+Otra interpretación posible es que estos productos son percibidos como relevantes y accesibles para diferentes niveles de ingreso, lo que implica que el precio no es un factor determinante en las decisiones de compra.
+Este hallazgo abre oportunidades para un análisis más profundo sobre la estrategia de precios y la diversidad de productos ofrecidos. 
+Si el precio no influye significativamente en las decisiones de compra, la plataforma podría considerar enfocarse en otros factores diferenciadores, como la experiencia del usuario, la rapidez en los envíos o la calidad del servicio al cliente, para fortalecer su posicionamiento.
+
+Análisis de satisfacción y optimización de envíos en diferentes categorías de productos:.
+Se observa que las clientas de ingresos altos están muy satisfechas con el servicio de entrega para productos de electrodomésticos (Appliances).
+Sin embargo, en las categorías de Books y Food, la diferencia en satisfacción es menor, lo que podría indicar problemas en el servicio de envío
+específico para estos productos. En la categoría de Clothing, el índice de satisfacción es significativamente mejor, lo que sugiere que el proceso
+de entrega para ropa se maneja con mayor eficacia que en las otras categorías.
+Para optimizar la satisfacción de las clientas y mejorar la eficiencia en los envíos, podría ser beneficioso implementar una plataforma de
+alquiler de libros online. Esto permitiría a las clientas alquilar libros junto con sus compras de ropa, combinando envíos y disminuyendo
+la carga logística en momentos de alta demanda.
+En caso de que la empresa experimente saturación de entregas en ciertos momentos del día, podría ser útil incentivar la compra de artículos
+menos urgentes, como libros, junto con productos de alta demanda. Esto permitiría agrupar envíos y liberar recursos para atender otras categorías
+con mayor rapidez.
+Para ofrecer mayor conveniencia a las clientas, podría implementarse un sistema de casilleros en lugares estratégicos de la ciudad.
+De esta forma, las clientas podrían retirar sus pedidos en el horario que más les convenga, reduciendo la presión sobre el sistema de entregas
+y mejorando la experiencia del cliente al permitirle flexibilidad en la recogida de sus productos.
+
+Como se observa de los graficos, se mantienen los productos mas populares para las mujeres que vivien en el Reino Unido y tienen ingresos altos, 
+mientras que muchas expresan satisfacción con su experiencia de compra, en ciudades como Birmingham, Leeds y Liverpool se observa una mayor proporción de insatisfacción, lo que representa una oportunidad para mejorar la experiencia del cliente en esas áreas. 
+Estas tendencias nos permiten adaptar estrategias para ofrecer productos y servicios que se alineen aún más con las necesidades y horarios de este segmento.
+En el caso de las clientas que pertencen al segmento de bajos ingresos se muestra una representatividad mayor en Birmingham y la satisfaccion es tambien mayor para esta ciudad, al igual que Edinburgh que no figura en ingresos altos, esto puede estar indicando que son ciudades con mayor representatividad de ingresos bajos o no hay alternativas al servicio, esto abre una oportunidad para mejorar en la zona, ofreciendo descuentos e incentivos que estimulen la compra de productos.
+Se observa gran representatividad en la ciudad de Belfast del grupo de ingresos indeterminados, sin embargo el nivel de Satisfaccion es bajo, identificar por que ciudades como Birmingham y Brighton tienen un nivel de satisfaccion del 100 % podria ayudar a mejorar.
+                        
+    Ropa, Electrodomesticos y comida son los productos mas comprados entre las personas de la categoria Adulto y veterano del genero femenino.
+Se encuentran en 5 ciudades, Memphis y Portland son ciudades con un nivel de insatisfaccion importante, esto puede ser por falta de productos, problemas en los envios, etc.
+Las personas adultas parecen estar en su mayoria mas insatisfechas, esta puede ser la razon por la que hay baja representatividad del grupo. Tanto Estados Unidos como 
+el Reino Unido tienen este problema, siendo que en general compran articulos de mauor tama;o, como electrodomesticos y muebles, que a si mismo son mas caros, es posible que 
+el servicio esta funcionando correctamente para los productos peque;os pero no para los grandes. Esto puede deberse a un problema en el envio, en el stock, en el precio u otros. 
+Estudiar con mayor detenimiento puede ayudar a mejorar el servicio y eventualmente las ventas para este grupo.
+              
+              
+Del genero masculino:
+              
+Tambien hay mayor representatividad de jovenes y adultos jovenes, se encuentran localizados en United States y United Kingdom, seguido por Germany.
+Boston y Chicago siguen siendo las ciudades con mayor representatividad pero ahora aparece San Francisico, esto es importante ya que es un lugar donde predomina poblacion joven, nativa a la tecnologia, por lo que hay potencial para expandir.
+Encontrar las razones por las insatisfacciones podrian ser clave para mejorar.
+              
+Chicago es la cuidad con mayor representatividad en ingresos bajos, tener en cuenta que los ingresos en cada ciudad pueden variar, lo importante es el ingreso real, ingreso vs cuanto puede comprar el ingresi en esa ciudad. Considerar entonces explorar productos diferenciados para que sean accesibles a un publico con menor ingreso.
+
+Para el grupo de genero masculino con ingresos altos y categoria de edad adulto, se observa que hay ciudades con alto nivel de satisfaccion y otras no. Al igual que en el caso del genero femenino, se recomienda estudiar las diferencias entre las ciudades para atender el problema. 
+
+Para el caso de adultos con ingresos bajos, aparecen ciudades que no figuran en otros segmentos, esto puede estar informando que hay productos de bajo costo que los de ingresos altos los perciben de mala calidad y no los compran, en contraposicion a los de ingresos bajos que si los compran y estan muy satisfechos. 
+Explorar la posibilidad de diferenciar a los clientes para bajar la percepcion del grupo con ingresos altos, ofrecer perfil premium para ver productos diferenciados, de alta calidad y nuevos.
+
+El grupo de ingresos intermedios esta dividido en Boston y Nashville, uno esta totalmente satisfecho y el otro no, sin emabrgo esto puede deberse a la baja representatividad del grupo.
+
+En United Kingdom aparece para el grupo joven de ingresos altos, en 4to lugar los smart phone, este podria ser un buen lugar para planificar una prueba de recambio de celulares. Se observa satisfaccion general en las ciudades, sin embargo, Portsmouth, Brighton y Birmingjam son las que tinen un nivel de satisfacicon mas elevado. Se podria probar en una de estas ciudades y otra que tenga un nivel de saisfaccion menor pero que el consumo de smart phones sea elevado para estudiar la incidencia de la promocion.
+
+''')
+
 
     elif(cluster==1):
        print('''''')

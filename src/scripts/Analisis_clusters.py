@@ -7,6 +7,7 @@ import numpy as np
 #import plotly.express as px
 from funciones_generales import *
 from plots import *
+from mensajes import mensaje_estuadio_ingresos
 
 
 csv_path = pathToData()
@@ -370,35 +371,40 @@ graficoMomentoDia(df_cluster0_analisis, 0)
 
 df_cluster0_analisis_f=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Female']
 
+# Cambiar los valores en el DataFrame
+df_cluster0_analisis_f['mapeo_Categoria_Edad'] = df_cluster0_analisis_f['mapeo_Categoria_Edad'].replace({'Adulto_Joven': 'Joven', 'Veterano': 'Adulto'})
+
 estudioPais(df_cluster0_analisis_f, 'Femenino')
+
 print('''Hay mayor representatividad de clientes que viven en United States y United Kingdom''')
 
 print('''*******Grupo femenino en Estados Unidos************''')
 
 paisGenero(df_cluster0_analisis_f, 'United States', 'Femenino', 0)
 
-# Se estudia el cluster 0 por genero femenino, Categorias de edad 'Adulto_Joven' y 'Joven'
+# Se estudia el cluster 0 por genero femenino, Categorias de edad 'Joven'
 
-genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Adulto_Joven', 0)
-
-genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Joven', 0)##
-
-analisisIngresos(df_cluster0_analisis_f,'Female', 'Adulto_Joven','United States', 0)
+genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Joven', 0)
+genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Adulto', 0)
 
 analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven','United States', 0)
-
+analisisIngresos(df_cluster0_analisis_f,'Female', 'Adulto','United States', 0)
 
 # Filtro también por los países 'United State' y 'United Kingdom'
 
 print('''*******Grupo femenino joven y adulto joven en United Kingdom************''')
 
 genero_edad_Hora(df_cluster0_analisis_f, 'Female', 'United Kingdom','Joven', 0)
+genero_edad_Hora(df_cluster0_analisis_f, 'Female', 'United Kingdom','Adulto', 0)
 
 analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven', 'United Kingdom', 0)
+analisisIngresos(df_cluster0_analisis_f,'Female', 'Adulto', 'United Kingdom', 0)
 
 
 df_cluster0_analisis_M=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Male']
 
+# Cambiar los valores en el DataFrame
+df_cluster0_analisis_M['mapeo_Categoria_Edad'] = df_cluster0_analisis_M['mapeo_Categoria_Edad'].replace({'Adulto_Joven': 'Joven', 'Veterano': 'Adulto', 'Adulto_Mayor': 'Adulto'})
 
 print('''*******Grupo Masculino************''')
 paisGenero(df_cluster0_analisis_M, 'United States', 'Masculino', 0)
@@ -409,33 +415,29 @@ estudioPais(df_cluster0_analisis_M, 'Masculino')
 
 analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'United States', 0)
 
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto_Joven', 'United States', 0)
+analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto', 'United States', 0)
 
 print('''*******United Kingdom************''')
 estudioPais(df_cluster0_analisis_M, 'Masculino')
 
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'United Kingdom')
+analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'United Kingdom', 0)
 
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto', 'United Kingdom')
-
-
-df_cluster0_analisis_i=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Indeterminate']
-
-
+analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto', 'United Kingdom', 0)
 
 
 print('''*******Grupo Indeterminate************''')
 
+df_cluster0_analisis_i=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Indeterminate']
 
 paisGenero(df_cluster0_analisis_i, 'United States', 'Indeterminado', 0)
-
+df_cluster0_analisis_i['mapeo_Categoria_Edad'] = df_cluster0_analisis_i['mapeo_Categoria_Edad'].replace({'Adulto_Joven': 'Joven', 'Veterano': 'Adulto'})
 
 analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Joven', 'United States', 0)
 
-analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Adulto_Joven', 'United States', 0)
+analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Adulto', 'United States', 0)
 
 
-
+mensaje_estuadio_ingresos(0)
 
 
 # Analisis del cluster 1

@@ -66,3 +66,5 @@ def analisisIngresos (df, genero, edad, pais, cluster):
     genero_edad_ing (df, 'Indeterminate', edad, pais)
 
 
+
+

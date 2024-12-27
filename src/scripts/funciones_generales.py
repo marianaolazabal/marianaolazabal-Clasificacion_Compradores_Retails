@@ -1,4 +1,7 @@
 import os
+from plots import estuadio_ingresos, genero_edad_ing, resultMensaje
+
+
 # Transformar variables
 def transformarTipoVariable(columns_to_convert,dataFrame, tipo):
     for column in columns_to_convert:
@@ -41,3 +44,28 @@ def pathToData():
     # Construye la ruta al archivo CSV en el directorio 'data'
     csv_path = os.path.join(root_dir, 'data', 'new_retail_data.zip')
     return csv_path
+
+
+
+def analisisIngresos (df, genero, edad, pais):
+    print(f"*******Grupo {genero} {edad} en {pais} con ingresos altos************")
+
+    estuadio_ingresos(df, 'High', edad, pais)
+    genero_edad_ing (df, genero, 'High', edad, pais)
+    resultMensaje(genero, 'High', edad, pais)
+
+
+    print(f"*******Grupo {genero} {edad} en {pais} con ingresos bajos************")
+
+    estuadio_ingresos(df, 'Low', edad, pais)
+    genero_edad_ing (df, genero, 'Low', edad, pais)
+    resultMensaje(genero, 'Low', edad, pais)
+
+
+    print(f"*******Grupo {genero} {edad} en {pais} con ingresos intermedios************")
+
+    estuadio_ingresos(df, 'Indeterminate', edad, pais)
+    genero_edad_ing (df, genero, 'Indeterminate', edad, pais)
+    resultMensaje(genero, 'Indeterminate', edad, pais)
+
+

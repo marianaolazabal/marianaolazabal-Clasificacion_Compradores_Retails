@@ -286,7 +286,7 @@ def top10 (df_top):
 
 #----------------------------------
 
-def estuadio_ingresos (df, valor, edad, pais):
+def estuadio_ingresos (df, valor, edad, pais, genero, cluster):
 
    df_genero_pais= df[df['mapeo_country']==pais]
    df_genero_pais_ingreso= df_genero_pais[df_genero_pais['mapeo_income']==valor]
@@ -295,52 +295,18 @@ def estuadio_ingresos (df, valor, edad, pais):
    top_10 = top10(df_genero_ingreso_edad).sort_values(ascending=False).head(10)
    print("Top 10 de categorías más compradas:")
    print(top_10)
+
+   mensaje_estuadio_ingresos(valor, edad, pais,genero, cluster)
 #----------------------------------
 
 
 
 
-def genero_edad_ing (df, genero, ingreso, edad, pais):
-
-    def top10_metodoPago(df_top):
-        # Seleccionar las columnas de categorías y métodos de pago
-        categorias = ['Cantidades_Totales_Appliances', 'Cantidades_Totales_Audio', 'Cantidades_Totales_Books',
-                    'Cantidades_Totales_Clothing', 'Cantidades_Totales_Computer', 'Cantidades_Totales_Food',
-                    'Cantidades_Totales_Furniture', 'Cantidades_Totales_Games_Toys',
-                    'Cantidades_Totales_Health_PersonalCare', 'Cantidades_Totales_Home_Decor',
-                    'Cantidades_Totales_Home_Necessities', 'Cantidades_Totales_Shoes',
-                    'Cantidades_Totales_Smart_Phone', 'Cantidades_Totales_Sports',
-                    'Cantidades_Totales_TV', 'Cantidades_Totales_Tools']
-
-        # Crear un DataFrame solo con las columnas de interés
-        df_totals1 = df_top[categorias + ['Cash', 'Credit', 'Debit']]
-
-
-        # Convertir el DataFrame a formato largo para tener cada categoría y método de pago en filas separadas
-        df_long = df_totals1.melt(id_vars=['Cash', 'Credit', 'Debit'],
-                                value_vars=categorias,
-                                var_name="Categoria",
-                                value_name="Cantidad_Total")
-
-        # Ordenar primero por "Cantidad_Total" y luego por el valor de cada método de pago
-        df_sorted = df_long.sort_values(by=["Cantidad_Total", "Cash", "Credit", "Debit"], ascending=False)
-
-        # Seleccionar el Top 10
-        top_10 = df_sorted.head(10)
-
-        return top_10
-
-    # Ejecutar la función y ver los resultados
+def genero_edad_ing (df, ingreso, edad, pais):
 
     filtroIngreso=df[df['mapeo_income']==ingreso]
     filtroIngreso_pais=filtroIngreso[filtroIngreso['mapeo_country']==pais]
     filtroIngresoCategoria=filtroIngreso_pais[filtroIngreso_pais['mapeo_Categoria_Edad']==edad]
-
-    top_10_metodoPago = top10_metodoPago(filtroIngresoCategoria)
-    print("Top 10 de categorías más compradas por métodos de pago:")
-    print(top_10_metodoPago)
-
-
 
     #como es el nivel de satisfaccion?
     df_counts = filtroIngresoCategoria.groupby(['mapeo_city', 'mapeo_satisfaction']).size().reset_index(name='Group_Count')

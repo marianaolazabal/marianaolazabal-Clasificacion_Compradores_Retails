@@ -381,26 +381,20 @@ paisGenero(df_cluster0_analisis_f, 'United States', 'Femenino', 0)
 
 genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Adulto_Joven', 0)
 
-genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Joven', 0)
+genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Joven', 0)##
 
+analisisIngresos(df_cluster0_analisis_f,'Female', 'Adulto_Joven','United States', 0)
 
-analisisIngresos(df_cluster0_analisis_f,'Female', 'Adulto_Joven','United States')
-
-print('''La categoria de producto mas comprado entre mujeres adultas-jovenes que viven en United States se encuentra "Food".
-La mayoria vive en Chicago y esta Satisfecha con el servicio, ''')
-
-
-analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven','United States')
+analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven','United States', 0)
 
 
 # Filtro también por los países 'United State' y 'United Kingdom'
 
 print('''*******Grupo femenino joven y adulto joven en United Kingdom************''')
-estudioPais(df_cluster0_analisis_f, 'Femenino')
 
-genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United Kingdom','Joven', 0)
+genero_edad_Hora(df_cluster0_analisis_f, 'Female', 'United Kingdom','Joven', 0)
 
-analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven', 'United Kingdom')
+analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven', 'United Kingdom', 0)
 
 
 df_cluster0_analisis_M=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Male']
@@ -413,9 +407,9 @@ print('''*******United States************''')
 estudioPais(df_cluster0_analisis_M, 'Masculino')
 
 
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'United States')
+analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'United States', 0)
 
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto_Joven', 'United States')
+analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto_Joven', 'United States', 0)
 
 print('''*******United Kingdom************''')
 estudioPais(df_cluster0_analisis_M, 'Masculino')
@@ -425,34 +419,20 @@ analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'United Kingdom')
 analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto', 'United Kingdom')
 
 
-
-print('''*******Germany************''')
-estudioPais(df_cluster0_analisis_M, 'Masculino')
-
-df_cluster0_analisis_M['mapeo_Categoria_Edad'] = np.where(
-    df_cluster0_analisis_M['mapeo_Categoria_Edad'] == 'Adulto_Joven',
-    'Adulto',
-    df_cluster0_analisis_M['mapeo_Categoria_Edad']
-)
-
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Joven', 'Germany')
-
-analisisIngresos(df_cluster0_analisis_M,'Male', 'Adulto', 'Germany')
-
 df_cluster0_analisis_i=df_cluster0_analisis[df_cluster0_analisis['mapeo_gender']=='Indeterminate']
 
 
+
+
 print('''*******Grupo Indeterminate************''')
-estudioPais(df_cluster0_analisis_i,'Indeterminado')
+
 
 paisGenero(df_cluster0_analisis_i, 'United States', 'Indeterminado', 0)
 
 
-analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Joven', 'United States')
+analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Joven', 'United States', 0)
 
-analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Adulto_Joven', 'United States')
-
-analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Joven', 'United Kingdom')
+analisisIngresos(df_cluster0_analisis_i,'Indeterminate', 'Adulto_Joven', 'United States', 0)
 
 
 
@@ -475,25 +455,130 @@ grafico_productos_mas_comprados(df_cluster1_analisis, 1, categorias)
 
 grafico_dispersion_gastos_frecuencia(df_cluster1_analisis, 1)
 
-grafico_dispersion_CantStandard(df_cluster1_analisis)
+grafico_dispersion_Cant(df_cluster1_analisis, "Cantidades_Totales_Standard", "TotalHistorico_GastadoCliente", 1 , 'Standard')
 
-grafico_dispersion_UrgentDelivery(df_cluster1_analisis)
+grafico_dispersion_Cant(df_cluster1_analisis, "Cantidades_Totales_Urgent-Delivery", "TotalHistorico_GastadoCliente", 1 , 'Urgent-Delivery')
 
-grafico_forma_pago(df_cluster1_analisis)
+grafico_forma_pago(df_cluster1_analisis, 1)
 
-graficoEstacion(df_cluster1_analisis)
+graficoEstacion(df_cluster1_analisis, 1)
 
 graficoMomentoDia(df_cluster1_analisis, 1)
 
 df_cluster1_analisis_f=df_cluster1_analisis[df_cluster1_analisis['mapeo_gender']=='Female']
 
-df_cluster1_analisis_M=df_cluster1_analisis[df_cluster1_analisis['mapeo_gender']=='Male']
 
-estudioPais(df_cluster0_analisis_f,'Femenino')
+estudioPais(df_cluster1_analisis_f, 'Femenino')
 
 paisGenero(df_cluster1_analisis_f, 'United States', 'Femenino', 1)
 
-paisGenero(df_cluster1_analisis_f, 'United Kingdom', 'Femenino', 1)
+# Se estudia el cluster 0 por genero femenino, Categorias de edad 'Adulto_Joven' y 'Joven'
+
+genero_edad_Hora(df_cluster1_analisis_f, 'Femenino', 'United States', 'Adulto_Joven', 1)
+
+genero_edad_Hora(df_cluster1_analisis_f, 'Femenino', 'United States', 'Joven', 1)##
+
+analisisIngresos(df_cluster1_analisis_f,'Female', 'Adulto_Joven','United States', 1)
+
+analisisIngresos(df_cluster1_analisis_f,'Female', 'Joven','United States', 1)
+
+
+# Filtro también por los países 'United State' y 'United Kingdom'
+
+print('''*******Grupo femenino joven y adulto joven en United Kingdom************''')
+
+genero_edad_Hora(df_cluster1_analisis_f, 'Female', 'United Kingdom','Joven', 1)
+
+analisisIngresos(df_cluster1_analisis_f,'Female', 'Joven', 'United Kingdom', 1)
+
+
+
+df_cluster1_analisis_M=df_cluster1_analisis[df_cluster1_analisis['mapeo_gender']=='Male']
+
+estudioPais(df_cluster1_analisis_M, 'Masculino')
+
+paisGenero(df_cluster1_analisis_M, 'United States', 'Femenino', 1)
+
+# Se estudia el cluster 0 por genero femenino, Categorias de edad 'Adulto_Joven' y 'Joven'
+
+genero_edad_Hora(df_cluster1_analisis_M, 'Masculino', 'United States', 'Adulto_Joven', 1)
+
+genero_edad_Hora(df_cluster1_analisis_M, 'Masculino', 'United States', 'Joven', 1)##
+
+analisisIngresos(df_cluster1_analisis_M,'Male', 'Adulto_Joven','United States', 1)
+
+analisisIngresos(df_cluster1_analisis_M,'Male', 'Joven','United States', 1)
+
+
+# Filtro también por los países 'United State' y 'United Kingdom'
+
+print('''*******Grupo femenino joven y adulto joven en United Kingdom************''')
+
+genero_edad_Hora(df_cluster1_analisis_M, 'Male', 'United Kingdom','Joven', 1)
+
+analisisIngresos(df_cluster1_analisis_M,'Male', 'Joven', 'United Kingdom', 1)
+
+
+
+df_cluster1_analisis_I=df_cluster1_analisis[df_cluster1_analisis['mapeo_gender']=='Indeterminate']
+
+estudioPais(df_cluster1_analisis_I, 'Indeterminate')
+
+paisGenero(df_cluster1_analisis_I, 'United States', 'Indeterminate', 1)
+
+# Se estudia el cluster 0 por genero femenino, Categorias de edad 'Adulto_Joven' y 'Joven'
+
+genero_edad_Hora(df_cluster1_analisis_I, 'Indeterminate', 'United States', 'Adulto_Joven', 1)
+
+genero_edad_Hora(df_cluster1_analisis_I, 'Indeterminate', 'United States', 'Joven', 1)##
+
+analisisIngresos(df_cluster1_analisis_I,'Indeterminate', 'Adulto_Joven','United States', 1)
+
+analisisIngresos(df_cluster1_analisis_I,'Indeterminate', 'Joven','United States', 1)
+
+
+# Filtro también por los países 'United State' y 'United Kingdom'
+
+print('''*******Grupo femenino joven y adulto joven en United Kingdom************''')
+
+genero_edad_Hora(df_cluster1_analisis_I, 'Indeterminate', 'United Kingdom','Joven', 1)
+
+analisisIngresos(df_cluster1_analisis_I,'Indeterminate', 'Joven', 'United Kingdom', 1)
+
+
+
+
+
+
+
+# Analisis del cluster 2
+
+df_cluster2_analisis = data_analizar[data_analizar['cluster'] == 2]
+
+
+graficoGasto_cliente(df_cluster2_analisis, 2)
+
+grafico_Edades_pais(df_cluster2_analisis, 2)
+
+grafico_gastos_genero_edad(df_cluster2_analisis, 2)
+
+grafico_gastos_genero_ingreso(df_cluster2_analisis, 2)
+
+grafico_productos_mas_comprados(df_cluster2_analisis, 2, categorias)
+
+grafico_dispersion_gastos_frecuencia(df_cluster2_analisis, 2)
+
+grafico_dispersion_Cant(df_cluster2_analisis, "Cantidades_Totales_Standard", "TotalHistorico_GastadoCliente", 2 , 'Standard')
+
+grafico_dispersion_Cant(df_cluster2_analisis, "Cantidades_Totales_Urgent-Delivery", "TotalHistorico_GastadoCliente", 2 , 'Urgent-Delivery')
+
+grafico_forma_pago(df_cluster2_analisis, 2)
+
+graficoEstacion(df_cluster2_analisis, 2)
+
+graficoMomentoDia(df_cluster2_analisis, 2)
+
+
 
 
 

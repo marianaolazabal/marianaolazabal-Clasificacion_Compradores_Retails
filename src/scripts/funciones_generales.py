@@ -1,5 +1,5 @@
 import os
-from plots import estuadio_ingresos, genero_edad_ing, resultMensaje
+from plots import estuadio_ingresos, genero_edad_ing
 
 
 # Transformar variables
@@ -47,25 +47,22 @@ def pathToData():
 
 
 
-def analisisIngresos (df, genero, edad, pais):
+def analisisIngresos (df, genero, edad, pais, cluster):
     print(f"*******Grupo {genero} {edad} en {pais} con ingresos altos************")
 
-    estuadio_ingresos(df, 'High', edad, pais)
-    genero_edad_ing (df, genero, 'High', edad, pais)
-    resultMensaje(genero, 'High', edad, pais)
+    estuadio_ingresos(df, 'High', edad, pais, genero, cluster)
+    genero_edad_ing (df, 'High', edad, pais)
 
 
     print(f"*******Grupo {genero} {edad} en {pais} con ingresos bajos************")
 
-    estuadio_ingresos(df, 'Low', edad, pais)
-    genero_edad_ing (df, genero, 'Low', edad, pais)
-    resultMensaje(genero, 'Low', edad, pais)
+    estuadio_ingresos(df, 'Low', edad, pais, genero, cluster)
+    genero_edad_ing (df, 'Low', edad, pais)
 
 
     print(f"*******Grupo {genero} {edad} en {pais} con ingresos intermedios************")
 
-    estuadio_ingresos(df, 'Indeterminate', edad, pais)
-    genero_edad_ing (df, genero, 'Indeterminate', edad, pais)
-    resultMensaje(genero, 'Indeterminate', edad, pais)
+    estuadio_ingresos(df, 'Indeterminate', edad, pais, genero, cluster)
+    genero_edad_ing (df, 'Indeterminate', edad, pais)
 
 

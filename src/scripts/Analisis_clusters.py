@@ -341,6 +341,7 @@ categorias = [
     'Cantidades_Totales_TV', 'Cantidades_Totales_Tools'
 ]
 
+
 graficoGasto_cliente(df_cluster0_analisis, 0)
 
 grafico_Edades_pais(df_cluster0_analisis, 0)
@@ -385,6 +386,7 @@ paisGenero(df_cluster0_analisis_f, 'United States', 'Femenino', 0)
 # Se estudia el cluster 0 por genero femenino, Categorias de edad 'Joven'
 
 genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Joven', 0)
+
 genero_edad_Hora(df_cluster0_analisis_f, 'Femenino', 'United States', 'Adulto', 0)
 
 analisisIngresos(df_cluster0_analisis_f,'Female', 'Joven','United States', 0)
@@ -447,21 +449,69 @@ df_cluster1_analisis = data_analizar[data_analizar['cluster'] == 1]
 
 graficoGasto_cliente(df_cluster1_analisis, 1)
 
+print('''Como se puede observar en el grafico de distribucion de genero por ingreso. 
+Si bien en el clúster 1, el género masculino sigue siendo dominante en términos de porcentaje en la mayoría de los grupos de ingresos, 
+se nota un aumento significativo en la proporción de género femenino comparado con el Cluster 0.
+En el grupo de ingresos "Indeterminate", el género femenino tiene una alta representatividad, superando al masculino.
+El género indeterminado mantiene una baja representatividad similar a la observada en el Cluster 0.
+
+Insights:
+El Cluster 1 muestra una mayor diversidad de género, con una representación femenina más marcada, aunque no supera al masculino en términos globales.
+El comportamiento particular de los ingresos "Indeterminate" en el Cluster 1, con predominancia femenina, podría indicar una tendencia o característica única que sería interesante explorar más a fondo.''')
+
 grafico_Edades_pais(df_cluster1_analisis, 1)
+
+print('''La distribución de las edades en el clúster 1 son parecidas al clúster 0, siendo la categoría Jóven y Adulto_Joven las que se llevan la mayor representatividad.''')
 
 grafico_gastos_genero_edad(df_cluster1_analisis, 1)
 
+print('''Aunque el gasto promedio es menor al del clúster 0, se observa un aumento en la participación del género femenino, con gran cantidad de outliers, 
+Estos outliers indican que, aunque la mayoría de las mujeres gastan en un rango más acotado, hay casos de mujeres que realizan compras mucho mayores al promedio.
+También se observa que estos outliers son menos extremos pero más frecuentes, lo que podría señalar una distribución más uniforme de las compras altas dentro de este género.
+Este fenómeno podría estar asociado a un subconjunto específico de clientas con patrones de compra atípicos, como aquellas con mayor poder adquisitivo o frecuencia de compras elevada.
+En ambos clusters, las categorías de edad "Joven" y "Adulto_Joven" lideran en términos de gasto total histórico.
+En el caso del gasto promedio del género indeterminado parece ser mayor que el de los demás géneros en la mayoría de las categorías de edad.
+Esto sugiere que, aunque representan un grupo menor en cantidad, tienen un comportamiento de compra más uniforme y con montos altos.
+Mientras el género femenino presenta más dispersión y oportunidades para explorar nichos específicos de clientas con alto gasto, 
+el género indeterminado destaca por su regularidad y alto poder adquisitivo, convirtiéndolo en un segmento estratégico para maximizar el valor de las ventas.
+''')
+
 grafico_gastos_genero_ingreso(df_cluster1_analisis, 1)
+
+print('''De la distribución del ingreso en el clúster 1 se observa que hay una representatividad pareja de los ingresos Altos, Medianos y Bajos para todos los géneros. 
+En cuánto al gasto, se observa que no hay grandes diferencias, con excepción del gnéro Indeterminado que tiende a gastar más y a ser más consistente.
+''')
 
 grafico_productos_mas_comprados(df_cluster1_analisis, 1, categorias)
 
+print('''Se observa que al igual que el clúster 0, los productos más comprados son aquellos dentro de la categoría Food, para todos los niveles de ingresos.
+Seguido por libros y ropa.''')
+
 grafico_dispersion_gastos_frecuencia(df_cluster1_analisis, 1)
+
+print('''A diferenia del resultado arrojado por el clúster 0 dónde en general, a mayor cantidad comprada, mayor es el gasto total. Que posiblemente indique que los clientes
+que pertenecen al clúster 0 y tienen un mayor poder adquisitivo, compran prudctos de mayor precio y en mayor volúmen.
+      
+El clúster 1 muestra dos relaciones distintas. Una relación negativa en compras menores a 15, posiblemente reflejando clientes que gastan en bienes de lujo o más costosos.
+Y otra, en compras mayores a 15 unidades, dónde el gasto disminuye, probablemente indicando patrones de consumo en productos más económicos.
+En ambos clusters, los clientes con frecuencia alta tienden a gastar más, pero en el caso del clúster 1 no necesariamente compran grandes cantidades.
+Esto puede estar indicando que hay clientes frecuentes que compran artículos relativamente caros. 
+
+Se podría entonces, para clientes de alta frecuencia, ofrecer incentivos por volumen o programas de lealtad que refuercen su patrón de compra.
+Para clientes que compran menos de 15 unidades, enfocar esfuerzos en la promoción de productos premium o de lujo y para aquellos que compran más de 15 unidades, potenciar ofertas en productos económicos o ventas al por mayor.
+''')
 
 grafico_dispersion_Cant(df_cluster1_analisis, "Cantidades_Totales_Standard", "TotalHistorico_GastadoCliente", 1 , 'Standard')
 
+print('''No parece haber una relación aparente entre lo gastado por los clientes y las cantidades compradas con el método de envio Standard.''')
+
 grafico_dispersion_Cant(df_cluster1_analisis, "Cantidades_Totales_Urgent-Delivery", "TotalHistorico_GastadoCliente", 1 , 'Urgent-Delivery')
 
+print('''No parece haber una relación aparente entre lo gastado por los clientes y las cantidades compradas con el método de envio Urgent-Delivery.''')
+
 grafico_forma_pago(df_cluster1_analisis, 1)
+
+print('''Hay una marcada preferencia por el uso de crédito para todos los clientes ''')
 
 graficoEstacion(df_cluster1_analisis, 1)
 

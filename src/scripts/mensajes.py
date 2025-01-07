@@ -333,4 +333,3 @@ En United Kingdom aparece para el grupo joven de ingresos altos, en 4to lugar lo
 def mensajePaisGenero(cluster, pais, genero):
   if(cluster==0):
     print(f'''La mayoría de las personas que viven en {pais} y son del género {genero}, pertenecen al grupo Joven y Adulto_Joven''')
-
